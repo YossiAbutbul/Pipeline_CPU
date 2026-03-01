@@ -40,6 +40,11 @@
   --switch-track: var(--surface-3);
   --switch-thumb: #d7dbe5;
   --switch-thumb-active: var(--accent);
+
+  /* Scroll Bar */
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: #2f3440;
+  --scrollbar-thumb-hover: #3a404d;
 }
 
 /* -----------------------------
@@ -73,4 +78,9 @@
   --switch-track: var(--surface-3);
   --switch-thumb: #3d4350;
   --switch-thumb-active: var(--accent);
+
+  /* Scroll Bar */
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: #c7c3b9;
+  --scrollbar-thumb-hover: #b6b2a8;
 }

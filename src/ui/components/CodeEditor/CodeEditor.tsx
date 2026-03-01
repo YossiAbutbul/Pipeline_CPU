@@ -60,51 +60,51 @@ export function CodeEditor({
   }
 
   return (
-    <div className={`codeEditor ${className}`}>
-        <div className="codeGutter" ref={gutterRef}>
-        {lines.map((n) => (
-            <div
-            key={n}
-            className={`codeLineNo ${n === currentLine ? "codeLineActive" : ""}`}
-            >
-            {n}
-            </div>
-        ))}
+  <div className={`codeEditor ${className}`}>
+    <div className="codeGutter" ref={gutterRef}>
+      {lines.map((n) => (
+        <div
+          key={n}
+          className={`codeLineNo ${n === currentLine ? "codeLineActive" : ""}`}
+        >
+          {n}
         </div>
-
-        <textarea
-        ref={textareaRef}
-        className="codeTextarea"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onClick={handleCaret}
-        onKeyUp={handleCaret}
-        onKeyDown={(e) => {
-            if (e.key === "Tab") {
-            e.preventDefault();
-            const ta = textareaRef.current;
-            if (!ta) return;
-
-            const start = ta.selectionStart;
-            const end = ta.selectionEnd;
-
-            // Insert 2 spaces at caret (or replace selection)
-            const newValue = value.substring(0, start) + "  " + value.substring(end);
-
-            onChange(newValue);
-
-            // Restore caret position after React state update
-            requestAnimationFrame(() => {
-                ta.selectionStart = ta.selectionEnd = start + 2;
-            });
-            }
-        }}
-        placeholder={placeholder}
-        spellCheck={false}
-        autoCorrect="off"
-        autoCapitalize="off"
-        aria-label={ariaLabel}
-        />
+      ))}
     </div>
-    );
+
+    <textarea
+      ref={textareaRef}
+      className="codeTextarea"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      onClick={handleCaret}
+      onKeyUp={handleCaret}
+      onKeyDown={(e) => {
+        if (e.key === "Tab") {
+          e.preventDefault();
+          const ta = textareaRef.current;
+          if (!ta) return;
+
+          const start = ta.selectionStart;
+          const end = ta.selectionEnd;
+
+          // Insert 2 spaces at caret (or replace selection)
+          const newValue = value.substring(0, start) + "  " + value.substring(end);
+
+          onChange(newValue);
+
+          // Restore caret position after React state update
+          requestAnimationFrame(() => {
+            ta.selectionStart = ta.selectionEnd = start + 2;
+          });
+        }
+      }}
+      placeholder={placeholder}
+      spellCheck={false}
+      autoCorrect="off"
+      autoCapitalize="off"
+      aria-label={ariaLabel}
+    />
+  </div>
+);
 }
