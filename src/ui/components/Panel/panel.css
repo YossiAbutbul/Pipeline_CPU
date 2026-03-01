@@ -1,0 +1,92 @@
+.panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-1);
+  /* box-shadow: var(--shadow); */
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  /* border-bottom: 1px solid var(--border); */
+}
+
+.panelTitle {
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  padding: 5px 12px;
+}
+
+.panelToolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.panelHeaderToolbarOnly {
+  justify-content: stretch;
+}
+.panelHeaderToolbarOnly .panelToolbar {
+  width: 100%;
+  flex: 1;
+}
+
+.panelBody {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Header size variants */
+/* Extra small */
+.panelHeader-xs {
+  padding: 14px 12px 6px;
+}
+
+.panelHeader-xs .panelTitle {
+  font-size: 13px;
+}
+
+/* Small */
+.panelHeader-sm {
+  padding: 8px 12px;
+}
+
+.panelHeader-sm .panelTitle {
+  font-size: 14px;
+}
+
+/* Medium (default) */
+.panelHeader-md {
+  padding: 12px 14px;
+}
+
+.panelHeader-md .panelTitle {
+  font-size: 1px;
+}
+
+/* Large */
+.panelHeader-lg {
+  padding: 18px 14px 18px 14px;
+}
+
+.panelHeader-lg .panelTitle {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Extra Large */
+.panelHeader-xl {
+  padding: 18px 12px 14px;
+}
+
+.panelHeader-xl .panelTitle {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}

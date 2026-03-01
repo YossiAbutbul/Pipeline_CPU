@@ -1,0 +1,47 @@
+.themeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.themeLabel {
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.2px;
+}
+
+.switch {
+  width: 46px;
+  height: 26px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--switch-track);
+  cursor: pointer;
+  position: relative;
+  transition: background var(--dur-1), border-color var(--dur-1);
+}
+
+.switchThumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 2px;
+  transition: left var(--dur-1), background var(--dur-1);
+  background: var(--switch-thumb);
+}
+
+/* ON = dark mode selected */
+.switchOn {
+  background: var(--accent-weak);
+  border-color: var(--accent-border);
+}
+.switchOn .switchThumb {
+  left: 22px;
+  background: var(--switch-thumb-active);
+}

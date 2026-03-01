@@ -1,0 +1,97 @@
+.codeEditor {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--control-bg);
+  overflow: hidden;
+}
+
+/* Gutter */
+.codeGutter {
+  padding: 10px 0;
+  background: var(--surface-2);
+  border-right: 1px solid var(--border);
+  overflow: hidden; /* we scroll it by syncing scrollTop */
+}
+
+.codeLineNo {
+  height: 20px;
+  line-height: 20px;
+  padding: 0 10px;
+  text-align: right;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+
+/* Text */
+.codeTextarea {
+  width: 100%;
+  height: 100%;
+  padding: 10px 12px;
+  border: 0;
+  outline: none;
+  resize: none;
+
+  background: transparent;
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  line-height: 20px; /* MUST match .codeLineNo height */
+
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.codeTextarea::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.codeLineActive {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.codeTextarea::selection {
+  background: var(--accent-weak);
+}
+
+.codeLineNo {
+  position: relative;
+}
+
+.codeLineError::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d14343; /* subtle red */
+}
+
+/* ---------- Show thin scrollbar on hover ---------- */
+.codeEditor:hover .codeTextarea {
+  scrollbar-width: thin; /* Firefox */
+}
+
+.codeEditor:hover .codeTextarea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.codeEditor:hover .codeTextarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.codeEditor:hover .codeTextarea::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 6px;
+}
+
+.codeEditor:hover .codeTextarea::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}

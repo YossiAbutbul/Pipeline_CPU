@@ -1,0 +1,45 @@
+.btn {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface-2);
+  cursor: pointer;
+  transition: transform var(--dur-1), background var(--dur-1),
+    border-color var(--dur-1);
+}
+
+.btn:hover {
+  background: var(--control-hover);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-sm {
+  padding: 8px 10px;
+  border-radius: 9px;
+}
+
+.btn-primary {
+  padding: 5px 12px;
+  background: var(--accent-weak);
+  border-color: var(--accent-border);
+}
+
+.btn-secondary {
+  padding: 5px 12px;
+  background: var(--panel-2);
+}
+
+.btn-ghost {
+  padding: 5px 12px;
+  background: transparent;
+}

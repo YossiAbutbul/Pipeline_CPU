@@ -1,0 +1,26 @@
+.programLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+.programEditorBox {
+  height: 35vh;
+  min-height: 220px;
+  max-height: 520px;
+}
+.programEditorBox .codeEditor {
+  height: 100%;
+}
+
+.programControls {
+  display: flex;
+  gap: 8px;
+}
+
+.programFooter {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}

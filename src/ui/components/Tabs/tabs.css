@@ -1,0 +1,34 @@
+.tabs {
+  display: flex;
+  width: 100%;
+  background: var(--surface-3);
+  /* border: 1px solid var(--border); */
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.tab {
+  flex: 1;
+  width: 0;
+  text-align: center;
+
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 6px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font: inherit;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  background: var(--control-hover);
+  color: var(--text);
+}
+
+.tabActive {
+  background: var(--surface-1);
+  color: var(--text);
+}

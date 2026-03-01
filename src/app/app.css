@@ -1,0 +1,23 @@
+.appShell {
+  display: grid;
+  grid-template-columns: 320px 1fr 360px;
+  height: 100vh;
+}
+
+.leftPane,
+.rightPane {
+  border-color: var(--border);
+  background: var(--panel);
+}
+
+.leftPane {
+  border-right: 1px solid var(--border);
+}
+
+.rightPane {
+  border-left: 1px solid var(--border);
+}
+
+.centerPane {
+  background: var(--bg);
+}

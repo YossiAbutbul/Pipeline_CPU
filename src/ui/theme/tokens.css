@@ -1,0 +1,76 @@
+/* -----------------------------
+   DARK MODE
+------------------------------ */
+:root {
+  /* Surfaces */
+  --bg: #0e0f12; /* app background */
+  --surface-1: #14161b; /* panels */
+  --surface-2: #1a1d24; /* nested / controls */
+  --surface-3: #202430; /* subtle fills (tabs bg etc.) */
+
+  /* Text */
+  --text: #e7e9ee;
+  --muted: #a6adba;
+
+  /* Lines & effects */
+  --border: #2a2f3a;
+  --shadow: 0 16px 44px rgba(0, 0, 0, 0.45);
+
+  /* Accent */
+  --accent: #2f4f8f;
+  --accent-weak: rgba(47, 79, 143, 0.18);
+  --accent-border: rgba(47, 79, 143, 0.34);
+
+  /* Controls */
+  --control-bg: #1a1d24;
+  --control-hover: #242936;
+
+  /* Radius / motion */
+  --radius: 12px;
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+
+  /* Spacing */
+  --space-1: 6px;
+  --space-2: 10px;
+  --space-3: 14px;
+  --space-4: 18px;
+
+  /* Toggle Switch */
+  --switch-track: var(--surface-3);
+  --switch-thumb: #d7dbe5;
+  --switch-thumb-active: var(--accent);
+}
+
+/* -----------------------------
+   LIGHT MODE
+------------------------------ */
+:root[data-theme="light"] {
+  /* Surfaces */
+  --bg: #f6f5f2;
+  --surface-1: #ffffff; /* panels */
+  --surface-2: #ededed; /* nested / controls */
+  --surface-3: #d1d1d1; /* subtle fills */
+
+  /* Text */
+  --text: #16181d;
+  --muted: #5a6270;
+
+  /* Lines & effects */
+  --border: #d9d5ca;
+  --shadow: 0 14px 26px rgba(16, 24, 40, 0.1);
+
+  /* Accent */
+  --accent: #1e3a8a;
+  --accent-weak: rgba(30, 58, 138, 0.14);
+  --accent-border: rgba(30, 58, 138, 0.28);
+
+  /* Controls */
+  --control-bg: var(--surface-2);
+  --control-hover: #e6e2d8;
+
+  /* Toggle Switch */
+  --switch-track: var(--surface-3);
+  --switch-thumb: #3d4350;
+  --switch-thumb-active: var(--accent);
+}
