@@ -2,6 +2,41 @@
    DARK MODE
 ------------------------------ */
 :root {
+  /* Typography */
+  --font-family-ui: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+    Arial, sans-serif;
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-md: 14px;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+
+  --line-height-ui: 1.35;
+
+  /* Borders */
+  --border-1: 1px;
+
+  /* Diagram (semantic tokens) */
+  --diagram-stage-fill: var(--surface-2);
+  --diagram-stage-stroke: var(--border);
+
+  --diagram-reg-fill: var(--surface-3);
+  --diagram-reg-stroke: var(--border);
+
+  --diagram-node-fill: var(--surface-2);
+  --diagram-node-stroke: var(--border);
+
+  --diagram-text: var(--text);
+  --diagram-text-muted: var(--muted);
+
+  --diagram-canvas-bg: var(--surface-1);
+
+  /* Program editor sizing (semantic) */
+  --program-editor-height: 360px;
+  --program-editor-min-height: 260px;
+  --program-editor-max-height: 440px;
+
   /* Surfaces */
   --bg: #0e0f12; /* app background */
   --surface-1: #14161b; /* panels */

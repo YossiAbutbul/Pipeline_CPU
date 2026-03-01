@@ -1,9 +1,10 @@
 .panel {
-  height: 100%;
   display: flex;
   flex-direction: column;
+  min-height: 0; /* critical for nested flex layouts */
+  height: 100%;
   background: var(--surface-1);
-  /* box-shadow: var(--shadow); */
+  overflow: hidden; /* header stays fixed, body handles overflow */
 }
 
 .panelHeader {
@@ -11,18 +12,20 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 14px;
-  /* border-bottom: 1px solid var(--border); */
+  gap: var(--space-3);
 }
 
 .panelTitle {
-  font-weight: 600;
-  letter-spacing: 0.2px;
+  color: var(--text);
+  font-family: var(--font-family-ui);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-ui);
   padding: 5px 12px;
 }
 
 .panelToolbar {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: center;
 }
 
@@ -35,58 +38,47 @@
 }
 
 .panelBody {
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
   flex: 1;
   min-height: 0;
+  padding: var(--space-3);
+  overflow: hidden;
 }
 
 /* Header size variants */
-/* Extra small */
 .panelHeader-xs {
-  padding: 14px 12px 6px;
+  padding: var(--space-1) var(--space-3);
 }
-
-.panelHeader-xs .panelTitle {
-  font-size: 13px;
-}
-
-/* Small */
 .panelHeader-sm {
-  padding: 8px 12px;
+  padding: var(--space-2) var(--space-3);
 }
-
-.panelHeader-sm .panelTitle {
-  font-size: 14px;
-}
-
-/* Medium (default) */
 .panelHeader-md {
-  padding: 12px 14px;
+  padding: var(--space-3) var(--space-3);
 }
-
-.panelHeader-md .panelTitle {
-  font-size: 1px;
-}
-
-/* Large */
 .panelHeader-lg {
-  padding: 18px 14px 18px 14px;
+  padding: var(--space-4) var(--space-3);
+}
+.panelHeader-xl {
+  padding: calc(var(--space-4) + var(--space-1)) var(--space-3);
 }
 
+/* Title size variants (keep them token-driven) */
+.panelHeader-xs .panelTitle {
+  font-size: var(--font-size-sm);
+}
+.panelHeader-sm .panelTitle {
+  font-size: var(--font-size-md);
+}
+.panelHeader-md .panelTitle {
+  font-size: 16px;
+} /* if you prefer, add --font-size-lg token */
 .panelHeader-lg .panelTitle {
   font-size: 18px;
-  font-weight: 700;
 }
-
-/* Extra Large */
-.panelHeader-xl {
-  padding: 18px 12px 14px;
-}
-
 .panelHeader-xl .panelTitle {
   font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
+}
+
+/* Toolbar-only header alignment */
+.panelHeaderToolbarOnly {
+  justify-content: flex-end;
 }

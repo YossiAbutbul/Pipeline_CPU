@@ -7,7 +7,8 @@
 }
 
 html,
-body {
+body,
+#root {
   height: 100%;
 }
 
@@ -16,4 +17,19 @@ body {
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
   background: var(--bg);
   color: var(--text);
+  overflow: hidden;
+}
+
+:root,
+:root[data-theme="light"] {
+  transition: background-color var(--dur-2) ease, color var(--dur-2) ease,
+    border-color var(--dur-2) ease, fill var(--dur-2) ease,
+    stroke var(--dur-2) ease;
+}
+
+/* Apply transition to all elements that use theme tokens */
+* {
+  transition: background-color var(--dur-2) ease, color var(--dur-2) ease,
+    border-color var(--dur-2) ease, fill var(--dur-2) ease,
+    stroke var(--dur-2) ease;
 }
