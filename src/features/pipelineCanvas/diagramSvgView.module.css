@@ -57,8 +57,55 @@
   fill: var(--diagram-text);
 }
 
-/* Layers (future toggles) */
-/* .layerStages {
-}
-.layerNodes {
+/* .layerEdges {
 } */
+
+.edge {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+  transition: stroke var(--dur-2) ease, opacity var(--dur-2) ease;
+}
+
+/* Layer styling */
+.edge[data-layer="data"] {
+  stroke: var(--border);
+}
+
+.edge[data-layer="control"] {
+  stroke: var(--accent-border);
+  opacity: 0.7;
+}
+
+.edge[data-layer="forwarding"] {
+  stroke: var(--accent);
+  stroke-dasharray: 6 6;
+  opacity: 0.75;
+}
+
+/* Active flow animation (subtle) */
+.edge[data-active="true"] {
+  stroke: var(--accent);
+  opacity: 1;
+  stroke-dasharray: 5 6;
+  animation: edgeFlow 900ms linear infinite;
+}
+
+@keyframes edgeFlow {
+  to {
+    stroke-dashoffset: -22;
+  }
+}
+
+/* Selection */
+.nodeGroup {
+  cursor: pointer;
+}
+
+.nodeGroup[data-selected="true"] .block,
+.nodeGroup[data-selected="true"] .pipelineReg {
+  stroke: var(--accent);
+  stroke-width: 2;
+}

@@ -1,22 +1,24 @@
 export type DiagramId = string;
-
 export type DiagramLayer = "data" | "control" | "forwarding";
 
 export type Point = { x: number; y: number };
 
+export type PortAnchor =
+  | "left"
+  | "right"
+  | "top"
+  | "bottom";
+
 export type Port = {
   id: string;
   label?: string;
+  anchor: PortAnchor;
+  offset: number;
 };
 
 export type DiagramNode = {
   id: string;
-  kind:
-    | "stage"
-    | "pipeline_reg"
-    | "block"
-    | "mux"
-    | "unit"; // hazard/forwarding/etc.
+  kind: "stage" | "pipeline_reg" | "block" | "mux" | "unit";
   label: string;
   ports?: {
     in?: Port[];
@@ -44,3 +46,6 @@ export type DiagramTemplate = {
     stages: Array<"IF" | "ID" | "EX" | "MEM" | "WB">;
   };
 };
+
+
+
