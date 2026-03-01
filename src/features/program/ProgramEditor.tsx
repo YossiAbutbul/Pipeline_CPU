@@ -21,20 +21,21 @@ export default function ProgramEditor() {
       }
     >
       <div className="programLayout">
-        <div className="programEditorBox">
-          <CodeEditor
-            value={program}
-            onChange={setProgram}
-            placeholder={"# Write MIPS here...\nadd $1,$2,$3\n"}
-            minLines={10}
-          />
-        </div>
-
         <div className="programControls">
           <Button variant="primary">Step</Button>
           <Button>Run</Button>
           <Button>Reset</Button>
         </div>
+        <div className="programEditorBox">
+          <CodeEditor
+            value={program}
+            onChange={setProgram}
+            placeholder={"# Write MIPS here...\nadd $1,$2,$3\n"}
+            minLines={1}
+          />
+        </div>
+
+        
 
         <div className="programFooter">
           <ThemeToggle label="Dark mode" />
