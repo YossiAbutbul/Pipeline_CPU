@@ -3,8 +3,8 @@
 ------------------------------ */
 :root {
   /* Typography */
-  --font-family-ui: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
-    Arial, sans-serif;
+  --font-family-ui:
+    ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   --font-size-xs: 12px;
   --font-size-sm: 13px;
   --font-size-md: 14px;
@@ -32,11 +32,21 @@
 
   --diagram-canvas-bg: var(--surface-1);
 
-  /* Program editor sizing (semantic) */
+  /* Program editor sizing */
   --program-editor-height: 360px;
   --program-editor-min-height: 260px;
   --program-editor-max-height: 440px;
 
+  /* Diagram geometry / interaction */
+  --diagram-pad: 60px; /* template coord padding around bounds */
+  --diagram-fit-inset: 16px; /* screen inset for fit-to-view */
+  --diagram-edge-width: 2px;
+  --diagram-route-lead: 18px; /* lead-out/lead-in length */
+  --diagram-zoom-min: 0.2;
+  --diagram-zoom-max: 4;
+  --diagram-label-line: 16px;
+
+  /* Dark Mode */
   /* Surfaces */
   --bg: #0e0f12; /* app background */
   --surface-1: #14161b; /* panels */

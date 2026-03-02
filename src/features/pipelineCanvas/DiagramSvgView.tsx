@@ -14,6 +14,12 @@ type Viewport = {
   ty: number;
 };
 
+type LayerState = {
+  data: boolean;
+  control: boolean;
+  forwarding: boolean;
+};
+
 export function DiagramSvgView({ template }: Props) {
   const bounds = getDiagramBounds(template);
 
@@ -32,6 +38,17 @@ export function DiagramSvgView({ template }: Props) {
   const [vp, setVp] = useState<Viewport>({ scale: 1, tx: 0, ty: 0 });
   const [isPanning, setIsPanning] = useState(false);
 
+  // NEW: layer toggles (data/control/forwarding)
+  const [visibleLayers, setVisibleLayers] = useState<LayerState>({
+    data: true,
+    control: true,
+    forwarding: true,
+  });
+
+  const toggleLayer = (layer: keyof LayerState) => {
+    setVisibleLayers((prev) => ({ ...prev, [layer]: !prev[layer] }));
+  };
+
   // Fit on mount + whenever the container size changes
   useEffect(() => {
     const svg = svgRef.current;
@@ -43,11 +60,13 @@ export function DiagramSvgView({ template }: Props) {
       const vh = rect.height;
       if (vw <= 0 || vh <= 0) return;
 
+      // Fit diagram rect into viewport with a little inset
       const inset = 16;
       const sx = (vw - inset * 2) / diagram.w;
       const sy = (vh - inset * 2) / diagram.h;
       const scale = Math.min(sx, sy);
 
+      // Center diagram
       const cx = diagram.x + diagram.w / 2;
       const cy = diagram.y + diagram.h / 2;
       const tx = vw / 2 - cx * scale;
@@ -73,11 +92,10 @@ export function DiagramSvgView({ template }: Props) {
     ty: 0,
   });
 
+  // Middle mouse only (scroll click)
   const onPointerDown = (e: React.PointerEvent<SVGSVGElement>) => {
-    // ✅ Pan only with middle mouse button
     if (e.button !== 1) return;
 
-    // ✅ Prevent browser auto-scroll behavior
     e.preventDefault();
 
     const svg = svgRef.current;
@@ -142,6 +160,8 @@ export function DiagramSvgView({ template }: Props) {
     setVp((prev) => {
       const nextScale = clamp(prev.scale * zoomFactor, 0.2, 4);
 
+      // Keep the point under cursor stable:
+      // screen = world*scale + t  => world = (screen - t)/scale
       const wx = (mx - prev.tx) / prev.scale;
       const wy = (my - prev.ty) / prev.scale;
 
@@ -152,13 +172,16 @@ export function DiagramSvgView({ template }: Props) {
     });
   };
 
+  // --- Existing helpers you already have ---
   const nodeById = useMemo(() => {
     const m = new Map<string, DiagramNode>();
     for (const n of template.nodes) m.set(n.id, n);
     return m;
   }, [template.nodes]);
 
+  // TEMP: mocked “active edges” (later will be driven by cycle simulation)
   const activeEdgeIds = useMemo(() => new Set<string>(["e_imem_to_ifid"]), []);
+
   const stages = template.nodes.filter((n) => n.kind === "stage");
   const pipelineRegs = template.nodes.filter((n) => n.kind === "pipeline_reg");
   const blocks = template.nodes.filter((n) => n.kind === "block");
@@ -167,6 +190,34 @@ export function DiagramSvgView({ template }: Props) {
 
   return (
     <div className={styles.root}>
+      {/* NEW: overlay controls */}
+      <div className={styles.overlay}>
+        <button
+          type="button"
+          className={styles.layerToggle}
+          data-on={visibleLayers.data ? "true" : "false"}
+          onClick={() => toggleLayer("data")}
+        >
+          Data
+        </button>
+        <button
+          type="button"
+          className={styles.layerToggle}
+          data-on={visibleLayers.control ? "true" : "false"}
+          onClick={() => toggleLayer("control")}
+        >
+          Control
+        </button>
+        <button
+          type="button"
+          className={styles.layerToggle}
+          data-on={visibleLayers.forwarding ? "true" : "false"}
+          onClick={() => toggleLayer("forwarding")}
+        >
+          Fwd
+        </button>
+      </div>
+
       <svg
         ref={svgRef}
         className={styles.svg}
@@ -179,8 +230,26 @@ export function DiagramSvgView({ template }: Props) {
         onPointerCancel={onPointerCancel}
         onWheel={onWheel}
       >
+        {/* Arrowhead marker (uses currentColor) */}
+        <defs>
+          <marker
+            id="pcv-arrow"
+            viewBox="0 0 10 10"
+            refX="9"
+            refY="5"
+            markerWidth="8"
+            markerHeight="8"
+            orient="auto"
+            markerUnits="strokeWidth"
+          >
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+          </marker>
+        </defs>
+
+        {/* Background */}
         <rect className={styles.canvasBg} x={0} y={0} width="100%" height="100%" />
 
+        {/* Viewport transform */}
         <g transform={`translate(${vp.tx} ${vp.ty}) scale(${vp.scale})`}>
           <g className={styles.layerStages}>
             {stages.map((n) => (
@@ -188,8 +257,11 @@ export function DiagramSvgView({ template }: Props) {
             ))}
           </g>
 
+          {/* Edges under nodes */}
           <g className={styles.layerEdges}>
             {template.edges.map((e) => {
+              if (!visibleLayers[e.layer]) return null;
+
               const fromNode = nodeById.get(e.from.nodeId);
               const toNode = nodeById.get(e.to.nodeId);
               if (!fromNode || !toNode) return null;
@@ -201,7 +273,7 @@ export function DiagramSvgView({ template }: Props) {
               const p1 = getPortPosition(fromNode, fromPort);
               const p2 = getPortPosition(toNode, toPort);
 
-              const d = orthogonalPath(p1.x, p1.y, p2.x, p2.y);
+              const d = routeEdge(p1, fromPort, p2, toPort);
 
               return (
                 <path
@@ -210,6 +282,7 @@ export function DiagramSvgView({ template }: Props) {
                   d={d}
                   data-layer={e.layer}
                   data-active={activeEdgeIds.has(e.id) ? "true" : "false"}
+                  markerEnd="url(#pcv-arrow)"
                 />
               );
             })}
@@ -245,9 +318,52 @@ function findPort(node: DiagramNode, portId: string): Port | undefined {
   return [...ins, ...outs].find((p) => p.id === portId);
 }
 
-function orthogonalPath(x1: number, y1: number, x2: number, y2: number) {
-  const midX = (x1 + x2) / 2;
-  return `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
+/**
+ * More “diagram-like” orthogonal routing:
+ * - lead-out from source in its anchor direction
+ * - bend once based on dx/dy
+ * - lead-in to target based on its anchor direction
+ */
+function routeEdge(
+  p1: { x: number; y: number },
+  fromPort: Port,
+  p2: { x: number; y: number },
+  toPort: Port
+) {
+  const lead = 18;
+
+  const d1 = anchorDir(fromPort.anchor);
+  const d2 = anchorDir(toPort.anchor);
+
+  const a1 = { x: p1.x + d1.x * lead, y: p1.y + d1.y * lead };
+  const a2 = { x: p2.x + d2.x * lead, y: p2.y + d2.y * lead };
+
+  const dx = a2.x - a1.x;
+  const dy = a2.y - a1.y;
+
+  const preferHFirst = Math.abs(dx) >= Math.abs(dy);
+  const mid = preferHFirst ? { x: a2.x, y: a1.y } : { x: a1.x, y: a2.y };
+
+  return [
+    `M ${p1.x} ${p1.y}`,
+    `L ${a1.x} ${a1.y}`,
+    `L ${mid.x} ${mid.y}`,
+    `L ${a2.x} ${a2.y}`,
+    `L ${p2.x} ${p2.y}`,
+  ].join(" ");
+}
+
+function anchorDir(anchor: Port["anchor"]) {
+  switch (anchor) {
+    case "left":
+      return { x: -1, y: 0 };
+    case "right":
+      return { x: 1, y: 0 };
+    case "top":
+      return { x: 0, y: -1 };
+    case "bottom":
+      return { x: 0, y: 1 };
+  }
 }
 
 function StageBand({ node }: { node: DiagramNode }) {

@@ -1,9 +1,41 @@
 .root {
+  position: relative;
   height: 100%;
   min-height: 0;
   overflow: hidden;
   background: transparent;
   border: 0;
+}
+
+.overlay {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: flex;
+  gap: var(--space-2);
+  z-index: 10;
+}
+
+.layerToggle {
+  border: var(--border-1) solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 6px 10px;
+  border-radius: calc(var(--radius) - 4px);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-2) ease,
+    border-color var(--dur-2) ease,
+    opacity var(--dur-2) ease;
+}
+
+.layerToggle[data-on="false"] {
+  opacity: 0.55;
+}
+
+.layerToggle:hover {
+  background: var(--control-hover);
 }
 
 .svg {
@@ -64,7 +96,7 @@
   fill: var(--diagram-text);
 }
 .canvasBg {
-  fill: var(--surface-1);
+  fill: var(--diagram-canvas-bg);
 }
 
 /* .layerEdges {
@@ -72,25 +104,31 @@
 
 .edge {
   fill: none;
-  stroke-width: 2;
+  stroke-width: var(--diagram-edge-width);
   stroke-linecap: round;
   stroke-linejoin: round;
   opacity: 0.85;
-  transition: stroke var(--dur-2) ease, opacity var(--dur-2) ease;
+  transition:
+    stroke var(--dur-2) ease,
+    opacity var(--dur-2) ease,
+    color var(--dur-2) ease;
 }
 
 /* Layer styling */
 .edge[data-layer="data"] {
   stroke: var(--border);
+  color: var(--border);
 }
 
 .edge[data-layer="control"] {
   stroke: var(--accent-border);
-  opacity: 0.7;
+  color: var(--accent-border);
+  opacity: 0.75;
 }
 
 .edge[data-layer="forwarding"] {
   stroke: var(--accent);
+  color: var(--accent);
   stroke-dasharray: 6 6;
   opacity: 0.75;
 }
@@ -98,6 +136,7 @@
 /* Active flow animation (subtle) */
 .edge[data-active="true"] {
   stroke: var(--accent);
+  color: var(--accent);
   opacity: 1;
   stroke-dasharray: 5 6;
   animation: edgeFlow 900ms linear infinite;
