@@ -200,11 +200,17 @@ export function MipsMonaco({ value, onChange, themeMode, height = "100%" }: Prop
       }}
       options={{
         minimap: { enabled: false },
+        "semanticHighlighting.enabled": false,
 
         glyphMargin: false,
         folding: false,
         guides: { indentation: false },
         renderWhitespace: "none",
+        renderControlCharacters: false,
+
+        fixedOverflowWidgets: true,
+        scrollBeyondLastLine: false,
+        automaticLayout: true,
 
         lineDecorationsWidth: 15,
         lineNumbersMinChars: 4,
@@ -213,6 +219,10 @@ export function MipsMonaco({ value, onChange, themeMode, height = "100%" }: Prop
         overviewRulerBorder: false,
         overviewRulerLanes: 0,
         hideCursorInOverviewRuler: true,
+
+        occurrencesHighlight: "off",
+        selectionHighlight: false,
+        matchBrackets: "near",
 
         scrollbar: {
           vertical: "auto",
@@ -235,8 +245,6 @@ export function MipsMonaco({ value, onChange, themeMode, height = "100%" }: Prop
         fontFamily:
           'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace',
 
-        scrollBeyondLastLine: false,
-        automaticLayout: true,
         tabSize: 2,
         insertSpaces: true,
       }}
