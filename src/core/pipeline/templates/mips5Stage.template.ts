@@ -32,7 +32,9 @@ export const MIPS_5_STAGE_BASE: DiagramTemplate = {
       id: "pc",
       kind: "block",
       label: "PC",
-      ports: { out: [{ id: "pc_out", anchor: "right", offset: 0.5 }] },
+      ports: { in: [{ id: "pc_in", anchor: "left", offset: 0.5 }],
+      out: [{ id: "pc_out", anchor: "right", offset: 0.5 }],
+      },
       layout: { position: { x: 40, y: 140 }, size: { w: 100, h: 60 } },
     },
     {
@@ -48,6 +50,30 @@ export const MIPS_5_STAGE_BASE: DiagramTemplate = {
     { id: "regfile", kind: "block", label: "Registers", layout: { position: { x: 290, y: 220 }, size: { w: 160, h: 160 } } },
     { id: "alu", kind: "block", label: "ALU", layout: { position: { x: 540, y: 260 }, size: { w: 140, h: 120 } } },
     { id: "dmem", kind: "block", label: "Data\nMemory", layout: { position: { x: 760, y: 260 }, size: { w: 160, h: 140 } } },
+
+    {
+      id: "adder_pc4",
+      kind: "block",
+      label: "Adder\n(+4)",
+      ports: {
+        in: [{ id: "a", anchor: "left", offset: 0.5 }],
+        out: [{ id: "sum", anchor: "right", offset: 0.5 }],
+      },
+      layout: { position: { x: 160, y: 140 }, size: { w: 110, h: 60 } },
+    },
+    {
+      id: "mux_pcsrc",
+      kind: "mux",
+      label: "PCSrc",
+      ports: {
+        in: [
+          { id: "in_pc4", anchor: "right", offset: 0.35 },
+          { id: "in_alt", anchor: "right", offset: 0.75 }, // branch/jump later
+        ],
+        out: [{ id: "out_next", anchor: "left", offset: 0.5 }],
+      },
+      layout: { position: { x: 0, y: 110 }, size: { w: 32, h: 90 } },
+    },
   ],
   edges: [
     {
@@ -60,6 +86,24 @@ export const MIPS_5_STAGE_BASE: DiagramTemplate = {
       id: "e_imem_to_ifid",
       from: { nodeId: "imem", portId: "instr" },
       to: { nodeId: "ifid", portId: "in_instr" },
+      layer: "data",
+    },
+    {
+      id: "e_pc_to_adder_pc4",
+      from: { nodeId: "pc", portId: "pc_out" },
+      to: { nodeId: "adder_pc4", portId: "a" },
+      layer: "data",
+    },
+    {
+      id: "e_adder_pc4_to_pcsrc",
+      from: { nodeId: "adder_pc4", portId: "sum" },
+      to: { nodeId: "mux_pcsrc", portId: "in_pc4" },
+      layer: "data",
+    },
+    {
+      id: "e_pcsrc_to_pc",
+      from: { nodeId: "mux_pcsrc", portId: "out_next" },
+      to: { nodeId: "pc", portId: "pc_in" },
       layer: "data",
     },
   ],

@@ -104,7 +104,7 @@
 
 .edge {
   fill: none;
-  stroke-width: var(--diagram-edge-width);
+  stroke-width: var(--pcv-edge-width);
   stroke-linecap: round;
   stroke-linejoin: round;
   opacity: 0.85;

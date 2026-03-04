@@ -1,6 +1,3 @@
-/* -----------------------------
-   DARK MODE
------------------------------- */
 :root {
   /* Typography */
   --font-family-ui:
@@ -32,6 +29,17 @@
 
   --diagram-canvas-bg: var(--surface-1);
 
+  /* -----------------------------
+     PCV Diagram (geometry / interaction)
+  ------------------------------ */
+  --pcv-diagram-pad: 60px;
+  --pcv-fit-inset: 16px;
+  --pcv-edge-width: 2px;
+  --pcv-route-lead: 18px;
+  --pcv-zoom-min: 0.2;
+  --pcv-zoom-max: 4;
+  --pcv-label-line: 16px;
+
   /* Program editor sizing */
   --program-editor-height: 360px;
   --program-editor-min-height: 260px;
@@ -46,7 +54,9 @@
   --diagram-zoom-max: 4;
   --diagram-label-line: 16px;
 
-  /* Dark Mode */
+  /* -----------------------------
+   DARK MODE
+------------------------------ */
   /* Surfaces */
   --bg: #0e0f12; /* app background */
   --surface-1: #14161b; /* panels */

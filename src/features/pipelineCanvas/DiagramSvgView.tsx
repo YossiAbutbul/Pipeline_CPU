@@ -3,6 +3,7 @@ import type { DiagramNode, DiagramTemplate, Port } from "@/core/pipeline/diagram
 import { getDiagramBounds } from "@/core/pipeline/diagramBounds";
 import { getPortPosition } from "@/core/pipeline/portGeometry";
 import styles from "./diagramSvgView.module.css";
+import { routeEdge } from "@/core/pipeline/routing/routeEdge";
 
 type Props = {
   template: DiagramTemplate;
@@ -20,20 +21,45 @@ type LayerState = {
   forwarding: boolean;
 };
 
+type LayoutVars = {
+    pad: number;
+    inset: number;
+    lead: number;
+    zoomMin: number;
+    zoomMax: number;
+    labelLine: number;
+  };
+
+function readCssNumber(el: Element, name: string, fallback: number) {
+  const raw = getComputedStyle(el).getPropertyValue(name).trim();
+  if (!raw) return fallback;
+  const v = Number.parseFloat(raw);
+  return Number.isFinite(v) ? v : fallback;
+}
+
 export function DiagramSvgView({ template }: Props) {
   const bounds = getDiagramBounds(template);
 
+  const svgRef = useRef<SVGSVGElement | null>(null);
+
+  const [layoutVars, setLayoutVars] = useState<LayoutVars>({
+    pad: 60,
+    inset: 16,
+    lead: 18,
+    zoomMin: 0.2,
+    zoomMax: 4,
+    labelLine: 16,
+  });
+
   // Diagram padding in template coordinates (fixed)
-  const pad = 60;
   const diagram = useMemo(() => {
+    const pad = layoutVars.pad;
     const x = bounds.minX - pad;
     const y = bounds.minY - pad;
     const w = bounds.width + pad * 2;
     const h = bounds.height + pad * 2;
     return { x, y, w, h };
   }, [bounds.minX, bounds.minY, bounds.width, bounds.height]);
-
-  const svgRef = useRef<SVGSVGElement | null>(null);
 
   const [vp, setVp] = useState<Viewport>({ scale: 1, tx: 0, ty: 0 });
   const [isPanning, setIsPanning] = useState(false);
@@ -60,8 +86,29 @@ export function DiagramSvgView({ template }: Props) {
       const vh = rect.height;
       if (vw <= 0 || vh <= 0) return;
 
+      const rootEl = svg.closest(`.${styles.root}`) ?? svg;
+      const pad = readCssNumber(rootEl, "--pcv-diagram-pad", 60);
+      const inset = readCssNumber(rootEl, "--pcv-fit-inset", 16);
+      const lead = readCssNumber(rootEl, "--pcv-route-lead", 18);
+      const zoomMin = readCssNumber(rootEl, "--pcv-zoom-min", 0.2);
+      const zoomMax = readCssNumber(rootEl, "--pcv-zoom-max", 4);
+      const labelLine = readCssNumber(rootEl, "--pcv-label-line", 16);
+
+  setLayoutVars((prev) => {
+    if (
+      prev.pad === pad &&
+      prev.inset === inset &&
+      prev.lead === lead &&
+      prev.zoomMin === zoomMin &&
+      prev.zoomMax === zoomMax &&
+      prev.labelLine === labelLine
+    ) {
+      return prev;
+    }
+    return { pad, inset, lead, zoomMin, zoomMax, labelLine };
+  });
+
       // Fit diagram rect into viewport with a little inset
-      const inset = 16;
       const sx = (vw - inset * 2) / diagram.w;
       const sy = (vh - inset * 2) / diagram.h;
       const scale = Math.min(sx, sy);
@@ -158,7 +205,7 @@ export function DiagramSvgView({ template }: Props) {
     const zoomFactor = Math.exp(-e.deltaY * 0.0015);
 
     setVp((prev) => {
-      const nextScale = clamp(prev.scale * zoomFactor, 0.2, 4);
+      const nextScale = clamp(prev.scale * zoomFactor, layoutVars.zoomMin, layoutVars.zoomMax);
 
       // Keep the point under cursor stable:
       // screen = world*scale + t  => world = (screen - t)/scale
@@ -273,7 +320,7 @@ export function DiagramSvgView({ template }: Props) {
               const p1 = getPortPosition(fromNode, fromPort);
               const p2 = getPortPosition(toNode, toPort);
 
-              const d = routeEdge(p1, fromPort, p2, toPort);
+              const d = routeEdge(p1, fromPort, p2, toPort, {leadPx: layoutVars.lead});
 
               return (
                 <path
@@ -318,53 +365,6 @@ function findPort(node: DiagramNode, portId: string): Port | undefined {
   return [...ins, ...outs].find((p) => p.id === portId);
 }
 
-/**
- * More “diagram-like” orthogonal routing:
- * - lead-out from source in its anchor direction
- * - bend once based on dx/dy
- * - lead-in to target based on its anchor direction
- */
-function routeEdge(
-  p1: { x: number; y: number },
-  fromPort: Port,
-  p2: { x: number; y: number },
-  toPort: Port
-) {
-  const lead = 18;
-
-  const d1 = anchorDir(fromPort.anchor);
-  const d2 = anchorDir(toPort.anchor);
-
-  const a1 = { x: p1.x + d1.x * lead, y: p1.y + d1.y * lead };
-  const a2 = { x: p2.x + d2.x * lead, y: p2.y + d2.y * lead };
-
-  const dx = a2.x - a1.x;
-  const dy = a2.y - a1.y;
-
-  const preferHFirst = Math.abs(dx) >= Math.abs(dy);
-  const mid = preferHFirst ? { x: a2.x, y: a1.y } : { x: a1.x, y: a2.y };
-
-  return [
-    `M ${p1.x} ${p1.y}`,
-    `L ${a1.x} ${a1.y}`,
-    `L ${mid.x} ${mid.y}`,
-    `L ${a2.x} ${a2.y}`,
-    `L ${p2.x} ${p2.y}`,
-  ].join(" ");
-}
-
-function anchorDir(anchor: Port["anchor"]) {
-  switch (anchor) {
-    case "left":
-      return { x: -1, y: 0 };
-    case "right":
-      return { x: 1, y: 0 };
-    case "top":
-      return { x: 0, y: -1 };
-    case "bottom":
-      return { x: 0, y: 1 };
-  }
-}
 
 function StageBand({ node }: { node: DiagramNode }) {
   const { x, y } = node.layout.position;
