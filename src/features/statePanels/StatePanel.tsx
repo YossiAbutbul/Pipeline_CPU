@@ -1,7 +1,7 @@
 import { Panel, Tabs } from "@/ui/components";
 import { useState } from "react";
 
-type TabKey = "registers" | "memory" | "pipeline";
+type TabKey = "registers" | "memory";
 
 export default function StatePanel() {
   const [tab, setTab] = useState<TabKey>("registers");
@@ -15,7 +15,7 @@ export default function StatePanel() {
             items={[
               { key: "registers", label: "Registers" },
               { key: "memory", label: "Memory" },
-              { key: "pipeline", label: "Pipeline" },
+              
             ]}
             value={tab}
             onChange={setTab}
@@ -23,9 +23,8 @@ export default function StatePanel() {
         </div>
       }
     >
-      {tab === "registers" && <div>Registers view (next step)</div>}
-      {tab === "memory" && <div>Memory view (next step)</div>}
-      {tab === "pipeline" && <div>Pipeline registers view (next step)</div>}
+      {tab === "registers" && <div>Registers view </div>}
+      {tab === "memory" && <div>Memory view </div>}
     </Panel>
   );
 }

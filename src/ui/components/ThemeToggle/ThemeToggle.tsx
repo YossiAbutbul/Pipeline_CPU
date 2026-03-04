@@ -1,11 +1,5 @@
-import { useEffect, useId, useState } from "react";
-import {
-  applyTheme,
-  getStoredTheme,
-  getSystemTheme,
-  storeTheme,
-  type Theme,
-} from "@/ui/theme/theme";
+import { useId } from "react";
+import { useTheme } from "@/ui/theme/ThemeProvider";
 import "./themeToggle.css";
 
 type Props = {
@@ -14,21 +8,12 @@ type Props = {
 
 export function ThemeToggle({ label = "Dark mode" }: Props) {
   const id = useId();
-  const [theme, setTheme] = useState<Theme>("dark");
-
-  useEffect(() => {
-    const t = getStoredTheme() ?? getSystemTheme();
-    setTheme(t);
-    applyTheme(t);
-  }, []);
+  const { theme, setTheme } = useTheme();
 
   const checked = theme === "dark";
 
   function onChange(nextChecked: boolean) {
-    const next: Theme = nextChecked ? "dark" : "light";
-    setTheme(next);
-    applyTheme(next);
-    storeTheme(next);
+    setTheme(nextChecked ? "dark" : "light");
   }
 
   return (
@@ -43,7 +28,11 @@ export function ThemeToggle({ label = "Dark mode" }: Props) {
         className={`switch ${checked ? "switchOn" : "switchOff"}`}
         role="switch"
         aria-checked={checked}
-        onClick={() => onChange(!checked)}
+        onClick={(e) => {
+          onChange(!checked);
+
+          requestAnimationFrame(() => e.currentTarget.blur());
+        }}
       >
         <span className="switchThumb" />
       </button>
