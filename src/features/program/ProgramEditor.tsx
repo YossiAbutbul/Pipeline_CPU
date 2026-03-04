@@ -1,11 +1,12 @@
-import { Button, Panel, ThemeToggle, CodeEditor } from "@/ui/components";
 import { useState } from "react";
+import { Button, Panel, ThemeToggle } from "@/ui/components";
+import { MipsMonaco } from "@/ui/components/MipsMonaco";
+import { useTheme } from "@/ui/theme/ThemeProvider";
 import "./programEditor.css";
 
 export default function ProgramEditor() {
-  const [program, setProgram] = useState(
-    "# Write MIPS here...\n"
-  );
+  const [program, setProgram] = useState("# Write MIPS here...\nadd $t0,$t1,$t2\n");
+  const { themeMode } = useTheme();
 
   return (
     <Panel
@@ -26,16 +27,10 @@ export default function ProgramEditor() {
           <Button>Run</Button>
           <Button>Reset</Button>
         </div>
-        <div className="programEditorBox">
-          <CodeEditor
-            value={program}
-            onChange={setProgram}
-            placeholder={"# Write MIPS here...\nadd $1,$2,$3\n"}
-            minLines={1}
-          />
-        </div>
 
-        
+        <div className="programEditorBox">
+          <MipsMonaco value={program} onChange={setProgram} themeMode={themeMode} height="100%" />
+        </div>
 
         <div className="programFooter">
           <ThemeToggle label="Dark mode" />
