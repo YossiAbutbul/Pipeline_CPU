@@ -100,6 +100,13 @@
   --scrollbar-track: transparent;
   --scrollbar-thumb: #2f3440;
   --scrollbar-thumb-hover: #3a404d;
+
+  /* CPU Diagram */
+  --dp: #b3b3b3; /* data paths border and text color */
+  --ctrl: #7ad0ff; /* control paths border and text color */
+  --compBg: #1a1d24; /* componnets background color */
+  --compStroke: #4b5568; /* componnets border color */
+  --chipBg: var(--surface-3); /* cause and epc color */
 }
 
 /* -----------------------------
@@ -138,4 +145,11 @@
   --scrollbar-track: transparent;
   --scrollbar-thumb: #c7c3b9;
   --scrollbar-thumb-hover: #b6b2a8;
+
+  /* CPU Diagram */
+  --dp: #16181d; /* data paths border and text color */
+  --ctrl: #0078ff; /* control paths border and text color */
+  --compBg: var(--surface-1); /* componnets background color */
+  --compStroke: #16181d; /* componnets border color */
+  --chipBg: var(--surface-2); /* cause and epc color */
 }

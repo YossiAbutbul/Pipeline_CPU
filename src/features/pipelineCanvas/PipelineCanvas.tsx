@@ -1,11 +1,12 @@
 import { Panel } from "@/ui/components";
-import { MIPS_5_STAGE_BASE } from "@/core/pipeline/templates/mips5Stage.template";
-import { DiagramSvgView } from "./DiagramSvgView";
+import CpuDiagram from "@/assets/cpu/mips_cpu.svg?react";
 
 export default function PipelineCanvas() {
   return (
     <Panel title="Pipeline Diagram" headerSize="xl">
-      <DiagramSvgView template={MIPS_5_STAGE_BASE} />
+      <div style={{ width: "100%", overflow: "auto" }}>
+        <CpuDiagram style={{ width: "100%", height: "auto" }} />
+      </div>
     </Panel>
   );
 }
