@@ -1,10 +1,7 @@
-/* -----------------------------
-   DARK MODE
------------------------------- */
 :root {
   /* Typography */
-  --font-family-ui: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
-    Arial, sans-serif;
+  --font-family-ui:
+    ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   --font-size-xs: 12px;
   --font-size-sm: 13px;
   --font-size-md: 14px;
@@ -32,11 +29,34 @@
 
   --diagram-canvas-bg: var(--surface-1);
 
-  /* Program editor sizing (semantic) */
+  /* -----------------------------
+     PCV Diagram (geometry / interaction)
+  ------------------------------ */
+  --pcv-diagram-pad: 60px;
+  --pcv-fit-inset: 16px;
+  --pcv-edge-width: 2px;
+  --pcv-route-lead: 18px;
+  --pcv-zoom-min: 0.2;
+  --pcv-zoom-max: 4;
+  --pcv-label-line: 16px;
+
+  /* Program editor sizing */
   --program-editor-height: 360px;
   --program-editor-min-height: 260px;
   --program-editor-max-height: 440px;
 
+  /* Diagram geometry / interaction */
+  --diagram-pad: 60px; /* template coord padding around bounds */
+  --diagram-fit-inset: 16px; /* screen inset for fit-to-view */
+  --diagram-edge-width: 2px;
+  --diagram-route-lead: 18px; /* lead-out/lead-in length */
+  --diagram-zoom-min: 0.2;
+  --diagram-zoom-max: 4;
+  --diagram-label-line: 16px;
+
+  /* -----------------------------
+   DARK MODE
+------------------------------ */
   /* Surfaces */
   --bg: #0e0f12; /* app background */
   --surface-1: #14161b; /* panels */
@@ -80,6 +100,13 @@
   --scrollbar-track: transparent;
   --scrollbar-thumb: #2f3440;
   --scrollbar-thumb-hover: #3a404d;
+
+  /* CPU Diagram */
+  --dp: #b3b3b3; /* data paths border and text color */
+  --ctrl: #7ad0ff; /* control paths border and text color */
+  --compBg: #1a1d24; /* componnets background color */
+  --compStroke: #4b5568; /* componnets border color */
+  --chipBg: var(--surface-3); /* cause and epc color */
 }
 
 /* -----------------------------
@@ -118,4 +145,11 @@
   --scrollbar-track: transparent;
   --scrollbar-thumb: #c7c3b9;
   --scrollbar-thumb-hover: #b6b2a8;
+
+  /* CPU Diagram */
+  --dp: #16181d; /* data paths border and text color */
+  --ctrl: #0078ff; /* control paths border and text color */
+  --compBg: var(--surface-1); /* componnets background color */
+  --compStroke: #16181d; /* componnets border color */
+  --chipBg: var(--surface-2); /* cause and epc color */
 }
