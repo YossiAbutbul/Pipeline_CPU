@@ -45,7 +45,6 @@ export function MipsMonaco({ value, onChange, themeMode, height = "100%" }: Prop
       language="mips"
       theme={theme}
       path="mips://program"
-      keepCurrentModel
       value={value}
       onChange={(v) => onChange(v ?? "")}
       onMount={(_editor, monaco) => {
