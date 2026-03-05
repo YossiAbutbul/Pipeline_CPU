@@ -6,7 +6,7 @@ export const INSTRUCTIONS = [
   "addi","addiu","andi","ori","xori","slti","sltiu","lui",
   "lw","sw","lb","lbu","lh","lhu","sb","sh",
   "beq","bne","blez","bgtz","bltz","bgez","j","jal",
-  "move","li","la","nop",
+  "move","li","la","nop","bubble",
   "syscall","break",
 ] as const;
 
@@ -128,6 +128,7 @@ export const INSTRUCTION_DOCS: Record<string, InsDoc> = {
   li: { sig: "li rt, imm", summary: "pseudo: load immediate" },
   la: { sig: "la rt, label", summary: "pseudo: load address of label" },
   nop: { sig: "nop", summary: "no operation" },
+  bubble: { sig: "bubble", summary: "pipeline bubble / stall cycle marker" },
   syscall: { sig: "syscall", summary: "system call" },
   break: { sig: "break", summary: "breakpoint / trap" },
 };
