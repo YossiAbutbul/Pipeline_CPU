@@ -1,6 +1,33 @@
 import type * as Monaco from "monaco-editor";
 import { DIRECTIVES, INSTRUCTIONS } from "./mipsData";
 
+export function registerMipsLanguageConfiguration(monaco: typeof Monaco) {
+  monaco.languages.setLanguageConfiguration("mips", {
+    comments: {
+      lineComment: "#",
+    },
+    brackets: [
+      ["(", ")"],
+      ["[", "]"],
+      ["{", "}"],
+    ],
+    autoClosingPairs: [
+      { open: "(", close: ")" },
+      { open: "[", close: "]" },
+      { open: "{", close: "}" },
+      { open: '"', close: '"', notIn: ["string", "comment"] },
+      { open: "'", close: "'", notIn: ["string", "comment"] },
+    ],
+    surroundingPairs: [
+      { open: "(", close: ")" },
+      { open: "[", close: "]" },
+      { open: "{", close: "}" },
+      { open: '"', close: '"' },
+      { open: "'", close: "'" },
+    ],
+  });
+}
+
 export function registerMipsTokenizer(monaco: typeof Monaco) {
   monaco.languages.setMonarchTokensProvider("mips", {
     defaultToken: "",

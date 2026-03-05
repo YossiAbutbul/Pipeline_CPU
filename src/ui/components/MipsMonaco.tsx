@@ -52,7 +52,7 @@ export function MipsMonaco({ value, onChange, themeMode, height = "100%" }: Prop
 
         // Register language/providers once per mount (and avoid duplicates)
         disposablesRef.current?.dispose();
-        disposablesRef.current = setupMipsMonaco(monaco as any, themeMode);
+        disposablesRef.current = setupMipsMonaco(monaco as any, themeMode)
 
         // Define theme from current tokens + apply
         defineMipsThemeFromTokens(monaco as any, themeMode);
@@ -62,7 +62,11 @@ export function MipsMonaco({ value, onChange, themeMode, height = "100%" }: Prop
         minimap: { enabled: false },
         "semanticHighlighting.enabled": false,
 
-        // reduce noisy suggestions from "words in document"
+        autoClosingBrackets: "always",
+        autoClosingQuotes: "always",
+        autoClosingDelete: "always",
+        autoClosingOvertype: "always",
+
         suggest: { showWords: false },
         suggestOnTriggerCharacters: true,
         quickSuggestions: { other: true, comments: false, strings: false },

@@ -4,7 +4,7 @@ import ProgramEditor from "@/features/program/ProgramEditor";
 import StatePanel from "@/features/statePanels/StatePanel";
 import "./app.css";
 
-const DEFAULT_PROGRAM = "#write MIPS here...\n";
+const DEFAULT_PROGRAM = "#write MIPS here...\nadd $1, $2, $3\n";
 const PIPELINE_STAGES = ["IF", "ID", "EX", "MEM", "WB"] as const;
 
 type StageName = (typeof PIPELINE_STAGES)[number];

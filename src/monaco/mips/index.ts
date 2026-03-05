@@ -1,5 +1,5 @@
 import type * as Monaco from "monaco-editor";
-import { registerMipsTokenizer } from "./tokenizer";
+import { registerMipsLanguageConfiguration, registerMipsTokenizer } from "./tokenizer";
 import { registerMipsCompletion } from "./completion";
 import { registerMipsHover } from "./hover";
 import { registerMipsSignature } from "./signature";
@@ -14,6 +14,7 @@ export function setupMipsMonaco(monaco: typeof Monaco, mode: "dark" | "light"): 
     if (!monaco.languages.getLanguages().some((l) => l.id === "mips")) {
       monaco.languages.register({ id: "mips" });
     }
+    registerMipsLanguageConfiguration(monaco);
     registerMipsTokenizer(monaco);
     didInit = true;
   }
