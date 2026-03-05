@@ -1,6 +1,10 @@
 import Editor, { useMonaco } from "@monaco-editor/react";
 import { useEffect, useMemo, useRef } from "react";
 
+import { setupMipsMonaco, type MipsMonacoDisposables } from "@/monaco/mips";
+import { MIPS_THEME_DARK, MIPS_THEME_LIGHT } from "@/monaco/mips/themes";
+import "@/monaco/mips/style.css";
+
 type Props = {
   value: string;
   onChange: (v: string) => void;
@@ -8,212 +12,28 @@ type Props = {
   height?: string | number;
 };
 
-const INSTRUCTIONS = [
-  "add","addu","sub","subu","and","or","xor","nor","slt","sltu",
-  "sll","srl","sra","sllv","srlv","srav",
-  "mult","multu","div","divu","mfhi","mflo","mthi","mtlo",
-  "jr","jalr",
-  "addi","addiu","andi","ori","xori","slti","sltiu","lui",
-  "lw","sw","lb","lbu","lh","lhu","sb","sh",
-  "beq","bne","blez","bgtz","bltz","bgez","j","jal",
-  "move","li","la","nop",
-  "syscall","break",
-];
-
-const DIRECTIVES = [
-  ".data",".text",".globl",".global",".word",".half",".byte",".asciiz",".ascii",".space",".align",
-];
-
-const REG_ALIASES = [
-  "zero","at","v0","v1","a0","a1","a2","a3",
-  "t0","t1","t2","t3","t4","t5","t6","t7","t8","t9",
-  "s0","s1","s2","s3","s4","s5","s6","s7",
-  "k0","k1","gp","sp","fp","ra",
-];
-
 export function MipsMonaco({ value, onChange, themeMode, height = "100%" }: Props) {
   const monaco = useMonaco();
-  const theme = useMemo(() => (themeMode === "dark" ? "mips-dark" : "mips-light"), [themeMode]);
+  const theme = useMemo(
+    () => (themeMode === "dark" ? MIPS_THEME_DARK : MIPS_THEME_LIGHT),
+    [themeMode]
+  );
 
-  // prevent double registration (StrictMode mounts twice in dev)
-  const didInitRef = useRef(false);
+  const disposablesRef = useRef<MipsMonacoDisposables | null>(null);
 
-  // 1) One-time language + providers + themes
   useEffect(() => {
     if (!monaco) return;
-    if (didInitRef.current) return;
-    didInitRef.current = true;
 
-    // Language
-    if (!monaco.languages.getLanguages().some((l) => l.id === "mips")) {
-      monaco.languages.register({ id: "mips" });
-    }
-
-    monaco.languages.setMonarchTokensProvider("mips", {
-      defaultToken: "",
-      tokenPostfix: ".mips",
-      ignoreCase: true,
-      keywords: INSTRUCTIONS,
-      directives: DIRECTIVES,
-      tokenizer: {
-        root: [
-          [/#[^\n]*/, "comment"],
-          [/^[ \t]*[A-Za-z_.$][\w.$]*:/, "type.identifier"],
-          [/\.[A-Za-z_]+\b/, { cases: { "@directives": "keyword.directive", "@default": "keyword.directive" } }],
-          [/\$([0-9]+|[A-Za-z_][A-Za-z0-9_]*)\b/, "variable.predefined"],
-          [/-?0x[0-9a-fA-F]+\b/, "number.hex"],
-          [/-?\d+\b/, "number"],
-          [/"([^"\\]|\\.)*$/, "string.invalid"],
-          [/"/, "string", "@string"],
-          [/[A-Za-z_][\w.$]*\b/, { cases: { "@keywords": "keyword", "@default": "identifier" } }],
-          [/[(),]/, "delimiter"],
-          [/[+\-*/]/, "operator"],
-          [/[ \t\r\n]+/, ""],
-        ],
-        string: [
-          [/[^\\"]+/, "string"],
-          [/\\./, "string.escape"],
-          [/"/, "string", "@pop"],
-        ],
-      },
-    });
-
-    // Completion provider
-    const completionDisposable = monaco.languages.registerCompletionItemProvider("mips", {
-      triggerCharacters: ["$", ".", " "],
-
-      provideCompletionItems: (model, position /*, context, token */) => {
-        const line = model.getLineContent(position.lineNumber);
-        const cursorIdx = position.column - 1; // 0-based index in the line
-        const beforeCursor = line.slice(0, cursorIdx);
-
-        // Detect a register token right before the cursor: "$", "$r", "$ra", etc.
-        // We also ensure it's a real token boundary (start of line or non-word char before '$')
-        const m = beforeCursor.match(/(?:^|[^A-Za-z0-9_])(\$[A-Za-z0-9_]*)$/);
-
-        const word = model.getWordUntilPosition(position);
-        const defaultRange = new monaco.Range(
-          position.lineNumber,
-          word.startColumn,
-          position.lineNumber,
-          word.endColumn
-        );
-
-        // If we're inside a $token, replace ONLY that token
-        const regRange = m
-          ? new monaco.Range(
-              position.lineNumber,
-              position.column - m[1].length,
-              position.lineNumber,
-              position.column
-            )
-          : defaultRange;
-
-        const regSuggestions = REG_ALIASES.map((r) => {
-          const full = `$${r}`;
-          return {
-            label: full,
-            kind: monaco.languages.CompletionItemKind.Variable,
-
-            // required by typings
-            insertText: full,
-            range: regRange,
-
-            // force replacement of "$..." (prevents $$ra)
-            textEdit: { range: regRange, text: full },
-
-            sortText: "0_" + full,
-            filterText: full,
-          };
-        });
-
-        if (m) {
-          return { suggestions: regSuggestions };
-        }
-
-        const suggestions = [
-          ...INSTRUCTIONS.map((k) => ({
-            label: k,
-            kind: monaco.languages.CompletionItemKind.Keyword,
-            insertText: k,
-            range: defaultRange,
-            sortText: "1_" + k,
-            filterText: k,
-          })),
-          ...DIRECTIVES.map((d) => ({
-            label: d,
-            kind: monaco.languages.CompletionItemKind.Keyword,
-            insertText: d,
-            range: defaultRange,
-            sortText: "2_" + d,
-            filterText: d,
-          })),
-          ...regSuggestions, // optional: keep regs in general context too
-        ];
-
-        return { suggestions };
-      },
-    });
-
-    // Themes
-    monaco.editor.defineTheme("mips-dark", {
-      base: "vs-dark",
-      inherit: true,
-      rules: [
-        { token: "comment", foreground: "7A7A7A" },
-        { token: "keyword", foreground: "4FC3F7" },
-        { token: "keyword.directive", foreground: "B39DDB" },
-        { token: "variable.predefined", foreground: "81C784" },
-        { token: "number", foreground: "FFD54F" },
-        { token: "number.hex", foreground: "FFD54F" },
-        { token: "string", foreground: "FFAB91" },
-        { token: "type.identifier", foreground: "F48FB1" },
-      ],
-      colors: {
-        "editor.background": "#0f1115",
-        "editorGutter.background": "#0f1115",
-
-        "editor.lineHighlightBackground": "#1f2633",
-        "editor.selectionBackground": "#264f7844",
-        "editor.inactiveSelectionBackground": "#264f7822",
-
-        "editorLineNumber.foreground": "#8a93a6",
-        "editorLineNumber.activeForeground": "#c9d1d9",
-      },
-    });
-
-    monaco.editor.defineTheme("mips-light", {
-      base: "vs",
-      inherit: true,
-      rules: [
-        { token: "comment", foreground: "7A7A7A" },
-        { token: "keyword", foreground: "1565C0" },
-        { token: "keyword.directive", foreground: "6A1B9A" },
-        { token: "variable.predefined", foreground: "2E7D32" },
-        { token: "number", foreground: "EF6C00" },
-        { token: "number.hex", foreground: "EF6C00" },
-        { token: "string", foreground: "C62828" },
-        { token: "type.identifier", foreground: "AD1457" },
-      ],
-      colors: {
-        "editor.background": "#ffffff",
-        "editorGutter.background": "#ffffff",
-
-        "editor.lineHighlightBackground": "#f0f4f9",
-        "editor.selectionBackground": "#264f7826",
-        "editor.inactiveSelectionBackground": "#264f7817",
-
-        "editorLineNumber.foreground": "#6b7280",
-        "editorLineNumber.activeForeground": "#111827",
-      },
-    });
+    // Ensure we don't accumulate providers across remounts
+    disposablesRef.current?.dispose();
+    disposablesRef.current = setupMipsMonaco(monaco);
 
     return () => {
-      completionDisposable.dispose();
+      disposablesRef.current?.dispose();
+      disposablesRef.current = null;
     };
   }, [monaco]);
 
-  // Apply theme whenever themeMode changes
   useEffect(() => {
     if (!monaco) return;
     monaco.editor.setTheme(theme);
@@ -229,11 +49,22 @@ export function MipsMonaco({ value, onChange, themeMode, height = "100%" }: Prop
       value={value}
       onChange={(v) => onChange(v ?? "")}
       onMount={(_editor, m) => {
+        disposablesRef.current?.dispose();
+        disposablesRef.current = setupMipsMonaco(m);
         m.editor.setTheme(theme);
       }}
       options={{
         minimap: { enabled: false },
         "semanticHighlighting.enabled": false,
+
+        // reduce noisy suggestions from "words in document"
+        suggest: { showWords: false },
+        suggestOnTriggerCharacters: true,
+        quickSuggestions: {                
+          other: true,
+          comments: false,
+          strings: false,
+        },
 
         glyphMargin: false,
         folding: false,

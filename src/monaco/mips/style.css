@@ -1,0 +1,8 @@
+.monaco-editor .suggest-widget {
+  width: 200px !important;
+  max-width: 200px !important;
+}
+
+.monaco-editor .suggest-widget .monaco-list {
+  width: 200px !important;
+}
