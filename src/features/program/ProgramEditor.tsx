@@ -4,7 +4,7 @@ import { useTheme } from "@/ui/theme/ThemeProvider";
 import { Trash2 } from "lucide-react";
 import "./programEditor.css";
 
-const DEFAULT_PROGRAM = "#write MIPS here...\n";
+const DEFAULT_PROGRAM = "# Write MIPS here...\n";
 
 type Props = {
   program: string;
