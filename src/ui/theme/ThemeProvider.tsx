@@ -11,7 +11,6 @@ type ThemeContextValue = {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // ✅ IMPORTANT: synchronous init on first render (no "dark first" flash)
   const [theme, setThemeState] = useState<Theme>(() => initTheme());
 
   const setTheme = (next: Theme) => {
