@@ -1,11 +1,84 @@
-import { Panel } from "@/ui/components";
+import { Button, Panel } from "@/ui/components";
 import CpuDiagram from "@/assets/cpu/mips_cpu.svg?react";
+import "./pipelineCanvas.css";
 
-export default function PipelineCanvas() {
+type PipelineSlots = {
+  IF: string | null;
+  ID: string | null;
+  EX: string | null;
+  MEM: string | null;
+  WB: string | null;
+};
+
+type Props = {
+  pipeline: PipelineSlots;
+  onStepForward: () => void;
+  onStepBackward: () => void;
+  canStepBackward: boolean;
+};
+
+const STAGE_ORDER: Array<keyof PipelineSlots> = ["IF", "ID", "EX", "MEM", "WB"];
+
+export default function PipelineCanvas({
+  pipeline,
+  onStepForward,
+  onStepBackward,
+  canStepBackward,
+}: Props) {
   return (
     <Panel title="Pipeline Diagram" headerSize="xl">
-      <div style={{ width: "100%", overflow: "auto" }}>
-        <CpuDiagram style={{ width: "100%", height: "auto" }} />
+      <div className="pipelineTracker" aria-label="Pipeline stage tracker">
+        {STAGE_ORDER.map((stage) => {
+          const instruction = pipeline[stage];
+          return (
+            <div key={stage} className={`pipelineStage ${instruction ? "isActive" : ""}`}>
+              <div className="pipelineStageName">{stage}</div>
+              <div className="pipelineStageInstruction">{instruction ?? "Empty"}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="pipelineTrackerControls">
+        <Button
+          onClick={onStepBackward}
+          disabled={!canStepBackward}
+          className="btn-iconOnly"
+          aria-label="Step backward"
+          title="Step backward"
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+            <path
+              d="M15 6l-6 6 6 6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </Button>
+        <Button
+          variant="primary"
+          onClick={onStepForward}
+          className="btn-iconOnly"
+          aria-label="Step forward"
+          title="Step forward"
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+            <path
+              d="M9 6l6 6-6 6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </Button>
+      </div>
+
+      <div style={{ width: "100%", overflow: "auto", display: "flex", justifyContent: "center" }}>
+        <CpuDiagram style={{ width: "90%", height: "auto" }} />
       </div>
     </Panel>
   );

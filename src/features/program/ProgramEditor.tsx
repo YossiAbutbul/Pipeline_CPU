@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button, Panel, ThemeToggle } from "@/ui/components";
 import { MipsMonaco } from "@/ui/components/MipsMonaco";
 import { useTheme } from "@/ui/theme/ThemeProvider";
@@ -6,12 +5,22 @@ import "./programEditor.css";
 
 const DEFAULT_PROGRAM = "#write MIPS here...\n";
 
-export default function ProgramEditor() {
-  const [program, setProgram] = useState(DEFAULT_PROGRAM);
+type Props = {
+  program: string;
+  onProgramChange: (value: string) => void;
+  onReset: () => void;
+};
+
+export default function ProgramEditor({
+  program,
+  onProgramChange,
+  onReset,
+}: Props) {
   const { themeMode } = useTheme();
 
   const handleClearProgram = () => {
-    setProgram(DEFAULT_PROGRAM);
+    onProgramChange(DEFAULT_PROGRAM);
+    onReset();
   };
 
   return (
@@ -27,9 +36,8 @@ export default function ProgramEditor() {
       <div className="programLayout">
         <div className="programControls">
           <div className="programActions">
-            <Button variant="primary">Step</Button>
             <Button>Run</Button>
-            <Button>Reset</Button>
+            <Button onClick={onReset}>Reset</Button>
           </div>
           <Button
             type="button"
@@ -59,7 +67,7 @@ export default function ProgramEditor() {
         </div>
 
         <div className="programEditorBox">
-          <MipsMonaco value={program} onChange={setProgram} themeMode={themeMode} height="100%" />
+          <MipsMonaco value={program} onChange={onProgramChange} themeMode={themeMode} height="100%" />
         </div>
 
         <div className="programFooter">
