@@ -81,21 +81,62 @@ export function MipsMonaco({ value, onChange, themeMode, height = "100%" }: Prop
     // Completion provider
     const completionDisposable = monaco.languages.registerCompletionItemProvider("mips", {
       triggerCharacters: ["$", ".", " "],
-      provideCompletionItems: (model, position) => {
+
+      provideCompletionItems: (model, position /*, context, token */) => {
+        const line = model.getLineContent(position.lineNumber);
+        const cursorIdx = position.column - 1; // 0-based index in the line
+        const beforeCursor = line.slice(0, cursorIdx);
+
+        // Detect a register token right before the cursor: "$", "$r", "$ra", etc.
+        // We also ensure it's a real token boundary (start of line or non-word char before '$')
+        const m = beforeCursor.match(/(?:^|[^A-Za-z0-9_])(\$[A-Za-z0-9_]*)$/);
+
         const word = model.getWordUntilPosition(position);
-        const range = {
-          startLineNumber: position.lineNumber,
-          endLineNumber: position.lineNumber,
-          startColumn: word.startColumn,
-          endColumn: word.endColumn,
-        };
+        const defaultRange = new monaco.Range(
+          position.lineNumber,
+          word.startColumn,
+          position.lineNumber,
+          word.endColumn
+        );
+
+        // If we're inside a $token, replace ONLY that token
+        const regRange = m
+          ? new monaco.Range(
+              position.lineNumber,
+              position.column - m[1].length,
+              position.lineNumber,
+              position.column
+            )
+          : defaultRange;
+
+        const regSuggestions = REG_ALIASES.map((r) => {
+          const full = `$${r}`;
+          return {
+            label: full,
+            kind: monaco.languages.CompletionItemKind.Variable,
+
+            // required by typings
+            insertText: full,
+            range: regRange,
+
+            // force replacement of "$..." (prevents $$ra)
+            textEdit: { range: regRange, text: full },
+
+            sortText: "0_" + full,
+            filterText: full,
+          };
+        });
+
+        if (m) {
+          return { suggestions: regSuggestions };
+        }
 
         const suggestions = [
           ...INSTRUCTIONS.map((k) => ({
             label: k,
             kind: monaco.languages.CompletionItemKind.Keyword,
             insertText: k,
-            range,
+            range: defaultRange,
             sortText: "1_" + k,
             filterText: k,
           })),
@@ -103,21 +144,11 @@ export function MipsMonaco({ value, onChange, themeMode, height = "100%" }: Prop
             label: d,
             kind: monaco.languages.CompletionItemKind.Keyword,
             insertText: d,
-            range,
+            range: defaultRange,
             sortText: "2_" + d,
             filterText: d,
           })),
-          ...REG_ALIASES.map((r) => {
-            const label = `$${r}`;
-            return {
-              label,
-              kind: monaco.languages.CompletionItemKind.Variable,
-              insertText: label,
-              range,
-              sortText: "3_" + label,
-              filterText: label,
-            };
-          }),
+          ...regSuggestions, // optional: keep regs in general context too
         ];
 
         return { suggestions };

@@ -28,6 +28,13 @@
 /* Controls */
 .programControls {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.programActions {
+  display: flex;
   gap: var(--space-2);
   flex-wrap: wrap;
 }
@@ -36,6 +43,41 @@
   margin-top: auto;
   padding-top: var(--space-2);
   border-top: var(--border-1) solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-2);
+}
+
+.clearProgramButton {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 999px;
+  border: none;
+  color: var(--danger-fg);
+  background: transparent;
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+  transition:
+    background var(--dur-1),
+    color var(--dur-1),
+    transform var(--dur-1);
+}
+
+.clearProgramButton:hover:not(:disabled) {
+  background: var(--danger-bg-soft);
+  color: var(--danger-fg-strong);
+  transform: translateY(-1px);
+}
+
+.clearProgramButton:disabled {
+  opacity: 0.5;
+}
+
+.clearProgramIcon {
+  width: 16px;
+  height: 16px;
 }
 
 /* ========================= */
@@ -109,4 +151,10 @@
   padding-left: 6px !important;
   padding-right: 6px !important;
   opacity: 0.75;
+}
+
+/* Completion tab width */
+.monaco-editor .suggest-widget {
+  width: 200px !important;
+  font-size: 12px;
 }
