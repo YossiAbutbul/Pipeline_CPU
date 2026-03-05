@@ -37,6 +37,9 @@ export default function App() {
   const canStepBackward = history.length > 0;
 
   const instructions = useMemo(() => parseInstructions(program), [program]);
+  const hasInstructionsToInject = nextInstructionIndex < instructions.length;
+  const hasPipelineWork = Object.values(pipeline).some((value) => value !== null);
+  const canStepForward = hasInstructionsToInject || hasPipelineWork;
 
   const handleProgramChange = (nextProgram: string) => {
     setProgram(nextProgram);
@@ -46,6 +49,10 @@ export default function App() {
   };
 
   const handleStep = () => {
+    if (!canStepForward) {
+      return;
+    }
+
     const incomingInstruction = instructions[nextInstructionIndex] ?? null;
     const currentSnapshot: PipelineSnapshot = {
       pipeline,
@@ -102,6 +109,7 @@ export default function App() {
           onStepForward={handleStep}
           onStepBackward={handleStepBack}
           canStepBackward={canStepBackward}
+          canStepForward={canStepForward}
         />
       </main>
 

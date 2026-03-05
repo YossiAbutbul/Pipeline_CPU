@@ -1,5 +1,6 @@
 import { Button, Panel } from "@/ui/components";
 import CpuDiagram from "@/assets/cpu/mips_cpu.svg?react";
+import { Rewind , FastForward  } from "lucide-react";
 import "./pipelineCanvas.css";
 
 type PipelineSlots = {
@@ -15,6 +16,7 @@ type Props = {
   onStepForward: () => void;
   onStepBackward: () => void;
   canStepBackward: boolean;
+  canStepForward: boolean;
 };
 
 const STAGE_ORDER: Array<keyof PipelineSlots> = ["IF", "ID", "EX", "MEM", "WB"];
@@ -24,6 +26,7 @@ export default function PipelineCanvas({
   onStepForward,
   onStepBackward,
   canStepBackward,
+  canStepForward,
 }: Props) {
   return (
     <Panel title="Pipeline Diagram" headerSize="xl">
@@ -33,7 +36,7 @@ export default function PipelineCanvas({
           return (
             <div key={stage} className={`pipelineStage ${instruction ? "isActive" : ""}`}>
               <div className="pipelineStageName">{stage}</div>
-              <div className="pipelineStageInstruction">{instruction ?? "Empty"}</div>
+              <div className="pipelineStageInstruction">{instruction ?? "Unknown"}</div>
             </div>
           );
         })}
@@ -46,34 +49,17 @@ export default function PipelineCanvas({
           aria-label="Step backward"
           title="Step backward"
         >
-          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
-            <path
-              d="M15 6l-6 6 6 6"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <Rewind size={16} aria-hidden="true" />
         </Button>
         <Button
           variant="primary"
           onClick={onStepForward}
+          disabled={!canStepForward}
           className="btn-iconOnly"
           aria-label="Step forward"
           title="Step forward"
         >
-          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
-            <path
-              d="M9 6l6 6-6 6"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <FastForward size={16} aria-hidden="true" />
         </Button>
       </div>
 
