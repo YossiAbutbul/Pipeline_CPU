@@ -1,8 +1,7 @@
-import Editor, { useMonaco } from "@monaco-editor/react";
+import Editor from "@monaco-editor/react";
 import { useEffect, useMemo, useRef } from "react";
-
 import { setupMipsMonaco, type MipsMonacoDisposables } from "@/monaco/mips";
-import { MIPS_THEME_DARK, MIPS_THEME_LIGHT } from "@/monaco/mips/themes";
+import { MIPS_THEME_DARK, MIPS_THEME_LIGHT, defineMipsThemeFromTokens } from "@/monaco/mips/themes";
 import "@/monaco/mips/style.css";
 
 type Props = {
@@ -13,31 +12,32 @@ type Props = {
 };
 
 export function MipsMonaco({ value, onChange, themeMode, height = "100%" }: Props) {
-  const monaco = useMonaco();
   const theme = useMemo(
     () => (themeMode === "dark" ? MIPS_THEME_DARK : MIPS_THEME_LIGHT),
     [themeMode]
   );
 
   const disposablesRef = useRef<MipsMonacoDisposables | null>(null);
+  const monacoRef = useRef<Parameters<NonNullable<React.ComponentProps<typeof Editor>["onMount"]>>[1] | null>(null);
 
+  // Cleanup on unmount
   useEffect(() => {
-    if (!monaco) return;
-
-    // Ensure we don't accumulate providers across remounts
-    disposablesRef.current?.dispose();
-    disposablesRef.current = setupMipsMonaco(monaco);
-
     return () => {
       disposablesRef.current?.dispose();
       disposablesRef.current = null;
+      monacoRef.current = null;
     };
-  }, [monaco]);
+  }, []);
 
+  // When themeMode changes, refresh Monaco theme colors from CSS tokens
   useEffect(() => {
+    const monaco = monacoRef.current;
     if (!monaco) return;
+
+    // Recompute theme from current CSS variables (data-theme already changed by ThemeProvider)
+    defineMipsThemeFromTokens(monaco as any, themeMode);
     monaco.editor.setTheme(theme);
-  }, [monaco, theme]);
+  }, [themeMode, theme]);
 
   return (
     <Editor
@@ -48,10 +48,16 @@ export function MipsMonaco({ value, onChange, themeMode, height = "100%" }: Prop
       keepCurrentModel
       value={value}
       onChange={(v) => onChange(v ?? "")}
-      onMount={(_editor, m) => {
+      onMount={(_editor, monaco) => {
+        monacoRef.current = monaco;
+
+        // Register language/providers once per mount (and avoid duplicates)
         disposablesRef.current?.dispose();
-        disposablesRef.current = setupMipsMonaco(m);
-        m.editor.setTheme(theme);
+        disposablesRef.current = setupMipsMonaco(monaco as any, themeMode);
+
+        // Define theme from current tokens + apply
+        defineMipsThemeFromTokens(monaco as any, themeMode);
+        monaco.editor.setTheme(theme);
       }}
       options={{
         minimap: { enabled: false },
@@ -60,11 +66,11 @@ export function MipsMonaco({ value, onChange, themeMode, height = "100%" }: Prop
         // reduce noisy suggestions from "words in document"
         suggest: { showWords: false },
         suggestOnTriggerCharacters: true,
-        quickSuggestions: {                
-          other: true,
-          comments: false,
-          strings: false,
-        },
+        quickSuggestions: { other: true, comments: false, strings: false },
+        quickSuggestionsDelay: 40,
+
+        hover: { enabled: true, delay: 150 },
+        parameterHints: { enabled: true },
 
         glyphMargin: false,
         folding: false,
