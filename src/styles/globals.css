@@ -36,7 +36,7 @@ body {
     stroke var(--dur-2) ease;
 }
 
-/* Apply transition to all elements that use theme tokens */
+/* Apply transition to all elements that use theme tokens
 * {
   transition:
     background-color var(--dur-2) ease,
@@ -44,7 +44,7 @@ body {
     border-color var(--dur-2) ease,
     fill var(--dur-2) ease,
     stroke var(--dur-2) ease;
-}
+} */
 
 /* Smooth theme transitions for SVG */
 svg rect,

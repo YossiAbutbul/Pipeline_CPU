@@ -1,11 +1,5 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import {
-  applyTheme,
-  getStoredTheme,
-  getSystemTheme,
-  storeTheme,
-  type Theme,
-} from "@/ui/theme/theme";
+import React, { createContext, useContext, useMemo, useState } from "react";
+import { initTheme, applyTheme, storeTheme, type Theme } from "@/ui/theme/theme";
 
 type ThemeContextValue = {
   theme: Theme;
@@ -17,14 +11,8 @@ type ThemeContextValue = {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("dark");
-
-  // hydrate once
-  useEffect(() => {
-    const t = getStoredTheme() ?? getSystemTheme();
-    setThemeState(t);
-    applyTheme(t);
-  }, []);
+  // ✅ IMPORTANT: synchronous init on first render (no "dark first" flash)
+  const [theme, setThemeState] = useState<Theme>(() => initTheme());
 
   const setTheme = (next: Theme) => {
     setThemeState(next);
@@ -37,7 +25,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<ThemeContextValue>(
     () => ({
       theme,
-      themeMode: theme, 
+      themeMode: theme,
       setTheme,
       toggleTheme,
     }),
