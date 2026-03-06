@@ -60,11 +60,11 @@ export function defineMipsThemeFromTokens(monaco: typeof Monaco, mode: ThemeMode
       { token: "comment", foreground: mode === "dark" ? "7A7A7A" : "6B7280" },
       { token: "keyword", foreground: mode === "dark" ? "4FC3F7" : "1e3a8a" },
       { token: "keyword.directive", foreground: mode === "dark" ? "B39DDB" : "6A1B9A" },
-      { token: "variable.predefined", foreground: mode === "dark" ? "81C784" : "166534" },
       { token: "number", foreground: mode === "dark" ? "FFD54F" : "B45309" },
       { token: "number.hex", foreground: mode === "dark" ? "FFD54F" : "B45309" },
       { token: "string", foreground: mode === "dark" ? "FFAB91" : "B91C1C" },
       { token: "type.identifier", foreground: mode === "dark" ? "F48FB1" : "9D174D" },
+      { token: "register", foreground: mode === "dark" ? "81C784" : "166534" },
     ],
 
     colors: {
