@@ -1,0 +1,204 @@
+.registerEditor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+}
+
+.registerFormulaBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  min-width: 0;
+}
+
+.registerFormulaLabel {
+  color: var(--text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.registerFormulaInput,
+.registerValueInput {
+  height: 32px;
+  border: none;
+  border-radius: calc(var(--radius) - 6px);
+  background: color-mix(in oklab, var(--surface-2) 78%, transparent);
+  color: var(--text);
+  font-size: var(--font-size-sm);
+  padding: 0 var(--space-1);
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+}
+
+.registerFormulaInput {
+  width: 100%;
+  max-width: 180px;
+  min-width: 0;
+  flex: 1 1 120px;
+}
+
+.registerValueInput {
+  width: 100%;
+  max-width: 104px;
+  justify-self: start;
+}
+
+.registerFormulaInput:focus-visible,
+.registerValueInput:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.registerFormulaActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex: 0 0 auto;
+}
+
+.registerHintRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.registerClearAllButton {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  flex: 0 0 auto;
+}
+
+.registerFormulaHint {
+  color: var(--muted);
+  font-size: var(--font-size-xs);
+}
+
+.registerError {
+  border: var(--border-1) solid var(--accent-border);
+  background: var(--accent-weak);
+  color: var(--text);
+  border-radius: calc(var(--radius) - 4px);
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.registerList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overflow-x: hidden;
+  padding-right: var(--space-1);
+}
+
+.registerHeaderRow,
+.registerRow {
+  display: grid;
+  grid-template-columns: 72px 56px minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: center;
+  min-width: 0;
+}
+
+.registerStickyHeader {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--surface-1);
+  padding-bottom: var(--space-1);
+}
+
+.registerHeaderRow {
+  position: relative;
+  background: var(--surface-3);
+  border: var(--border-1) solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
+  padding: var(--space-1) var(--space-2);
+}
+
+.registerHeaderCell {
+  color: var(--muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  justify-self: start;
+  letter-spacing: 0.02em;
+}
+
+.registerRow {
+  background: var(--surface-2);
+  border: var(--border-1) solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
+  padding: var(--space-1) var(--space-2);
+}
+
+.registerRow + .registerRow {
+  margin-top: var(--space-1);
+}
+
+.registerName {
+  color: var(--muted);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-ui);
+  font-weight: var(--font-weight-regular);
+}
+
+.registerNum {
+  color: var(--muted);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-ui);
+  font-weight: var(--font-weight-regular);
+}
+
+.registerValueInput:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.registerList {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+.registerList::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.registerList::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+.registerList::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+}
+
+.registerList::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+@media (max-width: 640px) {
+  .registerFormulaBar {
+    align-items: stretch;
+  }
+
+  .registerFormulaLabel {
+    width: 100%;
+  }
+
+  .registerFormulaInput {
+    flex: 1 1 140px;
+  }
+}
