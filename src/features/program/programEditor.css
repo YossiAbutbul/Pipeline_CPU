@@ -55,21 +55,17 @@
 .initialPcInput {
   width: 180px;
   max-width: 100%;
-  height: 34px;
-  padding: 0 var(--space-2);
+  height: 32px;
+  padding: 0 var(--space-1);
   border: var(--border-1) solid var(--border);
-  border-radius: calc(var(--radius) - 2px);
-  background: var(--surface-2);
+  border-radius: var(--radius);
+  background: color-mix(in oklab, var(--surface-2) 78%, transparent);
   color: var(--text);
-  font-size: var(--font-size-md);
-  line-height: var(--line-height-ui);
+  font-size: var(--font-size-sm);
+  padding-left: var(--space-2);
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
-  transition:
-    border-color var(--dur-1),
-    box-shadow var(--dur-1),
-    background var(--dur-1);
 }
 
 .initialPcInput::placeholder {
@@ -78,7 +74,6 @@
 
 .initialPcInput:focus-visible {
   outline: none;
-  border-color: var(--border);
   box-shadow: none;
 }
 
