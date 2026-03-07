@@ -2,9 +2,11 @@ import { useMemo, useState } from "react";
 import PipelineCanvas from "@/features/pipelineCanvas/PipelineCanvas";
 import ProgramEditor from "@/features/program/ProgramEditor";
 import StatePanel from "@/features/statePanels/StatePanel";
+import { compileAndLog } from "@/features/compiler";
 import "./app.css";
 
 const DEFAULT_PROGRAM = "# Write MIPS here...\nadd $1, $2, $3\n";
+const DEFAULT_INITIAL_PC = "0x00400000";
 const PIPELINE_STAGES = ["IF", "ID", "EX", "MEM", "WB"] as const;
 
 type StageName = (typeof PIPELINE_STAGES)[number];
@@ -29,23 +31,80 @@ function parseInstructions(program: string) {
     .filter((line) => line.length > 0 && !line.startsWith("#"));
 }
 
+function parseInitialPc(raw: string): number {
+  const value = raw.trim();
+  if (!value) {
+    throw new Error("Initial PC is required");
+  }
+
+  const numeric = value.toLowerCase().startsWith("0x") ? Number.parseInt(value, 16) : Number(value);
+  if (!Number.isInteger(numeric)) {
+    throw new Error("Initial PC must be a valid integer (e.g. 0x00400000)");
+  }
+  if (numeric < 0 || numeric > 0xffff_ffff) {
+    throw new Error("Initial PC must be within 32-bit unsigned range");
+  }
+  if (numeric % 4 !== 0) {
+    throw new Error("Initial PC must be word-aligned (multiple of 4)");
+  }
+
+  return numeric >>> 0;
+}
+
 export default function App() {
   const [program, setProgram] = useState(DEFAULT_PROGRAM);
+  const [initialPc, setInitialPc] = useState(DEFAULT_INITIAL_PC);
   const [pipeline, setPipeline] = useState<PipelineSlots>(EMPTY_PIPELINE);
   const [nextInstructionIndex, setNextInstructionIndex] = useState(0);
   const [history, setHistory] = useState<PipelineSnapshot[]>([]);
-  const canStepBackward = history.length > 0;
+  const [runSessionActive, setRunSessionActive] = useState(false);
 
   const instructions = useMemo(() => parseInstructions(program), [program]);
   const hasInstructionsToInject = nextInstructionIndex < instructions.length;
   const hasPipelineWork = Object.values(pipeline).some((value) => value !== null);
-  const canStepForward = hasInstructionsToInject || hasPipelineWork;
+  const canStepForward = runSessionActive && (hasInstructionsToInject || hasPipelineWork);
+  const canStepBackward = runSessionActive && history.length > 0;
 
   const handleProgramChange = (nextProgram: string) => {
     setProgram(nextProgram);
     setPipeline(EMPTY_PIPELINE);
     setNextInstructionIndex(0);
     setHistory([]);
+    setRunSessionActive(false);
+  };
+
+  const handleInitialPcChange = (value: string) => {
+    setInitialPc(value);
+    setPipeline(EMPTY_PIPELINE);
+    setNextInstructionIndex(0);
+    setHistory([]);
+    setRunSessionActive(false);
+  };
+
+  const handleRun = () => {
+    let parsedInitialPc: number;
+    try {
+      parsedInitialPc = parseInitialPc(initialPc);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`[MIPS Compiler] Failed to compile: ${message}`);
+      setRunSessionActive(false);
+      return;
+    }
+
+    try {
+      compileAndLog(program, { initialPc: parsedInitialPc });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`[MIPS Compiler] Failed to compile: ${message}`);
+      setRunSessionActive(false);
+      return;
+    }
+
+    setPipeline(EMPTY_PIPELINE);
+    setNextInstructionIndex(0);
+    setHistory([]);
+    setRunSessionActive(true);
   };
 
   const handleStep = () => {
@@ -91,6 +150,7 @@ export default function App() {
     setPipeline(EMPTY_PIPELINE);
     setNextInstructionIndex(0);
     setHistory([]);
+    setRunSessionActive(false);
   };
 
   return (
@@ -100,6 +160,9 @@ export default function App() {
           program={program}
           onProgramChange={handleProgramChange}
           onReset={handleResetPipeline}
+          onRun={handleRun}
+          initialPc={initialPc}
+          onInitialPcChange={handleInitialPcChange}
         />
       </aside>
 
