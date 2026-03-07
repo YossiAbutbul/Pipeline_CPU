@@ -113,7 +113,7 @@ export default function PipelineCanvas({
   }, [isDragging]);
 
   return (
-    <Panel title="Pipeline Diagram" headerSize="xl">
+    <Panel title="5 Stages Pipeline CPU Diagram" headerSize="xl">
       <div className="pipelineCanvasLayout">
         <div className="pipelineTracker" aria-label="Pipeline stage tracker">
           {STAGE_ORDER.map((stage) => {
