@@ -34,14 +34,25 @@ export function evaluateRegisterFormula(formula: string, registerNumber: number)
     throw new Error("Formula is empty");
   }
 
-  const isSafe = /^[0-9a-fxA-F+\-*/()%<>&|^~\sA-Za-z]+$/.test(normalized);
+  const isSafe = /^[=0-9a-fxA-F+\-*/()%<>&|^~\sA-Za-z]+$/.test(normalized);
   if (!isSafe) {
     throw new Error("Formula contains unsupported characters");
   }
 
-  const resolved = normalized
-    .replace(/\b(index|num|number)\b/g, String(registerNumber))
-    .replace(/\bi\b/g, String(registerNumber));
+  const assignmentMatch = normalized.match(/^(index|num|number|i)\s*=\s*(.+)$/i);
+  const constantMode = normalized.startsWith("=") || Boolean(assignmentMatch);
+  const expression = normalized.startsWith("=")
+    ? normalized.slice(1).trim()
+    : assignmentMatch
+      ? assignmentMatch[2].trim()
+      : normalized;
+  if (!expression) {
+    throw new Error("Formula is empty");
+  }
+
+  const resolved = constantMode
+    ? expression
+    : expression.replace(/\b(index|num|number)\b/g, String(registerNumber)).replace(/\bi\b/g, String(registerNumber));
 
   const result = Function(`"use strict"; return (${resolved});`)();
   if (!Number.isFinite(result) || !Number.isInteger(result)) {
