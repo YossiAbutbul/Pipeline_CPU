@@ -1,18 +1,19 @@
 import { Button } from "@/ui/components";
-import { Trash2 } from "lucide-react";
+import { Check, Settings2, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
-  createDefaultRegisterValues,
   evaluateRegisterFormula,
   parseRegisterValue,
   REGISTERS,
   toHex32,
+  createDefaultRegisterValues,
 } from "./registerEditorModel";
 import "./registerEditor.css";
 
 export default function RegisterEditor() {
   const [formula, setFormula] = useState("num * 0x200");
   const [error, setError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [values, setValues] = useState<Record<string, string>>(() => createDefaultRegisterValues());
 
   const valueRows = useMemo(
@@ -64,42 +65,70 @@ export default function RegisterEditor() {
     }
   };
 
+  const toggleEditMode = () => {
+    if (!isEditing) {
+      setIsEditing(true);
+      return;
+    }
+
+    try {
+      const nextValues = { ...values };
+      for (const reg of REGISTERS) {
+        if (reg.alias === "zero") {
+          nextValues.zero = "0x00000000";
+          continue;
+        }
+        const parsed = parseRegisterValue(values[reg.alias] ?? "0");
+        nextValues[reg.alias] = toHex32(parsed);
+      }
+      setValues(nextValues);
+      setError(null);
+      setIsEditing(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  };
+
   return (
     <div className="registerEditor">
-      <div className="registerFormulaBar">
-        <label htmlFor="registerFormula" className="registerFormulaLabel">
-          Formula
-        </label>
-        <input
-          id="registerFormula"
-          className="registerFormulaInput"
-          value={formula}
-          onChange={(event) => setFormula(event.target.value)}
-          placeholder="num * 0x200"
-          spellCheck={false}
-        />
-        <div className="registerFormulaActions">
-          <Button size="sm" onClick={applyFormula}>
-            Apply
-          </Button>
-        </div>
-      </div>
+      {isEditing && (
+        <>
+          <div className="registerFormulaBar">
+            <label htmlFor="registerFormula" className="registerFormulaLabel">
+              Formula
+            </label>
+            <input
+              id="registerFormula"
+              className="registerFormulaInput"
+              value={formula}
+              onChange={(event) => setFormula(event.target.value)}
+              placeholder="num * 0x200"
+              spellCheck={false}
+            />
+            <div className="registerFormulaActions">
+              <Button size="sm" className="registerActionBtn" onClick={applyFormula}>
+                Apply
+              </Button>
+            </div>
+          </div>
+          <div className="registerFormulaHint">Use variables: `num`, `number`, `index`, or `i`.</div>
+        </>
+      )}
 
-      <div className="registerHintRow">
-        <div className="registerFormulaHint">Use variables: `num`, `number`, `index`, or `i`.</div>
-        <Button
-          type="button"
-          size="sm"
-          variant="ghost"
-          className="registerClearAllButton"
-          onClick={resetAll}
-          aria-label="Clear all register values"
-          title="Clear all register values"
-        >
-          <Trash2 size={16} aria-hidden="true" />
-        </Button>
-      </div>
       {error && <div className="registerError">{error}</div>}
+
+      <div className="registerTableToolbar">
+        <Button size="sm" className="registerEditToggle registerActionBtn" onClick={toggleEditMode}>
+          {isEditing ? <Check size={14} aria-hidden="true" /> : <Settings2 size={14} aria-hidden="true" />}
+          {isEditing ? "Done Editing" : "Edit Registers"}
+        </Button>
+        {isEditing && (
+          <Button size="sm" className="registerClearToggle registerActionBtn" onClick={resetAll}>
+            <Trash2 size={14} aria-hidden="true" />
+            Clear Values
+          </Button>
+        )}
+      </div>
 
       <div className="registerList" role="table" aria-label="Registers initial values">
         <div className="registerStickyHeader">
@@ -127,7 +156,7 @@ export default function RegisterEditor() {
               onBlur={() => normalizeRegister(row.alias)}
               spellCheck={false}
               aria-label={`Value for register ${row.alias}`}
-              disabled={row.alias === "zero"}
+              readOnly={!isEditing || row.alias === "zero"}
             />
           </div>
         ))}

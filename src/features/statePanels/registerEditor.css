@@ -25,7 +25,7 @@
 .registerValueInput {
   height: 32px;
   border: none;
-  border-radius: calc(var(--radius) - 6px);
+  border-radius: var(--radius);
   background: color-mix(in oklab, var(--surface-2) 78%, transparent);
   color: var(--text);
   font-size: var(--font-size-sm);
@@ -40,6 +40,8 @@
   max-width: 180px;
   min-width: 0;
   flex: 1 1 120px;
+  border: var(--border-1) solid var(--border);
+  padding-left: var(--space-2);
 }
 
 .registerValueInput {
@@ -61,25 +63,40 @@
   flex: 0 0 auto;
 }
 
-.registerHintRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-.registerClearAllButton {
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border-radius: 999px;
-  border: none;
-  background: transparent;
-  flex: 0 0 auto;
-}
-
 .registerFormulaHint {
   color: var(--muted);
+  font-size: var(--font-size-xs);
+}
+
+.registerTableToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: stretch;
+  gap: var(--space-2);
+  padding-bottom: var(--space-1);
+}
+
+.registerTableToolbar .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.registerEditToggle {
+  width: 100%;
+  flex: 1 1 0;
+  justify-content: center;
+}
+
+.registerClearToggle {
+  flex: 1 1 0;
+  justify-content: center;
+}
+
+.registerActionBtn {
+  height: 28px;
+  padding: 4px 8px;
+  border-radius: 8px;
   font-size: var(--font-size-xs);
 }
 
@@ -161,9 +178,9 @@
   font-weight: var(--font-weight-regular);
 }
 
-.registerValueInput:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+.registerFormulaInput:read-only,
+.registerValueInput:read-only {
+  cursor: default;
 }
 
 .registerList {
