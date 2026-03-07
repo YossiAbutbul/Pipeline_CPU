@@ -10,12 +10,18 @@ type Props = {
   program: string;
   onProgramChange: (value: string) => void;
   onReset: () => void;
+  onRun: () => void;
+  initialPc: string;
+  onInitialPcChange: (value: string) => void;
 };
 
 export default function ProgramEditor({
   program,
   onProgramChange,
   onReset,
+  onRun,
+  initialPc,
+  onInitialPcChange,
 }: Props) {
   const { themeMode } = useTheme();
 
@@ -35,9 +41,24 @@ export default function ProgramEditor({
       }
     >
       <div className="programLayout">
+        <div className="initialPcRow">
+          <label htmlFor="initialPc" className="initialPcLabel">
+            Initial PC:
+          </label>
+          <input
+            id="initialPc"
+            type="text"
+            className="initialPcInput"
+            value={initialPc}
+            onChange={(event) => onInitialPcChange(event.target.value)}
+            spellCheck={false}
+            autoComplete="off"
+            aria-label="Initial PC"
+          />
+        </div>
         <div className="programControls">
           <div className="programActions">
-            <Button>Run</Button>
+            <Button onClick={onRun}>Run</Button>
             <Button onClick={onReset}>Reset</Button>
           </div>
           <Button
