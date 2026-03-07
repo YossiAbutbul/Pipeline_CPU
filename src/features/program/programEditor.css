@@ -63,8 +63,9 @@
   color: var(--text);
   font-size: var(--font-size-md);
   line-height: var(--line-height-ui);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
-    monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
   transition:
     border-color var(--dur-1),
     box-shadow var(--dur-1),
@@ -75,14 +76,10 @@
   color: var(--muted);
 }
 
-.initialPcInput:hover {
-  background: var(--control-hover);
-}
-
 .initialPcInput:focus-visible {
   outline: none;
-  border-color: var(--accent-border);
-  box-shadow: 0 0 0 3px var(--accent-weak);
+  border-color: var(--border);
+  box-shadow: none;
 }
 
 .programFooter {
@@ -101,20 +98,8 @@
   padding: 0;
   border-radius: 999px;
   border: none;
-  color: var(--danger-fg);
   background: transparent;
   flex: 0 0 auto;
-  margin-inline-start: auto;
-  transition:
-    background var(--dur-1),
-    color var(--dur-1),
-    transform var(--dur-1);
-}
-
-.clearProgramButton:hover:not(:disabled) {
-  background: var(--danger-bg-soft);
-  color: var(--danger-fg-strong);
-  transform: translateY(-1px);
 }
 
 .clearProgramButton:disabled {
