@@ -1,0 +1,166 @@
+.memoryEditor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+}
+
+.memoryTableToolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.memoryTableToolbar .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+}
+
+.memoryActionBtn {
+  height: 28px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: var(--font-size-xs);
+}
+
+.memoryAddBtn {
+  flex: 1 1 0;
+}
+
+.memoryClearBtn {
+  flex: 1 1 0;
+}
+
+.memoryErrorRow {
+  height: 0;
+}
+
+.memoryRulesHeader {
+  color: var(--muted);
+  font-size: var(--font-size-xs);
+  margin-bottom: 0;
+}
+
+.memoryRulesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+}
+
+.memoryRulesEmpty {
+  color: var(--muted);
+  font-size: var(--font-size-xs);
+}
+
+.memoryRuleItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  border: var(--border-1) solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in oklab, var(--surface-1) 90%, var(--surface-2));
+  padding: var(--space-2);
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--border) 50%, transparent);
+}
+
+.memoryRuleHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.memoryRuleTitle {
+  color: var(--text);
+  font-size: calc(var(--font-size-md) + 3px);
+  font-weight: var(--font-weight-medium);
+}
+
+.memoryRuleActions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.memoryRuleMeta {
+  color: var(--muted);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-ui);
+}
+
+.memoryRuleValueLine {
+  color: var(--text);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-ui);
+}
+
+.memoryRuleDelete {
+  min-width: 26px;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 8px;
+}
+
+.memoryRuleEdit {
+  min-width: 26px;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 8px;
+}
+
+.memoryRuleModal .modalHeader {
+  padding-bottom: var(--space-2);
+  border-bottom: none;
+}
+
+.memoryRuleModal .modalBody {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.memoryRuleModal .modalTypeTag,
+.memoryRuleModal .modalDescription {
+  display: none;
+}
+
+.memoryRuleModal .modalField-half {
+  grid-column: span 6;
+}
+
+.memoryRuleModal .modalField-full {
+  grid-column: 1 / -1;
+}
+
+.memoryRuleModal .modalField-value {
+  grid-column: span 9;
+}
+
+.memoryRuleModal .modalField-toggle {
+  grid-column: span 3;
+  align-self: center;
+  justify-self: start;
+  padding-bottom: 0;
+}
+
+.memoryRuleModal .modalFooter {
+  grid-column: 1 / -1;
+}
+
+.memoryRuleModal .modalFieldLabel {
+  margin-bottom: 2px;
+}
+
+.memoryRuleModal .modalFooter {
+  border-top: var(--border-1) solid var(--border);
+  padding-top: var(--space-2);
+}
