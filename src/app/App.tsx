@@ -3,10 +3,9 @@ import PipelineCanvas from "@/features/pipelineCanvas/PipelineCanvas";
 import ProgramEditor from "@/features/program/ProgramEditor";
 import StatePanel from "@/features/statePanels/StatePanel";
 import { compileAndLog } from "@/features/compiler";
+import { clearPersistedAppState, createDefaultAppState, usePersistedAppState } from "./store/appStore";
 import "./app.css";
 
-const DEFAULT_PROGRAM = "# Write MIPS here...\nadd $1, $2, $3\n";
-const DEFAULT_INITIAL_PC = "0x00400000";
 const PIPELINE_STAGES = ["IF", "ID", "EX", "MEM", "WB"] as const;
 
 type StageName = (typeof PIPELINE_STAGES)[number];
@@ -52,8 +51,8 @@ function parseInitialPc(raw: string): number {
 }
 
 export default function App() {
-  const [program, setProgram] = useState(DEFAULT_PROGRAM);
-  const [initialPc, setInitialPc] = useState(DEFAULT_INITIAL_PC);
+  const [appState, setAppState] = usePersistedAppState();
+  const { program, initialPc, statePanelTab, registers, memory } = appState;
   const [pipeline, setPipeline] = useState<PipelineSlots>(EMPTY_PIPELINE);
   const [nextInstructionIndex, setNextInstructionIndex] = useState(0);
   const [history, setHistory] = useState<PipelineSnapshot[]>([]);
@@ -66,7 +65,7 @@ export default function App() {
   const canStepBackward = runSessionActive && history.length > 0;
 
   const handleProgramChange = (nextProgram: string) => {
-    setProgram(nextProgram);
+    setAppState((prev) => ({ ...prev, program: nextProgram }));
     setPipeline(EMPTY_PIPELINE);
     setNextInstructionIndex(0);
     setHistory([]);
@@ -74,7 +73,7 @@ export default function App() {
   };
 
   const handleInitialPcChange = (value: string) => {
-    setInitialPc(value);
+    setAppState((prev) => ({ ...prev, initialPc: value }));
     setPipeline(EMPTY_PIPELINE);
     setNextInstructionIndex(0);
     setHistory([]);
@@ -153,6 +152,12 @@ export default function App() {
     setRunSessionActive(false);
   };
 
+  const handleResetPersistedData = () => {
+    clearPersistedAppState();
+    setAppState(createDefaultAppState());
+    handleResetPipeline();
+  };
+
   return (
     <div className="appShell">
       <aside className="leftPane">
@@ -163,6 +168,7 @@ export default function App() {
           onRun={handleRun}
           initialPc={initialPc}
           onInitialPcChange={handleInitialPcChange}
+          onResetPersistedData={handleResetPersistedData}
         />
       </aside>
 
@@ -177,7 +183,26 @@ export default function App() {
       </main>
 
       <aside className="rightPane">
-        <StatePanel />
+        <StatePanel
+          tab={statePanelTab}
+          onTabChange={(tab) => setAppState((prev) => ({ ...prev, statePanelTab: tab }))}
+          registerFormula={registers.formula}
+          onRegisterFormulaChange={(formula) =>
+            setAppState((prev) => ({ ...prev, registers: { ...prev.registers, formula } }))
+          }
+          registerIsEditing={registers.isEditing}
+          onRegisterIsEditingChange={(isEditing) =>
+            setAppState((prev) => ({ ...prev, registers: { ...prev.registers, isEditing } }))
+          }
+          registerValues={registers.values}
+          onRegisterValuesChange={(values) =>
+            setAppState((prev) => ({ ...prev, registers: { ...prev.registers, values } }))
+          }
+          memoryRules={memory.rules}
+          onMemoryRulesChange={(rules) =>
+            setAppState((prev) => ({ ...prev, memory: { ...prev.memory, rules } }))
+          }
+        />
       </aside>
     </div>
   );
