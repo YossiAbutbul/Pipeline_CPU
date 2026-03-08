@@ -1,0 +1,163 @@
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  display: grid;
+  place-items: center;
+  padding: var(--space-3);
+  background: color-mix(in oklab, #000 44%, transparent);
+}
+
+.modalCard {
+  width: min(560px, 100%);
+  max-height: min(86vh, 860px);
+  display: flex;
+  flex-direction: column;
+  border: var(--border-1) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-3) var(--space-2) var(--space-3);
+  border-bottom: var(--border-1) solid var(--border);
+}
+
+.modalHeaderMain {
+  min-width: 0;
+}
+
+.modalTypeTag {
+  display: inline-block;
+  margin-bottom: var(--space-1);
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: var(--border-1) solid var(--border);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.modalTypeTag-form,
+.modalTypeTag-info {
+  color: var(--text);
+  border-color: var(--tooltip-info-border);
+}
+
+.modalTypeTag-warning {
+  color: var(--text);
+  border-color: var(--tooltip-warning-border);
+}
+
+.modalTypeTag-error {
+  color: var(--text);
+  border-color: var(--tooltip-error-border);
+}
+
+.modalTypeTag-success {
+  color: var(--text);
+  border-color: var(--tooltip-success-border);
+}
+
+.modalTitle {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--font-size-md);
+}
+
+.modalDescription {
+  margin: var(--space-1) 0 0 0;
+  color: var(--muted);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-ui);
+}
+
+.modalLabels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+
+.modalLabelChip {
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: var(--border-1) solid var(--border);
+  color: var(--muted);
+  font-size: var(--font-size-xs);
+}
+
+.modalCloseBtn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-1) solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.modalCloseBtn:hover {
+  background: var(--control-hover);
+}
+
+.modalBody {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--space-3);
+  display: grid;
+  gap: var(--space-2);
+}
+
+.modalField {
+  display: grid;
+  gap: 6px;
+}
+
+.modalFieldLabel {
+  color: var(--text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.modalInput {
+  width: 100%;
+  border: var(--border-1) solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 8px 10px;
+  font: inherit;
+}
+
+.modalTextarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.modalHelperText {
+  color: var(--muted);
+  font-size: var(--font-size-xs);
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  padding-top: var(--space-1);
+}
+
+@media (max-width: 640px) {
+  .modalOverlay {
+    padding: var(--space-2);
+  }
+}
