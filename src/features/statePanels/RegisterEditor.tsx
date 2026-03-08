@@ -1,5 +1,5 @@
-import { Button } from "@/ui/components";
-import { Check, Settings2, Trash2 } from "lucide-react";
+import { Button, Tooltip } from "@/ui/components";
+import { Check, Edit, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   evaluateRegisterFormula,
@@ -97,13 +97,46 @@ export default function RegisterEditor() {
             <label htmlFor="registerFormula" className="registerFormulaLabel">
               Formula
             </label>
-            <input
-              id="registerFormula"
-              className="registerFormulaInput"
-              value={formula}
-              onChange={(event) => setFormula(event.target.value)}
-              placeholder="num * 0x200"
-              spellCheck={false}
+            <div className="registerFormulaInputWrap">
+              <input
+                id="registerFormula"
+                className="registerFormulaInput"
+                value={formula}
+                onChange={(event) => setFormula(event.target.value)}
+                placeholder="num * 0x200"
+                spellCheck={false}
+              />
+              {error && (
+                <Tooltip
+                  variant="error"
+                  ariaLabel="Formula error details"
+                  align="start"
+                  showTrigger={false}
+                  open
+                  autoDismissMs={2500}
+                  dismissible
+                  onDismiss={() => setError(null)}
+                  content={error}
+                />
+              )}
+            </div>
+            <Tooltip
+              ariaLabel="Formula format help"
+              align="end"
+              content={
+                <>
+                  Sets initial values for all registers except <code>$zero</code>.
+                  <br />
+                  <br />
+                  Examples:
+                  <br />
+                  <code>num * 0x200</code>
+                  <br />
+                  <code>i + 4</code>
+                  <br />
+                  <code>=0x200</code> or <code>i = 0x200</code>
+                </>
+              }
             />
             <div className="registerFormulaActions">
               <Button size="sm" className="registerActionBtn" onClick={applyFormula}>
@@ -115,11 +148,9 @@ export default function RegisterEditor() {
         </>
       )}
 
-      {error && <div className="registerError">{error}</div>}
-
       <div className="registerTableToolbar">
         <Button size="sm" className="registerEditToggle registerActionBtn" onClick={toggleEditMode}>
-          {isEditing ? <Check size={14} aria-hidden="true" /> : <Settings2 size={14} aria-hidden="true" />}
+          {isEditing ? <Check size={14} aria-hidden="true" /> : <Edit size={14} aria-hidden="true" />}
           {isEditing ? "Done Editing" : "Edit Registers"}
         </Button>
         {isEditing && (
