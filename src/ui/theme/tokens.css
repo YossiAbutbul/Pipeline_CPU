@@ -113,16 +113,16 @@
   --tooltip-bg: color-mix(in oklab, var(--surface-1) 92%, var(--surface-2));
   --tooltip-info-bg: color-mix(in oklab, var(--accent) 90%, transparent);
   --tooltip-info-border: color-mix(in oklab, var(--accent) 72%, var(--border));
-  --tooltip-info-fg: var(--text);
+  /* --tooltip-info-fg: var(--text); */
   --tooltip-error-bg: color-mix(in oklab, #b42318 90%, transparent);
   --tooltip-error-border: color-mix(in oklab, #7a1c13 82%, var(--border));
-  --tooltip-error-fg: var(--text);
+  /* --tooltip-error-fg: var(--text); */
   --tooltip-warning-bg: color-mix(in oklab, #f7b500 90%, transparent);
   --tooltip-warning-border: color-mix(in oklab, #f7b500 78%, var(--border));
-  --tooltip-warning-fg: var(--text);
+  /* --tooltip-warning-fg: var(--text); */
   --tooltip-success-bg: color-mix(in oklab, var(--ctrl) 90%, transparent);
   --tooltip-success-border: color-mix(in oklab, var(--ctrl) 72%, var(--border));
-  --tooltip-success-fg: var(--text);
+  /* --tooltip-success-fg: var(--text); */
 }
 
 /* -----------------------------
@@ -169,18 +169,18 @@
   --compStroke: #16181d; /* componnets border color */
   --chipBg: var(--surface-2); /* cause and epc color */
 
-  /* Tooltip (semantic type colors) */
+  /* Tooltip */
   --tooltip-bg: color-mix(in oklab, var(--surface-1) 94%, var(--surface-2));
   --tooltip-info-bg: color-mix(in oklab, var(--accent) 90%, transparent);
   --tooltip-info-border: color-mix(in oklab, var(--accent) 44%, var(--border));
-  --tooltip-info-fg: color-mix(in oklab, var(--accent) 76%, var(--text));
+  /* --tooltip-info-fg: color-mix(in oklab, var(--accent) 76%, var(--text)); */
   --tooltip-error-bg: color-mix(in oklab, #c7372f 90%, transparent);
   --tooltip-error-border: color-mix(in oklab, #8f241d 62%, var(--border));
-  --tooltip-error-fg: color-mix(in oklab, #7a1c13 78%, var(--text));
+  /* --tooltip-error-fg: color-mix(in oklab, #7a1c13 78%, var(--text)); */
   --tooltip-warning-bg: color-mix(in oklab, #f7b500 90%, transparent);
   --tooltip-warning-border: color-mix(in oklab, #f7b500 48%, var(--border));
-  --tooltip-warning-fg: color-mix(in oklab, #f7b500 76%, var(--text));
+  /* --tooltip-warning-fg: color-mix(in oklab, #f7b500 76%, var(--text)); */
   --tooltip-success-bg: color-mix(in oklab, var(--ctrl) 90%, transparent);
   --tooltip-success-border: color-mix(in oklab, var(--ctrl) 44%, var(--border));
-  --tooltip-success-fg: color-mix(in oklab, var(--ctrl) 72%, var(--text));
+  /* --tooltip-success-fg: color-mix(in oklab, var(--ctrl) 72%, var(--text)); */
 }
