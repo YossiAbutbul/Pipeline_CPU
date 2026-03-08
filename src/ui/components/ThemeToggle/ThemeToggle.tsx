@@ -28,10 +28,8 @@ export function ThemeToggle({ label = "Dark mode" }: Props) {
         className={`switch ${checked ? "switchOn" : "switchOff"}`}
         role="switch"
         aria-checked={checked}
-        onClick={(e) => {
+        onClick={() => {
           onChange(!checked);
-
-          requestAnimationFrame(() => e.currentTarget.blur());
         }}
       >
         <span className="switchThumb" />

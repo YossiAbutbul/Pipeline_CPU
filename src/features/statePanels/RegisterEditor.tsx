@@ -1,6 +1,6 @@
 import { Button, Tooltip } from "@/ui/components";
 import { Check, Edit, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   evaluateRegisterFormula,
   parseRegisterValue,
@@ -15,6 +15,11 @@ export default function RegisterEditor() {
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [values, setValues] = useState<Record<string, string>>(() => createDefaultRegisterValues());
+  const [isScrollbarVisible, setIsScrollbarVisible] = useState(false);
+  const [scrollbarThumbTop, setScrollbarThumbTop] = useState(0);
+  const [scrollbarThumbHeight, setScrollbarThumbHeight] = useState(0);
+  const [hasTableOverflow, setHasTableOverflow] = useState(false);
+  const tableBodyRef = useRef<HTMLDivElement | null>(null);
 
   const valueRows = useMemo(
     () =>
@@ -88,6 +93,44 @@ export default function RegisterEditor() {
       setError(err instanceof Error ? err.message : String(err));
     }
   };
+
+  const updateOverlayScrollbar = () => {
+    const bodyEl = tableBodyRef.current;
+    if (!bodyEl) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = bodyEl;
+    const hasOverflow = scrollHeight > clientHeight + 1;
+    setHasTableOverflow(hasOverflow);
+
+    if (!hasOverflow) {
+      setScrollbarThumbTop(0);
+      setScrollbarThumbHeight(0);
+      return;
+    }
+
+    const minThumbHeight = 24;
+    const thumbHeight = Math.max(minThumbHeight, (clientHeight / scrollHeight) * clientHeight);
+    const maxThumbTop = clientHeight - thumbHeight;
+    const maxScrollTop = scrollHeight - clientHeight;
+    const thumbTop = maxScrollTop > 0 ? (scrollTop / maxScrollTop) * maxThumbTop : 0;
+
+    setScrollbarThumbHeight(thumbHeight);
+    setScrollbarThumbTop(thumbTop);
+  };
+
+  useEffect(() => {
+    updateOverlayScrollbar();
+
+    const bodyEl = tableBodyRef.current;
+    if (!bodyEl) return;
+
+    const resizeObserver = new ResizeObserver(() => updateOverlayScrollbar());
+    resizeObserver.observe(bodyEl);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [values]);
 
   return (
     <div className="registerEditor">
@@ -175,22 +218,47 @@ export default function RegisterEditor() {
             </div>
           </div>
         </div>
-        {valueRows.map((row) => (
-          <div className="registerRow" role="row" key={row.key}>
-            <div className="registerName" role="cell">{`$${row.alias}`}</div>
-            <div className="registerNum" role="cell">{`${row.num}`}</div>
-            <input
-              className="registerValueInput"
-              role="cell"
-              value={row.value}
-              onChange={(event) => updateRegister(row.alias, event.target.value)}
-              onBlur={() => normalizeRegister(row.alias)}
-              spellCheck={false}
-              aria-label={`Value for register ${row.alias}`}
-              readOnly={!isEditing || row.alias === "zero"}
+        <div
+          className="registerTableBodyWrap"
+          onMouseEnter={() => setIsScrollbarVisible(true)}
+          onMouseLeave={() => setIsScrollbarVisible(false)}
+        >
+          <div
+            ref={tableBodyRef}
+            className="registerTableBody"
+            role="rowgroup"
+            onScroll={updateOverlayScrollbar}
+          >
+            {valueRows.map((row) => (
+              <div className="registerRow" role="row" key={row.key}>
+                <div className="registerName" role="cell">{`$${row.alias}`}</div>
+                <div className="registerNum" role="cell">{`${row.num}`}</div>
+                <input
+                  className="registerValueInput"
+                  role="cell"
+                  value={row.value}
+                  onChange={(event) => updateRegister(row.alias, event.target.value)}
+                  onBlur={() => normalizeRegister(row.alias)}
+                  spellCheck={false}
+                  aria-label={`Value for register ${row.alias}`}
+                  readOnly={!isEditing || row.alias === "zero"}
+                />
+              </div>
+            ))}
+          </div>
+          <div
+            className={`registerOverlayScrollbar${isScrollbarVisible && hasTableOverflow ? " isVisible" : ""}`}
+            aria-hidden="true"
+          >
+            <div
+              className="registerOverlayThumb"
+              style={{
+                height: `${scrollbarThumbHeight}px`,
+                transform: `translateY(${scrollbarThumbTop}px)`,
+              }}
             />
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );

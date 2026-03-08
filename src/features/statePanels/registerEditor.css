@@ -113,9 +113,17 @@
   gap: 0;
   flex: 1;
   min-height: 0;
+}
+
+.registerTableBody {
+  height: 100%;
+  flex: 1;
+  min-height: 0;
   overflow: auto;
   overflow-x: hidden;
-  padding-right: var(--space-1);
+  padding-right: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .registerHeaderRow,
@@ -128,10 +136,7 @@
 }
 
 .registerStickyHeader {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  background: var(--surface-1);
+  flex: 0 0 auto;
   padding-bottom: var(--space-1);
 }
 
@@ -181,27 +186,44 @@
   cursor: default;
 }
 
-.registerList {
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+.registerTableBody::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
-.registerList::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.registerTableBodyWrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
 }
 
-.registerList::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
+.registerOverlayScrollbar {
+  position: absolute;
+  top: 1px;
+  right: 0px;
+  bottom: 0;
+  width: 5px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 700ms ease;
+  z-index: 4;
 }
 
-.registerList::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
+.registerOverlayScrollbar.isVisible {
+  opacity: 1;
+  transition: opacity 180ms ease;
+}
+
+.registerOverlayThumb {
+  position: absolute;
+  inset-inline-start: 0;
+  inline-size: 100%;
+  background-color: var(--scrollbar-thumb);
   border-radius: 999px;
 }
 
-.registerList::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover);
+.registerTableBodyWrap:hover .registerOverlayThumb {
+  background-color: var(--scrollbar-thumb-hover);
 }
 
 @media (max-width: 640px) {
