@@ -1,27 +1,14 @@
-﻿import { Button, Modal, Tooltip } from "@/ui/components";
+import type { MemoryRuleConfig, WriteMode } from "@/app/store/appStore";
+import type { ModalField } from "@/ui/components";
+import { Button, Modal, Tooltip } from "@/ui/components";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-import type { ModalField } from "@/ui/components";
 import { evaluateMemoryFormula, parseSignedOrUnsigned32, parseWordNumber, toHex32 } from "./memoryEditorModel";
 import "./memoryEditor.css";
 
-type WriteMode = "word" | "byte";
-type ActiveRule = {
-  id: string;
-  kind: "range_fill";
-  writeMode: WriteMode;
-  fullRange: boolean;
-  useFormula: boolean;
-  startRaw: string;
-  endRaw: string;
-  valueRaw: string;
-  formulaRaw: string;
-  start: number;
-  end: number;
-  valueText: string;
-  formulaText: string;
-  wordHex: string;
-  byteHex: string;
+type Props = {
+  rules: MemoryRuleConfig[];
+  onRulesChange: (rules: MemoryRuleConfig[]) => void;
 };
 
 const ADD_RULE_FIELDS: ModalField[] = [
@@ -92,22 +79,21 @@ const ADD_RULE_FIELDS: ModalField[] = [
   },
 ];
 
-export default function MemoryEditor() {
+export default function MemoryEditor({ rules, onRulesChange }: Props) {
   const toHexCompact = (value: number) => `0x${(value >>> 0).toString(16).toUpperCase()}`;
 
-  const [rules, setRules] = useState<ActiveRule[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
 
-  const formatAddressViews = (rule: ActiveRule) => {
+  const formatAddressViews = (rule: MemoryRuleConfig) => {
     if (rule.fullRange) {
       return "Address Full range";
     }
     return `Address ${rule.start} - ${rule.end} | ${toHexCompact(rule.start)} - ${toHexCompact(rule.end)}`;
   };
 
-  const buildRuleFromModal = (rawValues: Record<string, string>, existingId?: string): ActiveRule => {
+  const buildRuleFromModal = (rawValues: Record<string, string>, existingId?: string): MemoryRuleConfig => {
     const fullRange = (rawValues.fullRange ?? "false") === "true";
     const writeModeRaw = (rawValues.writeMode ?? "").trim();
     if (writeModeRaw !== "word" && writeModeRaw !== "byte") {
@@ -159,7 +145,7 @@ export default function MemoryEditor() {
 
   const addRuleFromModal = (rawValues: Record<string, string>) => {
     const rule = buildRuleFromModal(rawValues);
-    setRules((prev) => [...prev, rule]);
+    onRulesChange([...rules, rule]);
     setError(null);
     setIsAddModalOpen(false);
     setEditingRuleId(null);
@@ -167,18 +153,18 @@ export default function MemoryEditor() {
 
   const updateRuleFromModal = (rawValues: Record<string, string>, ruleId: string) => {
     const updated = buildRuleFromModal(rawValues, ruleId);
-    setRules((prev) => prev.map((rule) => (rule.id === ruleId ? updated : rule)));
+    onRulesChange(rules.map((rule) => (rule.id === ruleId ? updated : rule)));
     setError(null);
     setIsAddModalOpen(false);
     setEditingRuleId(null);
   };
 
   const removeRule = (ruleId: string) => {
-    setRules((prev) => prev.filter((rule) => rule.id !== ruleId));
+    onRulesChange(rules.filter((rule) => rule.id !== ruleId));
   };
 
   const clearRules = () => {
-    setRules([]);
+    onRulesChange([]);
     setError(null);
   };
 
@@ -258,9 +244,7 @@ export default function MemoryEditor() {
                 </Button>
               </div>
             </div>
-            <div className="memoryRuleMeta">
-              {formatAddressViews(rule)}
-            </div>
+            <div className="memoryRuleMeta">{formatAddressViews(rule)}</div>
             <div className="memoryRuleValueLine">
               {rule.useFormula
                 ? `Value formula ${rule.formulaText}`

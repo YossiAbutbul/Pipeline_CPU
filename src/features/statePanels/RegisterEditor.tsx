@@ -10,11 +10,24 @@ import {
 } from "./registerEditorModel";
 import "./registerEditor.css";
 
-export default function RegisterEditor() {
-  const [formula, setFormula] = useState("num * 0x200");
+type Props = {
+  formula: string;
+  onFormulaChange: (value: string) => void;
+  isEditing: boolean;
+  onIsEditingChange: (value: boolean) => void;
+  values: Record<string, string>;
+  onValuesChange: (value: Record<string, string>) => void;
+};
+
+export default function RegisterEditor({
+  formula,
+  onFormulaChange,
+  isEditing,
+  onIsEditingChange,
+  values,
+  onValuesChange,
+}: Props) {
   const [error, setError] = useState<string | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [values, setValues] = useState<Record<string, string>>(() => createDefaultRegisterValues());
   const [isScrollbarVisible, setIsScrollbarVisible] = useState(false);
   const [scrollbarThumbTop, setScrollbarThumbTop] = useState(0);
   const [scrollbarThumbHeight, setScrollbarThumbHeight] = useState(0);
@@ -38,7 +51,7 @@ export default function RegisterEditor() {
         const computed = reg.alias === "zero" ? 0 : evaluateRegisterFormula(formula, reg.num);
         next[reg.alias] = toHex32(computed);
       }
-      setValues(next);
+      onValuesChange(next);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -46,24 +59,24 @@ export default function RegisterEditor() {
   };
 
   const resetAll = () => {
-    setValues(createDefaultRegisterValues());
+    onValuesChange(createDefaultRegisterValues());
     setError(null);
   };
 
   const updateRegister = (alias: string, raw: string) => {
-    setValues((prev) => ({ ...prev, [alias]: raw }));
+    onValuesChange({ ...values, [alias]: raw });
   };
 
   const normalizeRegister = (alias: string) => {
     if (alias === "zero") {
-      setValues((prev) => ({ ...prev, zero: "0x00000000" }));
+      onValuesChange({ ...values, zero: "0x00000000" });
       return;
     }
 
     const current = values[alias] ?? "";
     try {
       const parsed = parseRegisterValue(current);
-      setValues((prev) => ({ ...prev, [alias]: toHex32(parsed) }));
+      onValuesChange({ ...values, [alias]: toHex32(parsed) });
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -72,7 +85,7 @@ export default function RegisterEditor() {
 
   const toggleEditMode = () => {
     if (!isEditing) {
-      setIsEditing(true);
+      onIsEditingChange(true);
       return;
     }
 
@@ -86,9 +99,9 @@ export default function RegisterEditor() {
         const parsed = parseRegisterValue(values[reg.alias] ?? "0");
         nextValues[reg.alias] = toHex32(parsed);
       }
-      setValues(nextValues);
+      onValuesChange(nextValues);
       setError(null);
-      setIsEditing(false);
+      onIsEditingChange(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
@@ -145,7 +158,7 @@ export default function RegisterEditor() {
                 id="registerFormula"
                 className="registerFormulaInput"
                 value={formula}
-                onChange={(event) => setFormula(event.target.value)}
+                onChange={(event) => onFormulaChange(event.target.value)}
                 placeholder="num * 0x200"
                 spellCheck={false}
               />
@@ -192,16 +205,16 @@ export default function RegisterEditor() {
       )}
 
       <div className="registerTableToolbar">
-        <Button size="sm" className="registerEditToggle registerActionBtn" onClick={toggleEditMode}>
-          {isEditing ? <Check size={14} aria-hidden="true" /> : <Edit size={14} aria-hidden="true" />}
-          {isEditing ? "Done Editing" : "Edit Registers"}
-        </Button>
         {isEditing && (
           <Button size="sm" className="registerClearToggle registerActionBtn" onClick={resetAll}>
             <Trash2 size={14} aria-hidden="true" />
             Clear Values
           </Button>
         )}
+        <Button size="sm" className="registerEditToggle registerActionBtn" onClick={toggleEditMode}>
+          {isEditing ? <Check size={14} aria-hidden="true" /> : <Edit size={14} aria-hidden="true" />}
+          {isEditing ? "Done Editing" : "Edit Registers"}
+        </Button>
       </div>
 
       <div className="registerList" role="table" aria-label="Registers initial values">
