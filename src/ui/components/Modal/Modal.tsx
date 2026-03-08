@@ -4,9 +4,13 @@ import { Button } from "../Button/Button";
 import type { ModalField, ModalProps } from "./types";
 import "./modal.css";
 
-function buildInitialValues(fields: ModalField[]) {
+function buildInitialValues(fields: ModalField[], initialValues?: Record<string, string>) {
   const next: Record<string, string> = {};
   for (const field of fields) {
+    if (field.type === "checkbox") {
+      next[field.id] = field.defaultChecked ? "true" : "false";
+      continue;
+    }
     if (field.defaultValue !== undefined) {
       next[field.id] = field.defaultValue;
       continue;
@@ -17,13 +21,24 @@ function buildInitialValues(fields: ModalField[]) {
     }
     next[field.id] = "";
   }
+  if (initialValues) {
+    for (const field of fields) {
+      if (initialValues[field.id] !== undefined) {
+        next[field.id] = initialValues[field.id];
+      }
+    }
+  }
   return next;
 }
 
 function parseValues(fields: ModalField[], values: Record<string, string>) {
-  const parsedValues: Record<string, string | number> = {};
+  const parsedValues: Record<string, string | number | boolean> = {};
   for (const field of fields) {
     const raw = values[field.id] ?? "";
+    if (field.type === "checkbox") {
+      parsedValues[field.id] = raw === "true";
+      continue;
+    }
     if (field.type === "number") {
       const parsed = Number(raw);
       parsedValues[field.id] = Number.isNaN(parsed) ? raw : parsed;
@@ -37,18 +52,21 @@ function parseValues(fields: ModalField[], values: Record<string, string>) {
 export function Modal({
   open,
   title,
+  className = "",
   variant = "form",
   typeLabel,
   labels = [],
   description,
   fields,
+  initialValues,
   submitLabel = "Save",
   cancelLabel = "Cancel",
   closeOnBackdropClick = true,
+  renderPreview,
   onClose,
   onSubmit,
 }: ModalProps) {
-  const [values, setValues] = useState<Record<string, string>>(() => buildInitialValues(fields));
+  const [values, setValues] = useState<Record<string, string>>(() => buildInitialValues(fields, initialValues));
 
   const effectiveTypeLabel = useMemo(
     () => typeLabel ?? (variant === "form" ? "Form" : variant.charAt(0).toUpperCase() + variant.slice(1)),
@@ -59,8 +77,8 @@ export function Modal({
     if (!open) {
       return;
     }
-    setValues(buildInitialValues(fields));
-  }, [open, fields]);
+    setValues(buildInitialValues(fields, initialValues));
+  }, [open, fields, initialValues]);
 
   useEffect(() => {
     if (!open) {
@@ -75,6 +93,11 @@ export function Modal({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open, onClose]);
 
+  const visibleFields = useMemo(
+    () => fields.filter((field) => (field.visibleWhen ? field.visibleWhen(values) : true)),
+    [fields, values],
+  );
+
   if (!open) {
     return null;
   }
@@ -82,7 +105,7 @@ export function Modal({
   return (
     <div className="modalOverlay" role="presentation" onMouseDown={closeOnBackdropClick ? onClose : undefined}>
       <div
-        className={`modalCard modalCard-${variant}`}
+        className={`modalCard modalCard-${variant} ${className}`}
         role="dialog"
         aria-modal="true"
         aria-label={title}
@@ -110,19 +133,21 @@ export function Modal({
 
         <form
           className="modalBody"
+          autoComplete="off"
           onSubmit={(event) => {
             event.preventDefault();
-            onSubmit({ values, parsedValues: parseValues(fields, values) });
+            onSubmit({ values, parsedValues: parseValues(visibleFields, values) });
           }}
         >
-          {fields.map((field) => (
-            <label className="modalField" key={field.id} htmlFor={`modal-field-${field.id}`}>
-              <span className="modalFieldLabel">{field.label}</span>
+          {visibleFields.map((field) => (
+            <label className={`modalField ${field.fieldClassName ?? ""}`} key={field.id} htmlFor={`modal-field-${field.id}`}>
+              {field.type !== "checkbox" && <span className="modalFieldLabel">{field.label}</span>}
 
               {field.type === "textarea" && (
                 <textarea
                   id={`modal-field-${field.id}`}
                   className="modalInput modalTextarea"
+                  autoComplete="off"
                   value={values[field.id] ?? ""}
                   onChange={(event) =>
                     setValues((prev) => ({ ...prev, [field.id]: event.target.value }))
@@ -155,6 +180,7 @@ export function Modal({
                   id={`modal-field-${field.id}`}
                   className="modalInput"
                   type={field.type}
+                  autoComplete="off"
                   value={values[field.id] ?? ""}
                   onChange={(event) =>
                     setValues((prev) => ({ ...prev, [field.id]: event.target.value }))
@@ -164,9 +190,26 @@ export function Modal({
                 />
               )}
 
+              {field.type === "checkbox" && (
+                <span className="modalCheckboxRow">
+                  <input
+                    id={`modal-field-${field.id}`}
+                    className="modalCheckbox"
+                    type="checkbox"
+                    checked={(values[field.id] ?? "false") === "true"}
+                    onChange={(event) =>
+                      setValues((prev) => ({ ...prev, [field.id]: event.target.checked ? "true" : "false" }))
+                    }
+                  />
+                  <span className="modalCheckboxLabel">{field.label}</span>
+                </span>
+              )}
+
               {field.helperText && <span className="modalHelperText">{field.helperText}</span>}
             </label>
           ))}
+
+          {renderPreview && <div className="modalPreviewBox">{renderPreview(values)}</div>}
 
           <div className="modalFooter">
             <Button type="button" variant="ghost" onClick={onClose}>

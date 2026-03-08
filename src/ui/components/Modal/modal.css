@@ -139,6 +139,25 @@
   font: inherit;
 }
 
+.modalCheckbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+.modalCheckboxRow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.modalCheckboxLabel {
+  color: var(--text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
 .modalTextarea {
   min-height: 88px;
   resize: vertical;
@@ -147,6 +166,30 @@
 .modalHelperText {
   color: var(--muted);
   font-size: var(--font-size-xs);
+}
+
+.modalPreviewBox {
+  border: var(--border-1) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  padding: var(--space-2);
+}
+
+.modalPreviewLabel {
+  color: var(--muted);
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.modalPreviewValue {
+  margin-top: var(--space-1);
+  color: var(--ctrl);
+  font-size: calc(var(--font-size-md) + 2px);
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  font-weight: var(--font-weight-medium);
 }
 
 .modalFooter {
