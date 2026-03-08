@@ -1,5 +1,6 @@
 import { Panel, Tabs } from "@/ui/components";
 import { useState } from "react";
+import MemoryEditor from "./MemoryEditor";
 import RegisterEditor from "./RegisterEditor";
 
 type TabKey = "registers" | "memory";
@@ -25,7 +26,7 @@ export default function StatePanel() {
       }
     >
       {tab === "registers" && <RegisterEditor />}
-      {tab === "memory" && <div>Memory view </div>}
+      {tab === "memory" && <MemoryEditor />}
     </Panel>
   );
 }
