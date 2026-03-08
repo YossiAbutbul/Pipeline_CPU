@@ -28,8 +28,13 @@
   background: color-mix(in oklab, var(--accent) 12%, var(--surface-2));
 }
 
+.pipelineStage.isActive .pipelineStageName,
+.pipelineStage.isActive .pipelineStageInstruction {
+  color: var(--text);
+}
+
 .pipelineStageName {
-  font-size: var(--font-size-sm);
+  /* font-size: var(--font-size-sm); */
   font-weight: var(--font-weight-medium);
   color: var(--muted);
 }
@@ -38,7 +43,9 @@
   font-size: var(--font-size-sm);
   color: var(--text);
   word-break: break-word;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
 }
 
 .pipelineTrackerControls {

@@ -39,9 +39,16 @@
   width: 100%;
   max-width: 180px;
   min-width: 0;
-  flex: 1 1 120px;
   border: var(--border-1) solid var(--border);
   padding-left: var(--space-2);
+}
+
+.registerFormulaInputWrap {
+  position: relative;
+  width: 100%;
+  max-width: 180px;
+  min-width: 0;
+  flex: 1 1 120px;
 }
 
 .registerValueInput {
@@ -98,15 +105,6 @@
   padding: 4px 8px;
   border-radius: 8px;
   font-size: var(--font-size-xs);
-}
-
-.registerError {
-  border: var(--border-1) solid var(--accent-border);
-  background: var(--accent-weak);
-  color: var(--text);
-  border-radius: calc(var(--radius) - 4px);
-  padding: var(--space-1) var(--space-2);
-  font-size: var(--font-size-sm);
 }
 
 .registerList {
