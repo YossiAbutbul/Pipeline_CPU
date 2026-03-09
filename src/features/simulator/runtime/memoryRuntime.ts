@@ -1,6 +1,6 @@
 import type { MemoryRuleConfig } from "@/app/store/appStore";
 import { evaluateMemoryFormula, parseSignedOrUnsigned32 } from "@/features/statePanels/memoryEditorModel";
-import type { SparseMemoryWords } from "./types";
+import type { SparseMemoryWords } from "../core/types";
 
 export const MEMORY_WORD_COUNT = 0x1_0000;
 export const MEMORY_BYTE_COUNT = MEMORY_WORD_COUNT * 4;

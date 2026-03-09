@@ -1,6 +1,6 @@
 import PipelineCanvas from "@/features/pipelineCanvas/PipelineCanvas";
 import ProgramEditor from "@/features/program/ProgramEditor";
-import { usePipelineRunSession } from "@/features/simulator/usePipelineRunSession";
+import { usePipelineRunSession } from "@/features/simulator/hooks/usePipelineRunSession";
 import StatePanel from "@/features/statePanels/StatePanel";
 import { clearPersistedAppState, createDefaultAppState, usePersistedAppState } from "./store/appStore";
 import "./app.css";

@@ -2,17 +2,17 @@ import { compileAndLog } from "@/features/compiler";
 import { parseProgram } from "@/features/compiler/parser";
 import { useMemo, useState } from "react";
 import type { MemoryRuleConfig } from "@/app/store/appStore";
-import { createMemoryFromRules } from "./memoryRuntime";
-import { parseInitialPc } from "./parse";
-import { stepPipelineForward } from "./pipelineStep";
-import { EMPTY_PIPELINE, EMPTY_PIPELINE_EFFECTS, EMPTY_PIPELINE_INDICES } from "./state";
+import { createMemoryFromRules } from "../runtime/memoryRuntime";
+import { parseInitialPc } from "../core/parse";
+import { stepPipelineForward } from "../stages/pipelineStep";
+import { EMPTY_PIPELINE, EMPTY_PIPELINE_EFFECTS, EMPTY_PIPELINE_INDICES } from "../core/state";
 import type {
   PipelineEffectSlots,
   PipelineInstructionSlots,
   PipelineSlots,
   PipelineSnapshot,
   SparseMemoryWords,
-} from "./types";
+} from "../core/types";
 
 type UsePipelineRunSessionArgs = {
   program: string;

@@ -1,9 +1,9 @@
 import { parseRegister } from "@/features/compiler/registers";
 import type { ParsedInstruction } from "@/features/compiler/types";
 import { parseRegisterValue } from "@/features/statePanels/registerEditorModel";
-import { parseImmediate } from "./parse";
-import { readWord, writeWord } from "./memoryRuntime";
-import type { MemoryWordDelta, SparseMemoryWords, StageEffect } from "./types";
+import { parseImmediate } from "../core/parse";
+import { readWord, writeWord } from "../runtime/memoryRuntime";
+import type { MemoryWordDelta, SparseMemoryWords, StageEffect } from "../core/types";
 
 type MemoryStageResult = {
   memoryWords: SparseMemoryWords;

@@ -1,8 +1,8 @@
 import { parseRegister } from "@/features/compiler/registers";
 import type { ParsedInstruction } from "@/features/compiler/types";
 import { REGISTERS, parseRegisterValue, toHex32 } from "@/features/statePanels/registerEditorModel";
-import { parseImmediate } from "./parse";
-import type { StageEffect } from "./types";
+import { parseImmediate } from "../core/parse";
+import type { StageEffect } from "../core/types";
 
 const REGISTER_ALIAS_BY_NUMBER = REGISTERS.reduce<Record<number, string>>((acc, reg) => {
   acc[reg.num] = reg.alias;
