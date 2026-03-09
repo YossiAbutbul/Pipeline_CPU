@@ -87,6 +87,30 @@
   display: block;
 }
 
+.diagramContent svg #data_paths path,
+.diagramContent svg #control_paths path {
+  cursor: pointer;
+  transition:
+    stroke 120ms ease,
+    stroke-width 120ms ease,
+    fill 120ms ease,
+    filter 120ms ease;
+}
+
+.diagramContent svg #data_paths path:hover {
+  stroke: color-mix(in oklab, #f5c542 82%, #fff2b3) !important;
+  stroke-width: 3px !important;
+  fill: color-mix(in oklab, #f5c542 82%, #fff2b3) !important;
+  filter: drop-shadow(0 0 5px color-mix(in oklab, #f5c542 58%, transparent));
+}
+
+.diagramContent svg #control_paths path:hover {
+  stroke: color-mix(in oklab, var(--accent) 86%, #9edcff) !important;
+  stroke-width: 3px !important;
+  fill: color-mix(in oklab, var(--accent) 84%, #9edcff) !important;
+  filter: drop-shadow(0 0 5px color-mix(in oklab, var(--accent) 62%, transparent));
+}
+
 .diagramViewport.canDrag {
   cursor: grab;
   user-select: none;
