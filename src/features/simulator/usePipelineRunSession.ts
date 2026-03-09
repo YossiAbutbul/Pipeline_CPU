@@ -1,14 +1,17 @@
 import { compileAndLog } from "@/features/compiler";
 import { parseProgram } from "@/features/compiler/parser";
 import { useMemo, useState } from "react";
+import type { MemoryRuleConfig } from "@/app/store/appStore";
+import { createMemoryFromRules } from "./memoryRuntime";
 import { parseInitialPc } from "./parse";
 import { stepPipelineForward } from "./pipelineStep";
-import { EMPTY_PIPELINE, EMPTY_PIPELINE_INDICES } from "./state";
-import type { PipelineInstructionSlots, PipelineSlots, PipelineSnapshot } from "./types";
+import { EMPTY_PIPELINE, EMPTY_PIPELINE_EFFECTS, EMPTY_PIPELINE_INDICES } from "./state";
+import type { PipelineEffectSlots, PipelineInstructionSlots, PipelineSlots, PipelineSnapshot } from "./types";
 
 type UsePipelineRunSessionArgs = {
   program: string;
   initialPc: string;
+  memoryRules: MemoryRuleConfig[];
   registerValues: Record<string, string>;
   onRegisterValuesChange: (values: Record<string, string>) => void;
 };
@@ -16,12 +19,15 @@ type UsePipelineRunSessionArgs = {
 export function usePipelineRunSession({
   program,
   initialPc,
+  memoryRules,
   registerValues,
   onRegisterValuesChange,
 }: UsePipelineRunSessionArgs) {
   const [pipeline, setPipeline] = useState<PipelineSlots>(EMPTY_PIPELINE);
   const [pipelineInstructionIndices, setPipelineInstructionIndices] =
     useState<PipelineInstructionSlots>(EMPTY_PIPELINE_INDICES);
+  const [pipelineEffects, setPipelineEffects] = useState<PipelineEffectSlots>(EMPTY_PIPELINE_EFFECTS);
+  const [memoryBytes, setMemoryBytes] = useState<Uint8Array>(() => createMemoryFromRules(memoryRules));
   const [nextInstructionIndex, setNextInstructionIndex] = useState(0);
   const [history, setHistory] = useState<PipelineSnapshot[]>([]);
   const [runSessionActive, setRunSessionActive] = useState(false);
@@ -36,6 +42,8 @@ export function usePipelineRunSession({
   const resetPipeline = () => {
     setPipeline(EMPTY_PIPELINE);
     setPipelineInstructionIndices(EMPTY_PIPELINE_INDICES);
+    setPipelineEffects(EMPTY_PIPELINE_EFFECTS);
+    setMemoryBytes(createMemoryFromRules(memoryRules));
     setNextInstructionIndex(0);
     setHistory([]);
     setRunSessionActive(false);
@@ -63,6 +71,8 @@ export function usePipelineRunSession({
 
     setPipeline(EMPTY_PIPELINE);
     setPipelineInstructionIndices(EMPTY_PIPELINE_INDICES);
+    setPipelineEffects(EMPTY_PIPELINE_EFFECTS);
+    setMemoryBytes(createMemoryFromRules(memoryRules));
     setNextInstructionIndex(0);
     setHistory([]);
     setRunSessionActive(true);
@@ -76,14 +86,18 @@ export function usePipelineRunSession({
     const result = stepPipelineForward({
       pipeline,
       pipelineInstructionIndices,
+      pipelineEffects,
       nextInstructionIndex,
       instructions,
       registerValues,
+      memoryBytes,
     });
 
     setHistory((prev) => [...prev, result.snapshot]);
     setPipeline(result.pipeline);
     setPipelineInstructionIndices(result.pipelineInstructionIndices);
+    setPipelineEffects(result.pipelineEffects);
+    setMemoryBytes(result.memoryBytes);
     setNextInstructionIndex(result.nextInstructionIndex);
 
     if (result.registerValues !== registerValues) {
@@ -100,6 +114,8 @@ export function usePipelineRunSession({
 
       setPipeline(previous.pipeline);
       setPipelineInstructionIndices(previous.pipelineInstructionIndices);
+      setPipelineEffects(previous.pipelineEffects);
+      setMemoryBytes(previous.memoryBytes.slice());
       setNextInstructionIndex(previous.nextInstructionIndex);
       onRegisterValuesChange(previous.registerValues);
 

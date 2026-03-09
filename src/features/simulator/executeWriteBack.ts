@@ -2,6 +2,7 @@ import { parseRegister } from "@/features/compiler/registers";
 import type { ParsedInstruction } from "@/features/compiler/types";
 import { REGISTERS, parseRegisterValue, toHex32 } from "@/features/statePanels/registerEditorModel";
 import { parseImmediate } from "./parse";
+import type { StageEffect } from "./types";
 
 const REGISTER_ALIAS_BY_NUMBER = REGISTERS.reduce<Record<number, string>>((acc, reg) => {
   acc[reg.num] = reg.alias;
@@ -36,7 +37,12 @@ function writeRegisterValue(values: Record<string, string>, registerNumber: numb
 export function applyWriteBack(
   instruction: ParsedInstruction | null,
   values: Record<string, string>,
+  effect: StageEffect | null = null,
 ): Record<string, string> {
+  if (effect?.wbWrite) {
+    return writeRegisterValue(values, effect.wbWrite.registerNumber, effect.wbWrite.value);
+  }
+
   if (!instruction) {
     return values;
   }

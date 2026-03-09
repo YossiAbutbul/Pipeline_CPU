@@ -24,6 +24,7 @@ export default function App() {
   } = usePipelineRunSession({
     program,
     initialPc,
+    memoryRules: memory.rules,
     registerValues: registers.values,
     onRegisterValuesChange: setRegisterValues,
   });
