@@ -28,11 +28,14 @@ export default function RegisterEditor({
   onValuesChange,
 }: Props) {
   const [error, setError] = useState<string | null>(null);
+  const [recentlyChangedAliases, setRecentlyChangedAliases] = useState<Record<string, true>>({});
   const [isScrollbarVisible, setIsScrollbarVisible] = useState(false);
   const [scrollbarThumbTop, setScrollbarThumbTop] = useState(0);
   const [scrollbarThumbHeight, setScrollbarThumbHeight] = useState(0);
   const [hasTableOverflow, setHasTableOverflow] = useState(false);
   const tableBodyRef = useRef<HTMLDivElement | null>(null);
+  const previousValuesRef = useRef<Record<string, string> | null>(null);
+  const highlightTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const valueRows = useMemo(
     () =>
@@ -145,6 +148,55 @@ export default function RegisterEditor({
     };
   }, [values]);
 
+  useEffect(() => {
+    const previous = previousValuesRef.current;
+    previousValuesRef.current = values;
+    if (!previous) {
+      return;
+    }
+
+    const changedAliases = REGISTERS
+      .map((reg) => reg.alias)
+      .filter((alias) => (previous[alias] ?? "0x00000000") !== (values[alias] ?? "0x00000000"));
+
+    if (changedAliases.length === 0) {
+      return;
+    }
+
+    setRecentlyChangedAliases((prev) => {
+      const next = { ...prev };
+      for (const alias of changedAliases) {
+        next[alias] = true;
+      }
+      return next;
+    });
+
+    for (const alias of changedAliases) {
+      const existing = highlightTimeoutsRef.current[alias];
+      if (existing) {
+        clearTimeout(existing);
+      }
+
+      highlightTimeoutsRef.current[alias] = setTimeout(() => {
+        setRecentlyChangedAliases((prev) => {
+          const next = { ...prev };
+          delete next[alias];
+          return next;
+        });
+        delete highlightTimeoutsRef.current[alias];
+      }, 1200);
+    }
+  }, [values]);
+
+  useEffect(
+    () => () => {
+      for (const timeout of Object.values(highlightTimeoutsRef.current)) {
+        clearTimeout(timeout);
+      }
+    },
+    [],
+  );
+
   return (
     <div className="registerEditor">
       {isEditing && (
@@ -243,11 +295,15 @@ export default function RegisterEditor({
             onScroll={updateOverlayScrollbar}
           >
             {valueRows.map((row) => (
-              <div className="registerRow" role="row" key={row.key}>
+              <div
+                className={`registerRow${recentlyChangedAliases[row.alias] ? " registerRowChanged" : ""}`}
+                role="row"
+                key={row.key}
+              >
                 <div className="registerName" role="cell">{`$${row.alias}`}</div>
                 <div className="registerNum" role="cell">{`${row.num}`}</div>
                 <input
-                  className="registerValueInput"
+                  className={`registerValueInput${isEditing && row.alias !== "zero" ? " registerValueInputEditable" : ""}`}
                   role="cell"
                   value={row.value}
                   onChange={(event) => updateRegister(row.alias, event.target.value)}

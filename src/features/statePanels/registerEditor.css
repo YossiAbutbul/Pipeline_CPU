@@ -26,7 +26,7 @@
   height: 32px;
   border: none;
   border-radius: var(--radius);
-  background: color-mix(in oklab, var(--surface-2) 78%, transparent);
+  background: transparent;
   color: var(--text);
   font-size: var(--font-size-sm);
   padding: 0 var(--space-1);
@@ -39,7 +39,6 @@
   width: 100%;
   max-width: 180px;
   min-width: 0;
-  border: var(--border-1) solid var(--border);
   padding-left: var(--space-2);
 }
 
@@ -58,9 +57,15 @@
 }
 
 .registerFormulaInput:focus-visible,
-.registerValueInput:focus-visible {
+.registerValueInputEditable:focus-visible {
   outline: none;
-  box-shadow: none;
+  border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent);
+}
+
+.registerValueInputEditable {
+  border: var(--border-1) solid var(--border);
+  background: var(--surface-2);
 }
 
 .registerFormulaActions {
@@ -161,10 +166,20 @@
   border: var(--border-1) solid var(--border);
   border-radius: calc(var(--radius) - 4px);
   padding: var(--space-1) var(--space-2);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .registerRow + .registerRow {
   margin-top: var(--space-1);
+}
+
+.registerRowChanged {
+  border-color: color-mix(in oklab, var(--accent) 65%, var(--border));
+  background: color-mix(in oklab, var(--accent) 18%, var(--surface-2));
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 38%, transparent);
 }
 
 .registerName {
