@@ -39,8 +39,22 @@ export function usePipelineRunSession({
   const [history, setHistory] = useState<PipelineSnapshot[]>([]);
   const [runSessionActive, setRunSessionActive] = useState(false);
 
-  const parsedProgram = useMemo(() => parseProgram(program), [program]);
+  const parsedProgram = useMemo(() => {
+    try {
+      const parsedInitialPc = parseInitialPc(initialPc);
+      return parseProgram(program, { initialPc: parsedInitialPc });
+    } catch {
+      return parseProgram(program);
+    }
+  }, [initialPc, program]);
   const instructions = parsedProgram.instructions;
+  const pcToInstructionIndex = useMemo(() => {
+    const map = new Map<number, number>();
+    instructions.forEach((instruction, index) => {
+      map.set(instruction.pc, index);
+    });
+    return map;
+  }, [instructions]);
   const hasInstructionsToInject = nextInstructionIndex < instructions.length;
   const hasPipelineWork = Object.values(pipelineInstructionIndices).some((value) => value !== null);
   const canStepForward = runSessionActive && (hasInstructionsToInject || hasPipelineWork);
@@ -98,6 +112,8 @@ export function usePipelineRunSession({
       pipelineEffects,
       nextInstructionIndex,
       instructions,
+      labels: parsedProgram.labels,
+      pcToInstructionIndex,
       registerValues,
       memoryWords,
     });

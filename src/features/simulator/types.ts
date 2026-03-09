@@ -53,6 +53,8 @@ export type ForwardStepInput = {
   pipelineEffects: PipelineEffectSlots;
   nextInstructionIndex: number;
   instructions: ParsedInstruction[];
+  labels: Record<string, number>;
+  pcToInstructionIndex: Map<number, number>;
   registerValues: Record<string, string>;
   memoryWords: SparseMemoryWords;
 };
