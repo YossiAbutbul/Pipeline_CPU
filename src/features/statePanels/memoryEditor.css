@@ -41,8 +41,90 @@
 
 .memoryRulesHeader {
   color: var(--muted);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   margin-bottom: 0;
+}
+
+.memoryRuntimeHeader {
+  color: var(--muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: 0;
+}
+
+.memoryRulesHelp {
+  color: var(--muted);
+  font-size: var(--font-size-xs);
+}
+
+.memorySectionDivider {
+  height: 1px;
+  background: var(--border);
+  margin: 2px 0;
+}
+
+.memoryRuntimeList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 168px;
+  min-height: 0;
+  overflow: auto;
+}
+
+.memoryRuntimeHeaderRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.2fr);
+  gap: var(--space-1);
+  align-items: center;
+  border: var(--border-1) solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-3);
+  padding: 4px 8px;
+}
+
+.memoryRuntimeHeaderCell {
+  font-size: var(--font-size-xs);
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.memoryRuntimeRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.2fr);
+  gap: var(--space-1);
+  align-items: center;
+  border: var(--border-1) solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  padding: 4px 8px;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.memoryRuntimeRowChanged {
+  border-color: color-mix(in oklab, var(--accent) 62%, var(--border));
+  background: color-mix(in oklab, var(--accent) 14%, var(--surface-2));
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 34%, transparent);
+}
+
+.memoryRuntimeCell {
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  font-size: var(--font-size-xs);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.memoryRuntimeCellWord,
+.memoryRuntimeCellAddress {
+  color: var(--muted);
 }
 
 .memoryRulesList {
@@ -50,7 +132,7 @@
   flex-direction: column;
   gap: var(--space-1);
   min-height: 0;
-  flex: 1;
+  max-height: 240px;
   overflow: auto;
 }
 

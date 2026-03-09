@@ -6,7 +6,13 @@ import { createMemoryFromRules } from "./memoryRuntime";
 import { parseInitialPc } from "./parse";
 import { stepPipelineForward } from "./pipelineStep";
 import { EMPTY_PIPELINE, EMPTY_PIPELINE_EFFECTS, EMPTY_PIPELINE_INDICES } from "./state";
-import type { PipelineEffectSlots, PipelineInstructionSlots, PipelineSlots, PipelineSnapshot } from "./types";
+import type {
+  PipelineEffectSlots,
+  PipelineInstructionSlots,
+  PipelineSlots,
+  PipelineSnapshot,
+  SparseMemoryWords,
+} from "./types";
 
 type UsePipelineRunSessionArgs = {
   program: string;
@@ -27,7 +33,8 @@ export function usePipelineRunSession({
   const [pipelineInstructionIndices, setPipelineInstructionIndices] =
     useState<PipelineInstructionSlots>(EMPTY_PIPELINE_INDICES);
   const [pipelineEffects, setPipelineEffects] = useState<PipelineEffectSlots>(EMPTY_PIPELINE_EFFECTS);
-  const [memoryBytes, setMemoryBytes] = useState<Uint8Array>(() => createMemoryFromRules(memoryRules));
+  const [memoryWords, setMemoryWords] = useState<SparseMemoryWords>(() => createMemoryFromRules(memoryRules));
+  const [changedMemoryWords, setChangedMemoryWords] = useState<number[]>([]);
   const [nextInstructionIndex, setNextInstructionIndex] = useState(0);
   const [history, setHistory] = useState<PipelineSnapshot[]>([]);
   const [runSessionActive, setRunSessionActive] = useState(false);
@@ -43,7 +50,8 @@ export function usePipelineRunSession({
     setPipeline(EMPTY_PIPELINE);
     setPipelineInstructionIndices(EMPTY_PIPELINE_INDICES);
     setPipelineEffects(EMPTY_PIPELINE_EFFECTS);
-    setMemoryBytes(createMemoryFromRules(memoryRules));
+    setMemoryWords(createMemoryFromRules(memoryRules));
+    setChangedMemoryWords([]);
     setNextInstructionIndex(0);
     setHistory([]);
     setRunSessionActive(false);
@@ -72,7 +80,8 @@ export function usePipelineRunSession({
     setPipeline(EMPTY_PIPELINE);
     setPipelineInstructionIndices(EMPTY_PIPELINE_INDICES);
     setPipelineEffects(EMPTY_PIPELINE_EFFECTS);
-    setMemoryBytes(createMemoryFromRules(memoryRules));
+    setMemoryWords(createMemoryFromRules(memoryRules));
+    setChangedMemoryWords([]);
     setNextInstructionIndex(0);
     setHistory([]);
     setRunSessionActive(true);
@@ -90,14 +99,15 @@ export function usePipelineRunSession({
       nextInstructionIndex,
       instructions,
       registerValues,
-      memoryBytes,
+      memoryWords,
     });
 
     setHistory((prev) => [...prev, result.snapshot]);
     setPipeline(result.pipeline);
     setPipelineInstructionIndices(result.pipelineInstructionIndices);
     setPipelineEffects(result.pipelineEffects);
-    setMemoryBytes(result.memoryBytes);
+    setMemoryWords(result.memoryWords);
+    setChangedMemoryWords(result.changedMemoryWords);
     setNextInstructionIndex(result.nextInstructionIndex);
 
     if (result.registerValues !== registerValues) {
@@ -115,7 +125,22 @@ export function usePipelineRunSession({
       setPipeline(previous.pipeline);
       setPipelineInstructionIndices(previous.pipelineInstructionIndices);
       setPipelineEffects(previous.pipelineEffects);
-      setMemoryBytes(previous.memoryBytes.slice());
+      setMemoryWords((currentMemory) => {
+        if (previous.memoryDeltas.length === 0) {
+          return currentMemory;
+        }
+
+        const reverted = new Map(currentMemory);
+        for (const delta of previous.memoryDeltas) {
+          if ((delta.previousValue >>> 0) === 0) {
+            reverted.delete(delta.wordIndex);
+          } else {
+            reverted.set(delta.wordIndex, delta.previousValue >>> 0);
+          }
+        }
+        return reverted;
+      });
+      setChangedMemoryWords(previous.changedMemoryWords);
       setNextInstructionIndex(previous.nextInstructionIndex);
       onRegisterValuesChange(previous.registerValues);
 
@@ -125,6 +150,9 @@ export function usePipelineRunSession({
 
   return {
     pipeline,
+    memoryWords,
+    changedMemoryWords,
+    runSessionActive,
     canStepForward,
     canStepBackward,
     resetPipeline,

@@ -12,7 +12,16 @@ export type PipelineSnapshot = {
   pipelineEffects: PipelineEffectSlots;
   nextInstructionIndex: number;
   registerValues: Record<string, string>;
-  memoryBytes: Uint8Array;
+  memoryDeltas: MemoryWordDelta[];
+  changedMemoryWords: number[];
+};
+
+export type SparseMemoryWords = Map<number, number>;
+
+export type MemoryWordDelta = {
+  wordIndex: number;
+  previousValue: number;
+  nextValue: number;
 };
 
 export type WbWriteEffect = {
@@ -33,7 +42,9 @@ export type ForwardStepResult = {
   pipelineEffects: PipelineEffectSlots;
   nextInstructionIndex: number;
   registerValues: Record<string, string>;
-  memoryBytes: Uint8Array;
+  memoryWords: SparseMemoryWords;
+  memoryDeltas: MemoryWordDelta[];
+  changedMemoryWords: number[];
 };
 
 export type ForwardStepInput = {
@@ -43,5 +54,5 @@ export type ForwardStepInput = {
   nextInstructionIndex: number;
   instructions: ParsedInstruction[];
   registerValues: Record<string, string>;
-  memoryBytes: Uint8Array;
+  memoryWords: SparseMemoryWords;
 };

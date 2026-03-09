@@ -3,7 +3,7 @@ import { runMemoryStage } from "./memoryStage";
 import type { ForwardStepInput, ForwardStepResult } from "./types";
 
 export function stepPipelineForward(input: ForwardStepInput): ForwardStepResult {
-  const { pipeline, pipelineInstructionIndices, pipelineEffects, nextInstructionIndex, instructions, registerValues, memoryBytes } = input;
+  const { pipeline, pipelineInstructionIndices, pipelineEffects, nextInstructionIndex, instructions, registerValues, memoryWords } = input;
 
   const incomingInstructionIndex = instructions[nextInstructionIndex] ? nextInstructionIndex : null;
   const incomingInstructionText = incomingInstructionIndex !== null ? instructions[incomingInstructionIndex].source : null;
@@ -12,7 +12,7 @@ export function stepPipelineForward(input: ForwardStepInput): ForwardStepResult 
   const wbEffect = pipelineEffects.MEM;
   const memInstructionIndex = pipelineInstructionIndices.EX;
   const memInstruction = memInstructionIndex !== null ? instructions[memInstructionIndex] : null;
-  const memResult = runMemoryStage(memInstruction, registerValues, memoryBytes);
+  const memResult = runMemoryStage(memInstruction, registerValues, memoryWords);
 
   const snapshot = {
     pipeline: { ...pipeline },
@@ -20,13 +20,16 @@ export function stepPipelineForward(input: ForwardStepInput): ForwardStepResult 
     pipelineEffects: { ...pipelineEffects },
     nextInstructionIndex,
     registerValues: { ...registerValues },
-    memoryBytes: memoryBytes.slice(),
+    memoryDeltas: memResult.deltas,
+    changedMemoryWords: memResult.changedMemoryWords,
   };
 
   return {
     snapshot,
     registerValues: applyWriteBack(wbInstruction, registerValues, wbEffect),
-    memoryBytes: memResult.memoryBytes,
+    memoryWords: memResult.memoryWords,
+    memoryDeltas: memResult.deltas,
+    changedMemoryWords: memResult.changedMemoryWords,
     pipeline: {
       IF: incomingInstructionText,
       ID: pipeline.IF,

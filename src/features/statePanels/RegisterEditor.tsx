@@ -17,6 +17,7 @@ type Props = {
   onIsEditingChange: (value: boolean) => void;
   values: Record<string, string>;
   onValuesChange: (value: Record<string, string>) => void;
+  isRuntimeLocked: boolean;
 };
 
 export default function RegisterEditor({
@@ -26,6 +27,7 @@ export default function RegisterEditor({
   onIsEditingChange,
   values,
   onValuesChange,
+  isRuntimeLocked,
 }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [recentlyChangedAliases, setRecentlyChangedAliases] = useState<Record<string, true>>({});
@@ -87,6 +89,10 @@ export default function RegisterEditor({
   };
 
   const toggleEditMode = () => {
+    if (isRuntimeLocked) {
+      return;
+    }
+
     if (!isEditing) {
       onIsEditingChange(true);
       return;
@@ -133,6 +139,13 @@ export default function RegisterEditor({
     setScrollbarThumbHeight(thumbHeight);
     setScrollbarThumbTop(thumbTop);
   };
+
+  useEffect(() => {
+    if (isRuntimeLocked && isEditing) {
+      onIsEditingChange(false);
+      setError(null);
+    }
+  }, [isEditing, isRuntimeLocked, onIsEditingChange]);
 
   useEffect(() => {
     updateOverlayScrollbar();
@@ -263,7 +276,7 @@ export default function RegisterEditor({
             Clear Values
           </Button>
         )}
-        <Button size="sm" className="registerEditToggle registerActionBtn" onClick={toggleEditMode}>
+        <Button size="sm" className="registerEditToggle registerActionBtn" onClick={toggleEditMode} disabled={isRuntimeLocked}>
           {isEditing ? <Check size={14} aria-hidden="true" /> : <Edit size={14} aria-hidden="true" />}
           {isEditing ? "Done Editing" : "Edit Registers"}
         </Button>

@@ -2,13 +2,16 @@ import type { MemoryRuleConfig, WriteMode } from "@/app/store/appStore";
 import type { ModalField } from "@/ui/components";
 import { Button, Modal, Tooltip } from "@/ui/components";
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { evaluateMemoryFormula, parseSignedOrUnsigned32, parseWordNumber, toHex32 } from "./memoryEditorModel";
 import "./memoryEditor.css";
 
 type Props = {
   rules: MemoryRuleConfig[];
   onRulesChange: (rules: MemoryRuleConfig[]) => void;
+  runtimeMemoryWords: Map<number, number>;
+  runtimeChangedWords: number[];
+  isRuntimeLocked: boolean;
 };
 
 const ADD_RULE_FIELDS: ModalField[] = [
@@ -79,12 +82,106 @@ const ADD_RULE_FIELDS: ModalField[] = [
   },
 ];
 
-export default function MemoryEditor({ rules, onRulesChange }: Props) {
+export default function MemoryEditor({
+  rules,
+  onRulesChange,
+  runtimeMemoryWords,
+  runtimeChangedWords,
+  isRuntimeLocked,
+}: Props) {
   const toHexCompact = (value: number) => `0x${(value >>> 0).toString(16).toUpperCase()}`;
 
   const [error, setError] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
+  const [recentlyChangedWords, setRecentlyChangedWords] = useState<Record<number, true>>({});
+  const [watchedWords, setWatchedWords] = useState<number[]>([]);
+  const highlightTimeoutsRef = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
+
+  const readWord = (words: Map<number, number>, wordIndex: number) => (words.get(wordIndex) ?? 0) >>> 0;
+
+  useEffect(() => {
+    if (runtimeChangedWords.length === 0) {
+      return;
+    }
+    setRecentlyChangedWords((prev) => {
+      const next = { ...prev };
+      for (const word of runtimeChangedWords) {
+        next[word] = true;
+      }
+      return next;
+    });
+
+    setWatchedWords((prev) => {
+      const next = [...prev];
+      for (const word of runtimeChangedWords) {
+        if (!next.includes(word)) {
+          next.unshift(word);
+        }
+      }
+      return next.slice(0, 24);
+    });
+
+    for (const word of runtimeChangedWords) {
+      const existing = highlightTimeoutsRef.current[word];
+      if (existing) {
+        clearTimeout(existing);
+      }
+      highlightTimeoutsRef.current[word] = setTimeout(() => {
+        setRecentlyChangedWords((prev) => {
+          const next = { ...prev };
+          delete next[word];
+          return next;
+        });
+        delete highlightTimeoutsRef.current[word];
+      }, 1200);
+    }
+  }, [runtimeChangedWords]);
+
+  useEffect(() => {
+    if (watchedWords.length > 0) {
+      return;
+    }
+
+    const initialNonZero = Array.from(runtimeMemoryWords.keys())
+      .sort((a, b) => a - b)
+      .slice(0, 24);
+
+    if (initialNonZero.length > 0) {
+      setWatchedWords(initialNonZero);
+    }
+  }, [runtimeMemoryWords, watchedWords.length]);
+
+  useEffect(
+    () => () => {
+      for (const timeout of Object.values(highlightTimeoutsRef.current)) {
+        clearTimeout(timeout);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!isRuntimeLocked) {
+      return;
+    }
+    setIsAddModalOpen(false);
+    setEditingRuleId(null);
+    setError(null);
+    setRecentlyChangedWords({});
+    setWatchedWords([]);
+  }, [isRuntimeLocked]);
+
+  const runtimeRows = useMemo(() => {
+    return watchedWords.map((wordIndex) => {
+      return {
+        wordIndex,
+        address: wordIndex * 4,
+        value: readWord(runtimeMemoryWords, wordIndex),
+        changed: Boolean(recentlyChangedWords[wordIndex]),
+      };
+    });
+  }, [recentlyChangedWords, runtimeMemoryWords, watchedWords]);
 
   const formatAddressViews = (rule: MemoryRuleConfig) => {
     if (rule.fullRange) {
@@ -184,11 +281,21 @@ export default function MemoryEditor({ rules, onRulesChange }: Props) {
   return (
     <div className="memoryEditor">
       <div className="memoryTableToolbar">
-        <Button size="sm" className="memoryActionBtn memoryAddBtn" onClick={() => setIsAddModalOpen(true)}>
+        <Button
+          size="sm"
+          className="memoryActionBtn memoryAddBtn"
+          onClick={() => setIsAddModalOpen(true)}
+          disabled={isRuntimeLocked}
+        >
           <Plus size={14} aria-hidden="true" />
           Add Rule
         </Button>
-        <Button size="sm" className="memoryActionBtn memoryClearBtn" onClick={clearRules} disabled={rules.length === 0}>
+        <Button
+          size="sm"
+          className="memoryActionBtn memoryClearBtn"
+          onClick={clearRules}
+          disabled={isRuntimeLocked || rules.length === 0}
+        >
           <Trash2 size={14} aria-hidden="true" />
           Clear Rules
         </Button>
@@ -211,6 +318,7 @@ export default function MemoryEditor({ rules, onRulesChange }: Props) {
       )}
 
       <div className="memoryRulesHeader">Rules ({rules.length})</div>
+      <div className="memoryRulesHelp">Rules initialize runtime memory when you press Run.</div>
       <div className="memoryRulesList">
         {rules.length === 0 && <div className="memoryRulesEmpty">No rules yet. Click Add Rule.</div>}
         {rules.map((rule, idx) => (
@@ -225,6 +333,7 @@ export default function MemoryEditor({ rules, onRulesChange }: Props) {
                   size="sm"
                   variant="ghost"
                   className="memoryRuleEdit"
+                  disabled={isRuntimeLocked}
                   onClick={() => {
                     setEditingRuleId(rule.id);
                     setIsAddModalOpen(true);
@@ -237,6 +346,7 @@ export default function MemoryEditor({ rules, onRulesChange }: Props) {
                   size="sm"
                   variant="ghost"
                   className="memoryRuleDelete"
+                  disabled={isRuntimeLocked}
                   onClick={() => removeRule(rule.id)}
                   aria-label={`Remove rule ${idx + 1}`}
                 >
@@ -254,8 +364,45 @@ export default function MemoryEditor({ rules, onRulesChange }: Props) {
         ))}
       </div>
 
+      <div className="memorySectionDivider" aria-hidden="true" />
+
+      <div className="memoryRuntimeHeader">Runtime Memory</div>
+      <div className="memoryRuntimeList" role="table" aria-label="Runtime memory words">
+        <div className="memoryRuntimeHeaderRow" role="row">
+          <div className="memoryRuntimeHeaderCell" role="columnheader">
+            Word
+          </div>
+          <div className="memoryRuntimeHeaderCell" role="columnheader">
+            Address
+          </div>
+          <div className="memoryRuntimeHeaderCell" role="columnheader">
+            Value
+          </div>
+        </div>
+        {runtimeRows.length === 0 && (
+          <div className="memoryRulesEmpty">No runtime updates yet. Run and step to populate values.</div>
+        )}
+        {runtimeRows.map((row) => (
+          <div
+            key={row.wordIndex}
+            className={`memoryRuntimeRow${row.changed ? " memoryRuntimeRowChanged" : ""}`}
+            role="row"
+          >
+            <div className="memoryRuntimeCell memoryRuntimeCellWord" role="cell">
+              W[{row.wordIndex}]
+            </div>
+            <div className="memoryRuntimeCell memoryRuntimeCellAddress" role="cell">
+              {toHex32(row.address)}
+            </div>
+            <div className="memoryRuntimeCell memoryRuntimeCellValue" role="cell">
+              {toHex32(row.value)}
+            </div>
+          </div>
+        ))}
+      </div>
+
       <Modal
-        open={isAddModalOpen}
+        open={isAddModalOpen && !isRuntimeLocked}
         title="Memory Rule"
         className="memoryRuleModal"
         variant="form"
@@ -269,6 +416,9 @@ export default function MemoryEditor({ rules, onRulesChange }: Props) {
           setEditingRuleId(null);
         }}
         onSubmit={({ values }) => {
+          if (isRuntimeLocked) {
+            return;
+          }
           try {
             if (editingRuleId) {
               updateRuleFromModal(values, editingRuleId);

@@ -15,6 +15,9 @@ export default function App() {
 
   const {
     pipeline,
+    memoryWords,
+    changedMemoryWords,
+    runSessionActive,
     canStepForward,
     canStepBackward,
     resetPipeline,
@@ -87,6 +90,9 @@ export default function App() {
           onMemoryRulesChange={(rules) =>
             setAppState((prev) => ({ ...prev, memory: { ...prev.memory, rules } }))
           }
+          runtimeMemoryWords={memoryWords}
+          runtimeChangedWords={changedMemoryWords}
+          isRuntimeLocked={runSessionActive}
         />
       </aside>
     </div>

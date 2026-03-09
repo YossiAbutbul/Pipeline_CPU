@@ -14,6 +14,9 @@ type Props = {
   onRegisterValuesChange: (value: Record<string, string>) => void;
   memoryRules: MemoryRuleConfig[];
   onMemoryRulesChange: (rules: MemoryRuleConfig[]) => void;
+  runtimeMemoryWords: Map<number, number>;
+  runtimeChangedWords: number[];
+  isRuntimeLocked: boolean;
 };
 
 export default function StatePanel({
@@ -27,6 +30,9 @@ export default function StatePanel({
   onRegisterValuesChange,
   memoryRules,
   onMemoryRulesChange,
+  runtimeMemoryWords,
+  runtimeChangedWords,
+  isRuntimeLocked,
 }: Props) {
   return (
     <Panel
@@ -52,9 +58,18 @@ export default function StatePanel({
           onIsEditingChange={onRegisterIsEditingChange}
           values={registerValues}
           onValuesChange={onRegisterValuesChange}
+          isRuntimeLocked={isRuntimeLocked}
         />
       )}
-      {tab === "memory" && <MemoryEditor rules={memoryRules} onRulesChange={onMemoryRulesChange} />}
+      {tab === "memory" && (
+        <MemoryEditor
+          rules={memoryRules}
+          onRulesChange={onMemoryRulesChange}
+          runtimeMemoryWords={runtimeMemoryWords}
+          runtimeChangedWords={runtimeChangedWords}
+          isRuntimeLocked={isRuntimeLocked}
+        />
+      )}
     </Panel>
   );
 }

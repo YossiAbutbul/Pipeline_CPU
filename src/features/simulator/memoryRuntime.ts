@@ -1,5 +1,6 @@
 import type { MemoryRuleConfig } from "@/app/store/appStore";
 import { evaluateMemoryFormula, parseSignedOrUnsigned32 } from "@/features/statePanels/memoryEditorModel";
+import type { SparseMemoryWords } from "./types";
 
 export const MEMORY_WORD_COUNT = 0x1_0000;
 export const MEMORY_BYTE_COUNT = MEMORY_WORD_COUNT * 4;
@@ -48,24 +49,50 @@ function evaluateByteFormula(formula: string, address: number): number {
   return (result as number) >>> 0;
 }
 
-export function readWord(memoryBytes: Uint8Array, address: number): number {
-  const b0 = memoryBytes[address] ?? 0;
-  const b1 = memoryBytes[address + 1] ?? 0;
-  const b2 = memoryBytes[address + 2] ?? 0;
-  const b3 = memoryBytes[address + 3] ?? 0;
-  return (((b0 << 24) | (b1 << 16) | (b2 << 8) | b3) >>> 0);
+export function readWord(memoryWords: SparseMemoryWords, address: number): number {
+  if (address < 0 || address % 4 !== 0) {
+    return 0;
+  }
+  const wordIndex = address >>> 2;
+  return (memoryWords.get(wordIndex) ?? 0) >>> 0;
 }
 
-export function writeWord(memoryBytes: Uint8Array, address: number, value: number): void {
-  const word = value >>> 0;
-  memoryBytes[address] = (word >>> 24) & 0xff;
-  memoryBytes[address + 1] = (word >>> 16) & 0xff;
-  memoryBytes[address + 2] = (word >>> 8) & 0xff;
-  memoryBytes[address + 3] = word & 0xff;
+export function writeWord(memoryWords: SparseMemoryWords, address: number, value: number): void {
+  if (address < 0 || address % 4 !== 0) {
+    return;
+  }
+  const wordIndex = address >>> 2;
+  const normalized = value >>> 0;
+  if (normalized === 0) {
+    memoryWords.delete(wordIndex);
+    return;
+  }
+  memoryWords.set(wordIndex, normalized);
 }
 
-export function createMemoryFromRules(rules: MemoryRuleConfig[]): Uint8Array {
-  const memoryBytes = new Uint8Array(MEMORY_BYTE_COUNT);
+function readByte(memoryWords: SparseMemoryWords, address: number): number {
+  if (address < 0 || address >= MEMORY_BYTE_COUNT) {
+    return 0;
+  }
+  const wordAddress = address & ~0x3;
+  const shift = (3 - (address & 0x3)) * 8;
+  return (readWord(memoryWords, wordAddress) >>> shift) & 0xff;
+}
+
+function writeByte(memoryWords: SparseMemoryWords, address: number, value: number): void {
+  if (address < 0 || address >= MEMORY_BYTE_COUNT) {
+    return;
+  }
+  const wordAddress = address & ~0x3;
+  const shift = (3 - (address & 0x3)) * 8;
+  const mask = ~(0xff << shift);
+  const prev = readWord(memoryWords, wordAddress);
+  const next = ((prev & mask) | ((value & 0xff) << shift)) >>> 0;
+  writeWord(memoryWords, wordAddress, next);
+}
+
+export function createMemoryFromRules(rules: MemoryRuleConfig[]): SparseMemoryWords {
+  const memoryWords: SparseMemoryWords = new Map();
 
   for (const rule of rules) {
     if (rule.kind !== "range_fill") {
@@ -83,7 +110,11 @@ export function createMemoryFromRules(rules: MemoryRuleConfig[]): Uint8Array {
         const value = rule.useFormula
           ? evaluateMemoryFormula(rule.formulaText || "0", word)
           : parseSignedOrUnsigned32(rule.valueText || "0", "Value");
-        writeWord(memoryBytes, word * 4, value);
+        if ((value >>> 0) !== 0) {
+          memoryWords.set(word, value >>> 0);
+        } else {
+          memoryWords.delete(word);
+        }
       }
       continue;
     }
@@ -98,9 +129,13 @@ export function createMemoryFromRules(rules: MemoryRuleConfig[]): Uint8Array {
       const value = rule.useFormula
         ? evaluateByteFormula(rule.formulaText || "0", address)
         : parseSignedOrUnsigned32(rule.valueText || "0", "Value");
-      memoryBytes[address] = value & 0xff;
+      const prevByte = readByte(memoryWords, address);
+      const nextByte = value & 0xff;
+      if (prevByte !== nextByte) {
+        writeByte(memoryWords, address, nextByte);
+      }
     }
   }
 
-  return memoryBytes;
+  return memoryWords;
 }

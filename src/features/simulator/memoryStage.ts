@@ -3,11 +3,13 @@ import type { ParsedInstruction } from "@/features/compiler/types";
 import { parseRegisterValue } from "@/features/statePanels/registerEditorModel";
 import { parseImmediate } from "./parse";
 import { readWord, writeWord } from "./memoryRuntime";
-import type { StageEffect } from "./types";
+import type { MemoryWordDelta, SparseMemoryWords, StageEffect } from "./types";
 
 type MemoryStageResult = {
-  memoryBytes: Uint8Array;
+  memoryWords: SparseMemoryWords;
   effect: StageEffect | null;
+  changedMemoryWords: number[];
+  deltas: MemoryWordDelta[];
 };
 
 const REGISTER_ALIAS_BY_NUMBER: Record<number, string> = {
@@ -67,10 +69,10 @@ function parseMemoryOperand(token: string): { offset: number; base: number } {
 export function runMemoryStage(
   instruction: ParsedInstruction | null,
   registerValues: Record<string, string>,
-  memoryBytes: Uint8Array,
+  memoryWords: SparseMemoryWords,
 ): MemoryStageResult {
   if (!instruction) {
-    return { memoryBytes, effect: null };
+    return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
   }
 
   const { mnemonic, operands } = instruction;
@@ -78,41 +80,60 @@ export function runMemoryStage(
   try {
     if (mnemonic === "sw") {
       if (operands.length !== 2) {
-        return { memoryBytes, effect: null };
+        return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
       }
 
       const rt = parseRegister(operands[0]);
       const { offset, base } = parseMemoryOperand(operands[1]);
       const address = (getRegisterValue(registerValues, base) + offset) >>> 0;
-      if (address % 4 !== 0 || address + 3 >= memoryBytes.length) {
-        return { memoryBytes, effect: null };
+      if (address % 4 !== 0) {
+        return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
       }
 
-      const nextMemory = memoryBytes.slice();
-      writeWord(nextMemory, address, getRegisterValue(registerValues, rt));
-      return { memoryBytes: nextMemory, effect: null };
+      const currentValue = readWord(memoryWords, address);
+      const nextValue = getRegisterValue(registerValues, rt);
+      if (currentValue === nextValue) {
+        return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
+      }
+
+      const nextMemory = new Map(memoryWords);
+      writeWord(nextMemory, address, nextValue);
+      return {
+        memoryWords: nextMemory,
+        effect: null,
+        changedMemoryWords: [address / 4],
+        deltas: [
+          {
+            wordIndex: address / 4,
+            previousValue: currentValue,
+            nextValue,
+          },
+        ],
+      };
     }
 
     if (mnemonic === "lw") {
       if (operands.length !== 2) {
-        return { memoryBytes, effect: null };
+        return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
       }
 
       const rt = parseRegister(operands[0]);
       const { offset, base } = parseMemoryOperand(operands[1]);
       const address = (getRegisterValue(registerValues, base) + offset) >>> 0;
-      if (address % 4 !== 0 || address + 3 >= memoryBytes.length) {
-        return { memoryBytes, effect: null };
+      if (address % 4 !== 0) {
+        return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
       }
 
       return {
-        memoryBytes,
+        memoryWords,
         effect: {
           wbWrite: {
             registerNumber: rt,
-            value: readWord(memoryBytes, address),
+            value: readWord(memoryWords, address),
           },
         },
+        changedMemoryWords: [],
+        deltas: [],
       };
     }
   } catch (error) {
@@ -120,5 +141,5 @@ export function runMemoryStage(
     console.warn(`[Pipeline] MEM execution skipped for "${instruction.source}": ${message}`);
   }
 
-  return { memoryBytes, effect: null };
+  return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
 }
