@@ -137,6 +137,8 @@ export default function PipelineCanvas({
 
     const targetById = new Map<string, SVGPathElement>();
 
+    const priorityHitPaths: SVGPathElement[] = [];
+
     sourcePaths.forEach((path) => {
       const pathId = path.id;
       const isControl = pathId.startsWith("ctrl_");
@@ -153,7 +155,12 @@ export default function PipelineCanvas({
       hitPath.setAttribute("d", dValue);
       hitPath.setAttribute("class", "cpuHitPath");
       hitPath.setAttribute("data-target-id", pathId);
-      hitGroup.appendChild(hitPath);
+      if (pathId === "w_signext_32bit_imm_to_idex") {
+        hitPath.setAttribute("stroke-width", "12");
+        priorityHitPaths.push(hitPath);
+      } else {
+        hitGroup.appendChild(hitPath);
+      }
 
       const handleEnter = () => {
         path.classList.add("isHovered");
@@ -169,6 +176,10 @@ export default function PipelineCanvas({
         hitPath.removeEventListener("pointerenter", handleEnter);
         hitPath.removeEventListener("pointerleave", handleLeave);
       });
+    });
+
+    priorityHitPaths.forEach((hitPath) => {
+      hitGroup.appendChild(hitPath);
     });
 
     svg.appendChild(hitGroup);
