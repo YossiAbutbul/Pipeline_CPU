@@ -59,7 +59,7 @@
   padding: 0 var(--space-1);
   border: var(--border-1) solid var(--border);
   border-radius: var(--radius);
-  background: color-mix(in oklab, var(--surface-2) 78%, transparent);
+  background: var(--surface-2);
   color: var(--text);
   font-size: var(--font-size-sm);
   padding-left: var(--space-2);
@@ -74,7 +74,8 @@
 
 .initialPcInput:focus-visible {
   outline: none;
-  box-shadow: none;
+  border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent);
 }
 
 .programFooter {

@@ -13,6 +13,7 @@ type Props = {
   onRun: () => void;
   initialPc: string;
   onInitialPcChange: (value: string) => void;
+  onResetPersistedData: () => void;
 };
 
 export default function ProgramEditor({
@@ -22,6 +23,7 @@ export default function ProgramEditor({
   onRun,
   initialPc,
   onInitialPcChange,
+  onResetPersistedData,
 }: Props) {
   const { themeMode } = useTheme();
 
@@ -37,6 +39,11 @@ export default function ProgramEditor({
       toolbar={
         <>
           <Button size="sm">Load</Button>
+          {import.meta.env.DEV && (
+            <Button size="sm" variant="ghost" onClick={onResetPersistedData}>
+              Reset Dbug
+            </Button>
+          )}
         </>
       }
     >
