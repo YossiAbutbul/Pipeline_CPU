@@ -87,9 +87,8 @@
   display: block;
 }
 
-.diagramContent svg path[id^="w_"],
-.diagramContent svg path[id^="ctrl_"] {
-  cursor: pointer;
+.diagramContent svg .cpuPath {
+  pointer-events: none;
   stroke-width: 2.5px;
   transition:
     stroke 120ms ease,
@@ -98,18 +97,26 @@
     filter 120ms ease;
 }
 
-.diagramContent svg path[id^="w_"]:hover {
-  stroke: color-mix(in oklab, #f5c542 82%, #fff2b3) !important;
-  stroke-width: 3px !important;
-  fill: color-mix(in oklab, #f5c542 82%, #fff2b3) !important;
-  filter: drop-shadow(0 0 5px color-mix(in oklab, #f5c542 58%, transparent));
+.diagramContent svg .cpuHitPath {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 8px;
+  pointer-events: stroke;
+  cursor: pointer;
 }
 
-.diagramContent svg path[id^="ctrl_"]:hover {
-  stroke: color-mix(in oklab, var(--accent) 86%, #9edcff) !important;
+.diagramContent svg .cpuPath.cpuPathData.isHovered {
+  stroke: var(--dp) !important;
   stroke-width: 3px !important;
-  fill: color-mix(in oklab, var(--accent) 84%, #9edcff) !important;
-  filter: drop-shadow(0 0 5px color-mix(in oklab, var(--accent) 62%, transparent));
+  paint-order: stroke fill;
+  filter: drop-shadow(0 0 4px color-mix(in oklab, var(--dp) 56%, transparent));
+}
+
+.diagramContent svg .cpuPath.cpuPathControl.isHovered {
+  stroke: var(--ctrl) !important;
+  stroke-width: 3px !important;
+  paint-order: stroke fill;
+  filter: drop-shadow(0 0 4px color-mix(in oklab, var(--ctrl) 56%, transparent));
 }
 
 .diagramViewport.canDrag {

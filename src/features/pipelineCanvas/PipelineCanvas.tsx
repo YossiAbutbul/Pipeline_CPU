@@ -32,6 +32,7 @@ export default function PipelineCanvas({
   const [zoom, setZoom] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const viewportRef = useRef<HTMLDivElement | null>(null);
+  const diagramRef = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef({
     startX: 0,
     startY: 0,
@@ -112,6 +113,75 @@ export default function PipelineCanvas({
     };
   }, [isDragging]);
 
+  useEffect(() => {
+    const diagramElement = diagramRef.current;
+    if (!diagramElement) {
+      return;
+    }
+
+    const svg = diagramElement.querySelector("svg");
+    if (!svg) {
+      return;
+    }
+
+    const sourcePaths = Array.from(
+      svg.querySelectorAll<SVGPathElement>('path[id^="w_"], path[id^="ctrl_"]'),
+    );
+    if (!sourcePaths.length) {
+      return;
+    }
+
+    const cleanupFns: Array<() => void> = [];
+    const hitGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    hitGroup.setAttribute("data-role", "hover-hit-areas");
+
+    const targetById = new Map<string, SVGPathElement>();
+
+    sourcePaths.forEach((path) => {
+      const pathId = path.id;
+      const isControl = pathId.startsWith("ctrl_");
+      path.classList.add("cpuPath", isControl ? "cpuPathControl" : "cpuPathData");
+      path.classList.remove("isHovered");
+      targetById.set(pathId, path);
+
+      const dValue = path.getAttribute("d");
+      if (!dValue) {
+        return;
+      }
+
+      const hitPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      hitPath.setAttribute("d", dValue);
+      hitPath.setAttribute("class", "cpuHitPath");
+      hitPath.setAttribute("data-target-id", pathId);
+      hitGroup.appendChild(hitPath);
+
+      const handleEnter = () => {
+        path.classList.add("isHovered");
+      };
+
+      const handleLeave = () => {
+        path.classList.remove("isHovered");
+      };
+
+      hitPath.addEventListener("pointerenter", handleEnter);
+      hitPath.addEventListener("pointerleave", handleLeave);
+      cleanupFns.push(() => {
+        hitPath.removeEventListener("pointerenter", handleEnter);
+        hitPath.removeEventListener("pointerleave", handleLeave);
+      });
+    });
+
+    svg.appendChild(hitGroup);
+
+    return () => {
+      cleanupFns.forEach((cleanup) => cleanup());
+      hitGroup.remove();
+      targetById.forEach((path) => {
+        path.classList.remove("cpuPath", "cpuPathControl", "cpuPathData", "isHovered");
+      });
+    };
+  }, []);
+
   return (
     <Panel title="5 Stages Pipeline CPU Diagram" headerSize="xl">
       <div className="pipelineCanvasLayout">
@@ -181,7 +251,7 @@ export default function PipelineCanvas({
           onMouseDown={handleDragStart}
           onMouseUp={handleDragEnd}
         >
-          <div className="diagramContent" style={{ width: `${90 * zoom}%` }}>
+          <div ref={diagramRef} className="diagramContent" style={{ width: `${90 * zoom}%` }}>
             <CpuDiagram style={{ width: "100%", height: "auto" }} />
           </div>
         </div>
