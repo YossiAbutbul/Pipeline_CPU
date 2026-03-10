@@ -59,13 +59,12 @@
 .registerFormulaInput:focus-visible,
 .registerValueInputEditable:focus-visible {
   outline: none;
-  border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
-  box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent);
+  box-shadow: none;
 }
 
 .registerValueInputEditable {
   border: var(--border-1) solid var(--border);
-  background: var(--surface-2);
+  background: var(--register-row-bg, var(--surface-2));
 }
 
 .registerFormulaActions {
@@ -162,7 +161,8 @@
 }
 
 .registerRow {
-  background: var(--surface-2);
+  --register-row-bg: var(--surface-2);
+  background: var(--register-row-bg);
   border: var(--border-1) solid var(--border);
   border-radius: calc(var(--radius) - 4px);
   padding: var(--space-1) var(--space-2);
@@ -177,8 +177,9 @@
 }
 
 .registerRowChanged {
+  --register-row-bg: color-mix(in oklab, var(--accent) 18%, var(--surface-2));
   border-color: color-mix(in oklab, var(--accent) 65%, var(--border));
-  background: color-mix(in oklab, var(--accent) 18%, var(--surface-2));
+  background: var(--register-row-bg);
   box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 38%, transparent);
 }
 
