@@ -12,7 +12,18 @@ type PipelineSlots = {
   WB: string | null;
 };
 
-type HoverSignalKey = "pc" | "pcPlus4" | "constant4" | "instructionWord" | "rsValue" | "rtValue";
+type HoverSignalKey =
+  | "pc"
+  | "pcPlus4"
+  | "constant4"
+  | "instructionWord"
+  | "rsValue"
+  | "rtValue"
+  | "imm16Value"
+  | "signExtendedImmValue"
+  | "aluInputA"
+  | "aluInputB"
+  | "aluResult";
 
 type HoveredSignalValues = Partial<Record<HoverSignalKey, string>>;
 
@@ -43,6 +54,15 @@ const PATH_SIGNAL_MAP: Partial<Record<string, { key: HoverSignalKey; label: stri
   w_regfile_rs2_to_cmp_eq: { key: "rsValue", label: "Read Data 1" },
   w_regfile_rt2_to_idex: { key: "rtValue", label: "Read Data 2" },
   w_regfile_rt2_to_cmp_eq: { key: "rtValue", label: "Read Data 2" },
+  w_16bit_imm_to_signext: { key: "imm16Value", label: "Immediate[15:0]" },
+  w_signext_32bit_imm_to_idex: { key: "signExtendedImmValue", label: "Sign-Extended Immediate" },
+  w_idex_rs3_to_mux_fwd_a: { key: "aluInputA", label: "ALU Input A" },
+  w_mux_fwd_a_rs_to_alu_a: { key: "aluInputA", label: "ALU Input A" },
+  w_idex_rt3_to_mux_fwd_b: { key: "aluInputB", label: "ALU Input B" },
+  w_mux_fwd_b_to_mux_alusrc: { key: "aluInputB", label: "ALU Input B" },
+  w_idex_32bit_imm_to_mux_alusrc: { key: "aluInputB", label: "ALU Input B" },
+  w_mux_alusrc_to_alu_b: { key: "aluInputB", label: "ALU Input B" },
+  w_alu_out_to_exmem: { key: "aluResult", label: "ALU Result" },
 };
 
 export default function PipelineCanvas({
