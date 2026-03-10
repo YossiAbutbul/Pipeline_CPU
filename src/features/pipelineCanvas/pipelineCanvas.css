@@ -87,6 +87,38 @@
   display: block;
 }
 
+.diagramContent svg .cpuPath {
+  pointer-events: none;
+  stroke-width: 2.5px;
+  transition:
+    stroke 120ms ease,
+    stroke-width 120ms ease,
+    fill 120ms ease,
+    filter 120ms ease;
+}
+
+.diagramContent svg .cpuHitPath {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 8px;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+.diagramContent svg .cpuPath.cpuPathData.isHovered {
+  stroke: var(--dp) !important;
+  stroke-width: 3px !important;
+  paint-order: stroke fill;
+  filter: drop-shadow(0 0 4px color-mix(in oklab, var(--dp) 56%, transparent));
+}
+
+.diagramContent svg .cpuPath.cpuPathControl.isHovered {
+  stroke: var(--ctrl) !important;
+  stroke-width: 3px !important;
+  paint-order: stroke fill;
+  filter: drop-shadow(0 0 4px color-mix(in oklab, var(--ctrl) 56%, transparent));
+}
+
 .diagramViewport.canDrag {
   cursor: grab;
   user-select: none;
