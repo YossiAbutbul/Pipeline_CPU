@@ -9,7 +9,10 @@ export type HoverSignalKey =
   | "signExtendedImmValue"
   | "aluInputA"
   | "aluInputB"
-  | "aluResult";
+  | "aluResult"
+  | "memoryAddress"
+  | "memoryWriteData"
+  | "memoryReadData";
 
 export type HoveredSignalValues = Partial<Record<HoverSignalKey, string>>;
 
@@ -32,4 +35,7 @@ export const PATH_SIGNAL_MAP: Partial<Record<string, { key: HoverSignalKey; labe
   w_idex_32bit_imm_to_mux_alusrc: { key: "aluInputB", label: "ALU Input B" },
   w_mux_alusrc_to_alu_b: { key: "aluInputB", label: "ALU Input B" },
   w_alu_out_to_exmem: { key: "aluResult", label: "ALU Result" },
+  w_exmem_alu_out4_to_dmem: { key: "memoryAddress", label: "Memory Address" },
+  w_fwd_b_exmem_to_dmem: { key: "memoryWriteData", label: "Memory Write Data" },
+  w_dmem_readdata_to_mux_memtoreg: { key: "memoryReadData", label: "Memory Read Data" },
 };

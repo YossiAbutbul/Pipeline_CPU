@@ -86,8 +86,9 @@ export function usePipelineRunSession({
       pipelineInstructionIndices,
       encodedInstructionHexByPc,
       registerValues,
+      memoryWords,
     });
-  }, [encodedInstructionHexByPc, instructions, pipelineInstructionIndices, registerValues]);
+  }, [encodedInstructionHexByPc, instructions, memoryWords, pipelineInstructionIndices, registerValues]);
 
   const resetPipeline = () => {
     setPipeline(EMPTY_PIPELINE);

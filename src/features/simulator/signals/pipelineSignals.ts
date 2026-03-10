@@ -5,6 +5,8 @@ import { REG_INFO } from "@/monaco/mips/mipsData";
 import { parseRegisterValue, toHex32 } from "@/features/statePanels/registerEditorModel";
 import { parseImmediate } from "../core/parse";
 import type { HoveredSignalValues } from "@/features/pipelineCanvas/pipelineHoverMap";
+import { readWord } from "../runtime/memoryRuntime";
+import type { SparseMemoryWords } from "../core/types";
 
 export type PipelineSignalValues = HoveredSignalValues;
 
@@ -260,22 +262,89 @@ function getExSignalValues(
   return {};
 }
 
+function getMemSignalValues(
+  instruction: ParsedInstruction | null,
+  values: Record<string, string>,
+  memoryWords: SparseMemoryWords,
+): {
+  memoryAddress?: string;
+  memoryWriteData?: string;
+  memoryReadData?: string;
+} {
+  if (!instruction) {
+    return {};
+  }
+
+  const { mnemonic, operands } = instruction;
+  const latchedAluResult = getExSignalValues(instruction, values).aluResult;
+  const latchedAddressValue = latchedAluResult ? Number.parseInt(latchedAluResult, 16) >>> 0 : null;
+
+  try {
+    if (["lw", "sw"].includes(mnemonic) && operands.length === 2) {
+      const match = operands[1].trim().match(/^([-+]?0x[0-9a-fA-F]+|[-+]?\d+)\(([^)]+)\)$/);
+      if (!match) {
+        return { memoryAddress: latchedAluResult };
+      }
+
+      const offset = parseImmediate(match[1]);
+      const baseValue = getRegisterNumericValue(values, parseRegister(match[2].trim()));
+      if (baseValue === null) {
+        return { memoryAddress: latchedAluResult };
+      }
+
+      const signExtendedOffset = ((offset & 0xffff) << 16 >> 16) >>> 0;
+      const address = (baseValue + signExtendedOffset) >>> 0;
+      if (address % 4 !== 0) {
+        return { memoryAddress: latchedAluResult };
+      }
+
+      if (mnemonic === "sw") {
+        const rtValue = getRegisterNumericValue(values, parseRegister(operands[0]));
+        return {
+          memoryAddress: toHex32(address) ?? latchedAluResult,
+          memoryWriteData: rtValue === null ? undefined : toHex32(rtValue),
+          memoryReadData: toHex32(readWord(memoryWords, address)),
+        };
+      }
+
+      return {
+        memoryAddress: toHex32(address) ?? latchedAluResult,
+        memoryReadData: toHex32(readWord(memoryWords, address)),
+      };
+    }
+  } catch {
+    return {
+      memoryAddress: latchedAluResult,
+      memoryReadData: latchedAddressValue === null ? undefined : toHex32(readWord(memoryWords, latchedAddressValue)),
+    };
+  }
+
+  return {
+    memoryAddress: latchedAluResult,
+    memoryReadData: latchedAddressValue === null ? undefined : toHex32(readWord(memoryWords, latchedAddressValue)),
+  };
+}
+
 export function buildPipelineSignalValues(args: {
   instructions: ParsedInstruction[];
   pipelineInstructionIndices: PipelineInstructionSlots;
   encodedInstructionHexByPc: Record<number, string>;
   registerValues: Record<string, string>;
+  memoryWords: SparseMemoryWords;
 }): PipelineSignalValues {
-  const { instructions, pipelineInstructionIndices, encodedInstructionHexByPc, registerValues } = args;
+  const { instructions, pipelineInstructionIndices, encodedInstructionHexByPc, registerValues, memoryWords } = args;
   const ifInstructionIndex = pipelineInstructionIndices.IF;
   const idInstructionIndex = pipelineInstructionIndices.ID;
   const exInstructionIndex = pipelineInstructionIndices.EX;
+  const memInstructionIndex = pipelineInstructionIndices.MEM;
   const ifInstruction = ifInstructionIndex === null ? null : instructions[ifInstructionIndex];
   const idInstruction = idInstructionIndex === null ? null : instructions[idInstructionIndex];
   const exInstruction = exInstructionIndex === null ? null : instructions[exInstructionIndex];
+  const memInstruction = memInstructionIndex === null ? null : instructions[memInstructionIndex];
   const [rsNumber, rtNumber] = getIdReadRegisterNumbers(idInstruction);
   const immediateValues = getIdImmediateValues(idInstruction);
   const exSignalValues = getExSignalValues(exInstruction, registerValues);
+  const memSignalValues = getMemSignalValues(memInstruction, registerValues, memoryWords);
 
   return {
     pc: ifInstruction ? `0x${(ifInstruction.pc >>> 0).toString(16).toUpperCase().padStart(8, "0")}` : undefined,
@@ -289,5 +358,8 @@ export function buildPipelineSignalValues(args: {
     aluInputA: exSignalValues.aluInputA,
     aluInputB: exSignalValues.aluInputB,
     aluResult: exSignalValues.aluResult,
+    memoryAddress: memSignalValues.memoryAddress,
+    memoryWriteData: memSignalValues.memoryWriteData,
+    memoryReadData: memSignalValues.memoryReadData,
   };
 }
