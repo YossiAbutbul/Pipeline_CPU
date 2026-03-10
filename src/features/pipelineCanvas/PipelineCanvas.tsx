@@ -12,7 +12,7 @@ type PipelineSlots = {
   WB: string | null;
 };
 
-type HoverSignalKey = "pc" | "pcPlus4" | "constant4" | "instructionWord";
+type HoverSignalKey = "pc" | "pcPlus4" | "constant4" | "instructionWord" | "rsValue" | "rtValue";
 
 type HoveredSignalValues = Partial<Record<HoverSignalKey, string>>;
 
@@ -39,6 +39,10 @@ const PATH_SIGNAL_MAP: Partial<Record<string, { key: HoverSignalKey; label: stri
   w_4_to_adder_pc4: { key: "constant4", label: "Constant 4" },
   w_adder_pc4_to_ifid: { key: "pcPlus4", label: "PC + 4" },
   w_imem_to_ifid: { key: "instructionWord", label: "Instruction" },
+  w_regfile_rs2_to_idex: { key: "rsValue", label: "Read Data 1" },
+  w_regfile_rs2_to_cmp_eq: { key: "rsValue", label: "Read Data 1" },
+  w_regfile_rt2_to_idex: { key: "rtValue", label: "Read Data 2" },
+  w_regfile_rt2_to_cmp_eq: { key: "rtValue", label: "Read Data 2" },
 };
 
 export default function PipelineCanvas({

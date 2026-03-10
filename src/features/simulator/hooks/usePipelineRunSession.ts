@@ -1,7 +1,10 @@
 import { compileAndLog, compileProgram } from "@/features/compiler";
+import { parseRegister } from "@/features/compiler/registers";
 import { parseProgram } from "@/features/compiler/parser";
+import { REG_INFO } from "@/monaco/mips/mipsData";
 import { useMemo, useState } from "react";
 import type { MemoryRuleConfig } from "@/app/store/appStore";
+import { parseRegisterValue, toHex32 } from "@/features/statePanels/registerEditorModel";
 import { createMemoryFromRules } from "../runtime/memoryRuntime";
 import { parseInitialPc } from "../core/parse";
 import { stepPipelineForward } from "../stages/pipelineStep";
@@ -22,7 +25,95 @@ type UsePipelineRunSessionArgs = {
   onRegisterValuesChange: (values: Record<string, string>) => void;
 };
 
-export type PipelineSignalValues = Partial<Record<"pc" | "pcPlus4" | "constant4" | "instructionWord", string>>;
+export type PipelineSignalValues = Partial<
+  Record<"pc" | "pcPlus4" | "constant4" | "instructionWord" | "rsValue" | "rtValue", string>
+>;
+
+const REGISTER_ALIAS_BY_NUMBER = Object.entries(REG_INFO).reduce<Record<number, string>>((acc, [alias, info]) => {
+  acc[info.num] = alias;
+  return acc;
+}, {});
+
+function parseMemoryBaseRegister(operand: string): number | null {
+  const match = operand.trim().match(/^([-+]?0x[0-9a-fA-F]+|[-+]?\d+)\(([^)]+)\)$/);
+  if (!match) {
+    return null;
+  }
+  return parseRegister(match[2].trim());
+}
+
+function getIdReadRegisterNumbers(instruction: { mnemonic: string; operands: string[] } | null): [number | null, number | null] {
+  if (!instruction) {
+    return [null, null];
+  }
+
+  const { mnemonic, operands } = instruction;
+
+  try {
+    if (["add", "addu", "sub", "subu", "and", "or", "xor", "nor", "slt", "sltu"].includes(mnemonic) && operands.length === 3) {
+      return [parseRegister(operands[1]), parseRegister(operands[2])];
+    }
+    if (["sllv", "srlv", "srav"].includes(mnemonic) && operands.length === 3) {
+      return [parseRegister(operands[2]), parseRegister(operands[1])];
+    }
+    if (["sll", "srl", "sra"].includes(mnemonic) && operands.length === 3) {
+      return [null, parseRegister(operands[1])];
+    }
+    if (["addi", "addiu", "andi", "ori", "xori", "slti", "sltiu"].includes(mnemonic) && operands.length === 3) {
+      return [parseRegister(operands[1]), null];
+    }
+    if (mnemonic === "move" && operands.length === 2) {
+      return [parseRegister(operands[1]), null];
+    }
+    if (["lw", "lb", "lbu", "lh", "lhu"].includes(mnemonic) && operands.length === 2) {
+      return [parseMemoryBaseRegister(operands[1]), null];
+    }
+    if (["sw", "sb", "sh"].includes(mnemonic) && operands.length === 2) {
+      return [parseMemoryBaseRegister(operands[1]), parseRegister(operands[0])];
+    }
+    if ((mnemonic === "beq" || mnemonic === "bne") && operands.length === 3) {
+      return [parseRegister(operands[0]), parseRegister(operands[1])];
+    }
+    if (["blez", "bgtz", "bltz", "bgez", "jr"].includes(mnemonic) && operands.length >= 1) {
+      return [parseRegister(operands[0]), null];
+    }
+    if (mnemonic === "jalr") {
+      if (operands.length === 1) {
+        return [parseRegister(operands[0]), null];
+      }
+      if (operands.length === 2) {
+        return [parseRegister(operands[1]), null];
+      }
+    }
+    if (["mult", "multu", "div", "divu"].includes(mnemonic) && operands.length === 2) {
+      return [parseRegister(operands[0]), parseRegister(operands[1])];
+    }
+    if (["mthi", "mtlo"].includes(mnemonic) && operands.length === 1) {
+      return [parseRegister(operands[0]), null];
+    }
+  } catch {
+    return [null, null];
+  }
+
+  return [null, null];
+}
+
+function getRegisterHexValue(values: Record<string, string>, registerNumber: number | null): string | undefined {
+  if (registerNumber === null) {
+    return undefined;
+  }
+
+  const alias = REGISTER_ALIAS_BY_NUMBER[registerNumber];
+  if (!alias) {
+    return undefined;
+  }
+
+  try {
+    return toHex32(parseRegisterValue(values[alias] ?? "0"));
+  } catch {
+    return undefined;
+  }
+}
 
 export function usePipelineRunSession({
   program,
@@ -83,23 +174,20 @@ export function usePipelineRunSession({
   const canStepBackward = runSessionActive && history.length > 0;
   const hoveredSignalValues = useMemo<PipelineSignalValues>(() => {
     const ifInstructionIndex = pipelineInstructionIndices.IF;
-    if (ifInstructionIndex === null) {
-      return {};
-    }
+    const idInstructionIndex = pipelineInstructionIndices.ID;
+    const ifInstruction = ifInstructionIndex === null ? null : instructions[ifInstructionIndex];
+    const idInstruction = idInstructionIndex === null ? null : instructions[idInstructionIndex];
+    const [rsNumber, rtNumber] = getIdReadRegisterNumbers(idInstruction);
 
-    const ifInstruction = instructions[ifInstructionIndex];
-    if (!ifInstruction) {
-      return {};
-    }
-
-    const pc = ifInstruction.pc >>> 0;
     return {
-      pc: `0x${pc.toString(16).toUpperCase().padStart(8, "0")}`,
-      pcPlus4: `0x${((pc + 4) >>> 0).toString(16).toUpperCase().padStart(8, "0")}`,
-      constant4: "0x00000004",
-      instructionWord: encodedInstructionHexByPc[pc] ?? undefined,
+      pc: ifInstruction ? `0x${(ifInstruction.pc >>> 0).toString(16).toUpperCase().padStart(8, "0")}` : undefined,
+      pcPlus4: ifInstruction ? `0x${(((ifInstruction.pc >>> 0) + 4) >>> 0).toString(16).toUpperCase().padStart(8, "0")}` : undefined,
+      constant4: ifInstruction ? "0x00000004" : undefined,
+      instructionWord: ifInstruction ? encodedInstructionHexByPc[ifInstruction.pc >>> 0] : undefined,
+      rsValue: getRegisterHexValue(registerValues, rsNumber),
+      rtValue: getRegisterHexValue(registerValues, rtNumber),
     };
-  }, [encodedInstructionHexByPc, instructions, pipelineInstructionIndices.IF]);
+  }, [encodedInstructionHexByPc, instructions, pipelineInstructionIndices.ID, pipelineInstructionIndices.IF, registerValues]);
 
   const resetPipeline = () => {
     setPipeline(EMPTY_PIPELINE);
