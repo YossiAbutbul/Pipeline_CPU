@@ -24,6 +24,7 @@ export default function App() {
     run,
     stepForward,
     stepBackward,
+    hoveredSignalValues,
   } = usePipelineRunSession({
     program,
     initialPc,
@@ -65,6 +66,7 @@ export default function App() {
       <main className="centerPane">
         <PipelineCanvas
           pipeline={pipeline}
+          hoveredSignalValues={hoveredSignalValues}
           onStepForward={stepForward}
           onStepBackward={stepBackward}
           canStepBackward={canStepBackward}

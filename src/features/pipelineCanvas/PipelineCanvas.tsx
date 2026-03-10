@@ -1,4 +1,4 @@
-import { Button, Panel } from "@/ui/components";
+import { Button, Panel, Tooltip } from "@/ui/components";
 import CpuDiagram from "@/assets/cpu/mips_cpu.svg?react";
 import { FastForward, Rewind, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -12,8 +12,20 @@ type PipelineSlots = {
   WB: string | null;
 };
 
+type HoverSignalKey = "pc" | "pcPlus4" | "constant4" | "instructionWord";
+
+type HoveredSignalValues = Partial<Record<HoverSignalKey, string>>;
+
+type HoverTooltipState = {
+  label: string;
+  value: string;
+  left: number;
+  top: number;
+} | null;
+
 type Props = {
   pipeline: PipelineSlots;
+  hoveredSignalValues: HoveredSignalValues;
   onStepForward: () => void;
   onStepBackward: () => void;
   canStepBackward: boolean;
@@ -21,9 +33,17 @@ type Props = {
 };
 
 const STAGE_ORDER: Array<keyof PipelineSlots> = ["IF", "ID", "EX", "MEM", "WB"];
+const PATH_SIGNAL_MAP: Partial<Record<string, { key: HoverSignalKey; label: string }>> = {
+  w_pc_to_imem: { key: "pc", label: "PC" },
+  w_pc_to_adder_pc4: { key: "pc", label: "PC" },
+  w_4_to_adder_pc4: { key: "constant4", label: "Constant 4" },
+  w_adder_pc4_to_ifid: { key: "pcPlus4", label: "PC + 4" },
+  w_imem_to_ifid: { key: "instructionWord", label: "Instruction" },
+};
 
 export default function PipelineCanvas({
   pipeline,
+  hoveredSignalValues,
   onStepForward,
   onStepBackward,
   canStepBackward,
@@ -31,6 +51,7 @@ export default function PipelineCanvas({
 }: Props) {
   const [zoom, setZoom] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
+  const [hoverTooltip, setHoverTooltip] = useState<HoverTooltipState>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const diagramRef = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef({
@@ -166,14 +187,44 @@ export default function PipelineCanvas({
         path.classList.add("isHovered");
       };
 
+      const handleMove = (event: PointerEvent) => {
+        const signal = PATH_SIGNAL_MAP[pathId];
+        const diagramBounds = diagramElement.getBoundingClientRect();
+        if (!signal) {
+          setHoverTooltip(null);
+          return;
+        }
+
+        const value = hoveredSignalValues[signal.key];
+        if (!value) {
+          setHoverTooltip(null);
+          return;
+        }
+
+        setHoverTooltip({
+          label: signal.label,
+          value,
+          left: event.clientX - diagramBounds.left,
+          top: event.clientY - diagramBounds.top,
+        });
+      };
+
       const handleLeave = () => {
         path.classList.remove("isHovered");
+        setHoverTooltip((current) => {
+          if (!current) {
+            return current;
+          }
+          return null;
+        });
       };
 
       hitPath.addEventListener("pointerenter", handleEnter);
+      hitPath.addEventListener("pointermove", handleMove);
       hitPath.addEventListener("pointerleave", handleLeave);
       cleanupFns.push(() => {
         hitPath.removeEventListener("pointerenter", handleEnter);
+        hitPath.removeEventListener("pointermove", handleMove);
         hitPath.removeEventListener("pointerleave", handleLeave);
       });
     });
@@ -190,8 +241,9 @@ export default function PipelineCanvas({
       targetById.forEach((path) => {
         path.classList.remove("cpuPath", "cpuPathControl", "cpuPathData", "isHovered");
       });
+      setHoverTooltip(null);
     };
-  }, []);
+  }, [hoveredSignalValues]);
 
   return (
     <Panel title="5 Stages Pipeline CPU Diagram" headerSize="xl">
@@ -264,6 +316,25 @@ export default function PipelineCanvas({
         >
           <div ref={diagramRef} className="diagramContent" style={{ width: `${90 * zoom}%` }}>
             <CpuDiagram style={{ width: "100%", height: "auto" }} />
+            {hoverTooltip && (
+              <div
+                className="pipelineHoverTooltip"
+                style={{ left: `${hoverTooltip.left}px`, top: `${hoverTooltip.top}px` }}
+              >
+                <Tooltip
+                  showTrigger={false}
+                  open
+                  align="center"
+                  ariaLabel={`${hoverTooltip.label} value`}
+                  content={
+                    <div className="pipelineTooltipBody">
+                      <div className="pipelineTooltipLabel">{hoverTooltip.label}</div>
+                      <div className="pipelineTooltipValue">{hoverTooltip.value}</div>
+                    </div>
+                  }
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

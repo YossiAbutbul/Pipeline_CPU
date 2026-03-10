@@ -81,6 +81,7 @@
 
 .diagramContent {
   margin: 0 auto;
+  position: relative;
 }
 
 .diagramContent svg {
@@ -127,6 +128,38 @@
 .diagramViewport.canDrag.isDragging {
   cursor: grabbing;
   user-select: none;
+}
+
+.pipelineHoverTooltip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.pipelineHoverTooltip .tooltipContent {
+  min-width: 132px;
+}
+
+.pipelineTooltipBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pipelineTooltipLabel {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.pipelineTooltipValue {
+  color: var(--text);
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+  font-size: 12px;
 }
 
 @media (max-width: 980px) {

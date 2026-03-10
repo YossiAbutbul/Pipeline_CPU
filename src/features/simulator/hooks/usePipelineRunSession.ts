@@ -1,4 +1,4 @@
-import { compileAndLog } from "@/features/compiler";
+import { compileAndLog, compileProgram } from "@/features/compiler";
 import { parseProgram } from "@/features/compiler/parser";
 import { useMemo, useState } from "react";
 import type { MemoryRuleConfig } from "@/app/store/appStore";
@@ -21,6 +21,8 @@ type UsePipelineRunSessionArgs = {
   registerValues: Record<string, string>;
   onRegisterValuesChange: (values: Record<string, string>) => void;
 };
+
+export type PipelineSignalValues = Partial<Record<"pc" | "pcPlus4" | "constant4" | "instructionWord", string>>;
 
 export function usePipelineRunSession({
   program,
@@ -47,6 +49,26 @@ export function usePipelineRunSession({
       return parseProgram(program);
     }
   }, [initialPc, program]);
+  const encodedInstructionHexByPc = useMemo(() => {
+    try {
+      const parsedInitialPc = parseInitialPc(initialPc);
+      const result = compileProgram(program, { initialPc: parsedInitialPc });
+      return result.encoded.reduce<Record<number, string>>((acc, instruction) => {
+        acc[instruction.pc] = instruction.hex;
+        return acc;
+      }, {});
+    } catch {
+      try {
+        const result = compileProgram(program);
+        return result.encoded.reduce<Record<number, string>>((acc, instruction) => {
+          acc[instruction.pc] = instruction.hex;
+          return acc;
+        }, {});
+      } catch {
+        return {};
+      }
+    }
+  }, [initialPc, program]);
   const instructions = parsedProgram.instructions;
   const pcToInstructionIndex = useMemo(() => {
     const map = new Map<number, number>();
@@ -59,6 +81,25 @@ export function usePipelineRunSession({
   const hasPipelineWork = Object.values(pipelineInstructionIndices).some((value) => value !== null);
   const canStepForward = runSessionActive && (hasInstructionsToInject || hasPipelineWork);
   const canStepBackward = runSessionActive && history.length > 0;
+  const hoveredSignalValues = useMemo<PipelineSignalValues>(() => {
+    const ifInstructionIndex = pipelineInstructionIndices.IF;
+    if (ifInstructionIndex === null) {
+      return {};
+    }
+
+    const ifInstruction = instructions[ifInstructionIndex];
+    if (!ifInstruction) {
+      return {};
+    }
+
+    const pc = ifInstruction.pc >>> 0;
+    return {
+      pc: `0x${pc.toString(16).toUpperCase().padStart(8, "0")}`,
+      pcPlus4: `0x${((pc + 4) >>> 0).toString(16).toUpperCase().padStart(8, "0")}`,
+      constant4: "0x00000004",
+      instructionWord: encodedInstructionHexByPc[pc] ?? undefined,
+    };
+  }, [encodedInstructionHexByPc, instructions, pipelineInstructionIndices.IF]);
 
   const resetPipeline = () => {
     setPipeline(EMPTY_PIPELINE);
@@ -175,5 +216,6 @@ export function usePipelineRunSession({
     run,
     stepForward,
     stepBackward,
+    hoveredSignalValues,
   };
 }
