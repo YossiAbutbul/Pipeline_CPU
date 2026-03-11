@@ -1,0 +1,78 @@
+export type HoverSignalKey =
+  | "pc"
+  | "pcPlus4"
+  | "constant4"
+  | "instructionWord"
+  | "rsValue"
+  | "rtValue"
+  | "imm16Value"
+  | "signExtendedImmValue"
+  | "aluInputA"
+  | "aluInputB"
+  | "aluResult"
+  | "memoryAddress"
+  | "memoryWriteData"
+  | "memoryReadData"
+  | "writeBackValue"
+  | "writeBackDest"
+  | "pcSrcCtrl"
+  | "regDstCtrl"
+  | "aluSrcCtrl"
+  | "memReadCtrl"
+  | "memWriteCtrl"
+  | "memToRegCtrl"
+  | "fwdACtrl"
+  | "fwdBCtrl"
+  | "exSourceAReg"
+  | "exSourceBReg"
+  | "memForwardDest"
+  | "wbForwardDest"
+  | "memForwardValue";
+
+export type HoveredSignalValues = Partial<Record<HoverSignalKey, string>>;
+
+export const PATH_SIGNAL_MAP: Partial<Record<string, { key: HoverSignalKey; label: string }>> = {
+  w_pc_to_imem: { key: "pc", label: "PC" },
+  w_pc_to_adder_pc4: { key: "pc", label: "PC" },
+  w_4_to_adder_pc4: { key: "constant4", label: "Constant 4" },
+  w_adder_pc4_to_ifid: { key: "pcPlus4", label: "PC + 4" },
+  w_imem_to_ifid: { key: "instructionWord", label: "Instruction" },
+  w_regfile_rs2_to_idex: { key: "rsValue", label: "Read Data 1" },
+  w_regfile_rs2_to_cmp_eq: { key: "rsValue", label: "Read Data 1" },
+  w_regfile_rt2_to_idex: { key: "rtValue", label: "Read Data 2" },
+  w_regfile_rt2_to_cmp_eq: { key: "rtValue", label: "Read Data 2" },
+  w_16bit_imm_to_signext: { key: "imm16Value", label: "Immediate[15:0]" },
+  w_signext_32bit_imm_to_idex: { key: "signExtendedImmValue", label: "Sign-Extended Immediate" },
+  w_idex_rs3_to_mux_fwd_a: { key: "aluInputA", label: "ALU Input A" },
+  w_mux_fwd_a_rs_to_alu_a: { key: "aluInputA", label: "ALU Input A" },
+  w_idex_rt3_to_mux_fwd_b: { key: "aluInputB", label: "ALU Input B" },
+  w_mux_fwd_b_to_mux_alusrc: { key: "aluInputB", label: "ALU Input B" },
+  w_idex_32bit_imm_to_mux_alusrc: { key: "aluInputB", label: "ALU Input B" },
+  w_mux_alusrc_to_alu_b: { key: "aluInputB", label: "ALU Input B" },
+  w_alu_out_to_exmem: { key: "aluResult", label: "ALU Result" },
+  w_exmem_alu_out4_to_dmem: { key: "memoryAddress", label: "Memory Address" },
+  w_fwd_b_exmem_to_dmem: { key: "memoryWriteData", label: "Memory Write Data" },
+  w_dmem_readdata_to_mux_memtoreg: { key: "memoryReadData", label: "Memory Read Data" },
+  w_dmem_aluout_to_memwb: { key: "memoryReadData", label: "Memory Read Data" },
+  w_exmem_alu_out_to_memwb: { key: "aluResult", label: "ALU Result" },
+  w_exmem_aluout_to_mux_memtoreg: { key: "aluResult", label: "ALU Result" },
+  w_mem_to_regfile: { key: "writeBackValue", label: "Writeback Value" },
+  w_wb_value_to_mux_fwd_a: { key: "writeBackValue", label: "Writeback Value" },
+  w_mux_memtoreg_to_mux_fwd_b: { key: "writeBackValue", label: "Writeback Value" },
+  w_exmem_regdst4_memwb: { key: "writeBackDest", label: "Writeback Register" },
+  w_dst2_reg_to_regfile: { key: "writeBackDest", label: "Writeback Register" },
+  ctrl_pcsrc: { key: "pcSrcCtrl", label: "PCSrc" },
+  ctrl_regdst: { key: "regDstCtrl", label: "RegDst" },
+  ctrl_alusrc: { key: "aluSrcCtrl", label: "ALUSrc" },
+  ctrl_mem_read: { key: "memReadCtrl", label: "MemRead" },
+  ctrl_mem_write: { key: "memWriteCtrl", label: "MemWrite" },
+  ctrl_memtoreg: { key: "memToRegCtrl", label: "MemToReg" },
+  ctrl_fwd_a: { key: "fwdACtrl", label: "ForwardA" },
+  ctrl_fwd_b: { key: "fwdBCtrl", label: "ForwardB" },
+  w_idex_rs_to_forwarding: { key: "exSourceAReg", label: "EX Source rs" },
+  w_idex_rt_to_forwarding: { key: "exSourceBReg", label: "EX Source rt" },
+  w_exmem_regdst4_to_forwarding: { key: "memForwardDest", label: "MEM Dest Register" },
+  w_memwb_regdst4_to_forwarding: { key: "wbForwardDest", label: "WB Dest Register" },
+  w_exmem_alu_out_to_mux_fwd_a: { key: "memForwardValue", label: "MEM Forward Value" },
+  w_exmem_alu_out4_to_mux_fwd_b: { key: "memForwardValue", label: "MEM Forward Value" },
+};

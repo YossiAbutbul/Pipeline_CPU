@@ -1,9 +1,10 @@
-import { compileAndLog } from "@/features/compiler";
+import { compileAndLog, compileProgram } from "@/features/compiler";
 import { parseProgram } from "@/features/compiler/parser";
 import { useMemo, useState } from "react";
 import type { MemoryRuleConfig } from "@/app/store/appStore";
 import { createMemoryFromRules } from "../runtime/memoryRuntime";
 import { parseInitialPc } from "../core/parse";
+import { buildPipelineSignalValues, type PipelineSignalValues } from "../signals/pipelineSignals";
 import { stepPipelineForward } from "../stages/pipelineStep";
 import { EMPTY_PIPELINE, EMPTY_PIPELINE_EFFECTS, EMPTY_PIPELINE_INDICES } from "../core/state";
 import type {
@@ -47,6 +48,26 @@ export function usePipelineRunSession({
       return parseProgram(program);
     }
   }, [initialPc, program]);
+  const encodedInstructionHexByPc = useMemo(() => {
+    try {
+      const parsedInitialPc = parseInitialPc(initialPc);
+      const result = compileProgram(program, { initialPc: parsedInitialPc });
+      return result.encoded.reduce<Record<number, string>>((acc, instruction) => {
+        acc[instruction.pc] = instruction.hex;
+        return acc;
+      }, {});
+    } catch {
+      try {
+        const result = compileProgram(program);
+        return result.encoded.reduce<Record<number, string>>((acc, instruction) => {
+          acc[instruction.pc] = instruction.hex;
+          return acc;
+        }, {});
+      } catch {
+        return {};
+      }
+    }
+  }, [initialPc, program]);
   const instructions = parsedProgram.instructions;
   const pcToInstructionIndex = useMemo(() => {
     const map = new Map<number, number>();
@@ -59,6 +80,18 @@ export function usePipelineRunSession({
   const hasPipelineWork = Object.values(pipelineInstructionIndices).some((value) => value !== null);
   const canStepForward = runSessionActive && (hasInstructionsToInject || hasPipelineWork);
   const canStepBackward = runSessionActive && history.length > 0;
+  const hoveredSignalValues = useMemo<PipelineSignalValues>(() => {
+    return buildPipelineSignalValues({
+      instructions,
+      pipelineInstructionIndices,
+      pipelineEffects,
+      encodedInstructionHexByPc,
+      registerValues,
+      memoryWords,
+      labels: parsedProgram.labels,
+      pcToInstructionIndex,
+    });
+  }, [encodedInstructionHexByPc, instructions, memoryWords, parsedProgram.labels, pcToInstructionIndex, pipelineEffects, pipelineInstructionIndices, registerValues]);
 
   const resetPipeline = () => {
     setPipeline(EMPTY_PIPELINE);
@@ -175,5 +208,6 @@ export function usePipelineRunSession({
     run,
     stepForward,
     stepBackward,
+    hoveredSignalValues,
   };
 }
