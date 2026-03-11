@@ -72,6 +72,7 @@ export default function App() {
           pipeline={pipeline}
           hoveredSignalValues={hoveredSignalValues}
           clockCycle={clockCycle}
+          showClockCycle={runSessionActive}
           onResetTracking={resetPipeline}
           onStepForward={stepForward}
           onStepBackward={stepBackward}

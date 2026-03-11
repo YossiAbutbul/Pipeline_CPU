@@ -50,10 +50,14 @@
 
 .pipelineTrackerControls {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   gap: var(--space-2);
   margin-bottom: var(--space-3);
+}
+
+.pipelineTrackerControls.hasCycleCounter {
+  justify-content: space-between;
 }
 
 .pipelineTrackerButtonGroup {

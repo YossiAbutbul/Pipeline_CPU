@@ -24,6 +24,7 @@ type Props = {
   pipeline: PipelineSlots;
   hoveredSignalValues: HoveredSignalValues;
   clockCycle: number;
+  showClockCycle: boolean;
   onResetTracking: () => void;
   onStepForward: () => void;
   onStepBackward: () => void;
@@ -40,6 +41,7 @@ export default function PipelineCanvas({
   pipeline,
   hoveredSignalValues,
   clockCycle,
+  showClockCycle,
   onResetTracking,
   onStepForward,
   onStepBackward,
@@ -253,10 +255,12 @@ export default function PipelineCanvas({
             );
           })}
         </div>
-        <div className="pipelineTrackerControls">
-          <div className="pipelineCycleCounter" aria-live="polite">
-            Clock Cycle: {clockCycle}
-          </div>
+        <div className={`pipelineTrackerControls ${showClockCycle ? "hasCycleCounter" : ""}`}>
+          {showClockCycle && (
+            <div className="pipelineCycleCounter" aria-live="polite">
+              Clock Cycle: {clockCycle}
+            </div>
+          )}
           <div className="pipelineTrackerButtonGroup">
             <Button
               onClick={handleZoomOut}
