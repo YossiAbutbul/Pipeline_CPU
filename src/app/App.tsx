@@ -57,6 +57,8 @@ export default function App() {
           onProgramChange={handleProgramChange}
           onReset={resetPipeline}
           onRun={run}
+          onStop={resetPipeline}
+          isRunActive={runSessionActive}
           initialPc={initialPc}
           onInitialPcChange={handleInitialPcChange}
           onResetPersistedData={handleResetPersistedData}
