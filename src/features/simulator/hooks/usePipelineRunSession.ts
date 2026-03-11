@@ -84,11 +84,12 @@ export function usePipelineRunSession({
     return buildPipelineSignalValues({
       instructions,
       pipelineInstructionIndices,
+      pipelineEffects,
       encodedInstructionHexByPc,
       registerValues,
       memoryWords,
     });
-  }, [encodedInstructionHexByPc, instructions, memoryWords, pipelineInstructionIndices, registerValues]);
+  }, [encodedInstructionHexByPc, instructions, memoryWords, pipelineEffects, pipelineInstructionIndices, registerValues]);
 
   const resetPipeline = () => {
     setPipeline(EMPTY_PIPELINE);

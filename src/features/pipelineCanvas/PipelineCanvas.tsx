@@ -194,8 +194,8 @@ export default function PipelineCanvas({
         setHoverTooltip({
           label: signal.label,
           value,
-          left: event.clientX - diagramBounds.left,
-          top: event.clientY - diagramBounds.top,
+          left: event.clientX - diagramBounds.left + 18,
+          top: event.clientY - diagramBounds.top - 18,
         });
       };
 

@@ -54,34 +54,28 @@ export function Tooltip({
     } else if (rect.right > window.innerWidth - padding) {
       nextShift = (window.innerWidth - padding) - rect.right;
     }
-    setShiftX(nextShift);
+    setShiftX((prev) => (prev === nextShift ? prev : nextShift));
     let nextShiftY = 0;
     if (rect.top < padding) {
       nextShiftY = padding - rect.top;
     } else if (rect.bottom > window.innerHeight - padding) {
       nextShiftY = (window.innerHeight - padding) - rect.bottom;
     }
-    setShiftY(nextShiftY);
+    setShiftY((prev) => (prev === nextShiftY ? prev : nextShiftY));
 
-    if (rect.bottom > window.innerHeight - padding) {
-      setPlacement("top");
-      return;
-    }
-    setPlacement("bottom");
+    const nextPlacement = rect.bottom > window.innerHeight - padding ? "top" : "bottom";
+    setPlacement((prev) => (prev === nextPlacement ? prev : nextPlacement));
   }, []);
 
   useLayoutEffect(() => {
     if (!isVisible) {
-      if (shiftX !== 0) {
-        setShiftX(0);
-      }
-      if (shiftY !== 0) {
-        setShiftY(0);
-      }
+      setShiftX((prev) => (prev === 0 ? prev : 0));
+      setShiftY((prev) => (prev === 0 ? prev : 0));
+      setPlacement((prev) => (prev === "bottom" ? prev : "bottom"));
       return;
     }
     updateShift();
-  }, [isVisible, updateShift, shiftX, shiftY, content]);
+  }, [isVisible, updateShift, content]);
 
   useLayoutEffect(() => {
     if (!isVisible) {

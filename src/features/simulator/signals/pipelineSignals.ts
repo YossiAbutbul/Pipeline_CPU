@@ -1,12 +1,11 @@
 import { parseRegister } from "@/features/compiler/registers";
 import type { ParsedInstruction } from "@/features/compiler/types";
-import type { PipelineInstructionSlots } from "../core/types";
+import type { PipelineEffectSlots, PipelineInstructionSlots, StageEffect, SparseMemoryWords } from "../core/types";
 import { REG_INFO } from "@/monaco/mips/mipsData";
 import { parseRegisterValue, toHex32 } from "@/features/statePanels/registerEditorModel";
 import { parseImmediate } from "../core/parse";
 import type { HoveredSignalValues } from "@/features/pipelineCanvas/pipelineHoverMap";
 import { readWord } from "../runtime/memoryRuntime";
-import type { SparseMemoryWords } from "../core/types";
 
 export type PipelineSignalValues = HoveredSignalValues;
 
@@ -14,6 +13,10 @@ const REGISTER_ALIAS_BY_NUMBER = Object.entries(REG_INFO).reduce<Record<number, 
   acc[info.num] = alias;
   return acc;
 }, {});
+
+function toHex8(value: number): string {
+  return `0x${(value & 0xff).toString(16).toUpperCase().padStart(2, "0")}`;
+}
 
 function parseMemoryBaseRegister(operand: string): number | null {
   const match = operand.trim().match(/^([-+]?0x[0-9a-fA-F]+|[-+]?\d+)\(([^)]+)\)$/);
@@ -262,6 +265,74 @@ function getExSignalValues(
   return {};
 }
 
+function getWriteBackRegisterNumber(instruction: ParsedInstruction | null, effect: StageEffect | null): number | null {
+  if (effect?.wbWrite) {
+    return effect.wbWrite.registerNumber;
+  }
+
+  if (!instruction) {
+    return null;
+  }
+
+  const { mnemonic, operands } = instruction;
+
+  try {
+    if (["add", "addu", "sub", "subu", "and", "or", "xor", "nor", "slt", "sltu"].includes(mnemonic) && operands.length === 3) {
+      return parseRegister(operands[0]);
+    }
+    if (["sll", "srl", "sra", "sllv", "srlv", "srav"].includes(mnemonic) && operands.length === 3) {
+      return parseRegister(operands[0]);
+    }
+    if (["addi", "addiu", "andi", "ori", "xori", "slti", "sltiu", "lui", "li"].includes(mnemonic) && operands.length >= 1) {
+      return parseRegister(operands[0]);
+    }
+    if (mnemonic === "move" && operands.length === 2) {
+      return parseRegister(operands[0]);
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function getWbSignalValues(
+  instruction: ParsedInstruction | null,
+  effect: StageEffect | null,
+  values: Record<string, string>,
+  memoryWords: SparseMemoryWords,
+): {
+  writeBackValue?: string;
+  writeBackDest?: string;
+} {
+  if (!instruction && !effect?.wbWrite) {
+    return {};
+  }
+
+  const destinationRegisterNumber = getWriteBackRegisterNumber(instruction, effect);
+  const writeBackDest = destinationRegisterNumber === null ? undefined : toHex8(destinationRegisterNumber);
+
+  if (effect?.wbWrite) {
+    return {
+      writeBackValue: toHex32(effect.wbWrite.value),
+      writeBackDest,
+    };
+  }
+
+  if (!instruction) {
+    return { writeBackDest };
+  }
+
+  const exSignals = getExSignalValues(instruction, values);
+  const memSignals = getMemSignalValues(instruction, values, memoryWords);
+  const writeBackValue = instruction.mnemonic === "lw" ? memSignals.memoryReadData : exSignals.aluResult;
+
+  return {
+    writeBackValue,
+    writeBackDest,
+  };
+}
+
 function getMemSignalValues(
   instruction: ParsedInstruction | null,
   values: Record<string, string>,
@@ -328,23 +399,27 @@ function getMemSignalValues(
 export function buildPipelineSignalValues(args: {
   instructions: ParsedInstruction[];
   pipelineInstructionIndices: PipelineInstructionSlots;
+  pipelineEffects: PipelineEffectSlots;
   encodedInstructionHexByPc: Record<number, string>;
   registerValues: Record<string, string>;
   memoryWords: SparseMemoryWords;
 }): PipelineSignalValues {
-  const { instructions, pipelineInstructionIndices, encodedInstructionHexByPc, registerValues, memoryWords } = args;
+  const { instructions, pipelineInstructionIndices, pipelineEffects, encodedInstructionHexByPc, registerValues, memoryWords } = args;
   const ifInstructionIndex = pipelineInstructionIndices.IF;
   const idInstructionIndex = pipelineInstructionIndices.ID;
   const exInstructionIndex = pipelineInstructionIndices.EX;
   const memInstructionIndex = pipelineInstructionIndices.MEM;
+  const wbInstructionIndex = pipelineInstructionIndices.WB;
   const ifInstruction = ifInstructionIndex === null ? null : instructions[ifInstructionIndex];
   const idInstruction = idInstructionIndex === null ? null : instructions[idInstructionIndex];
   const exInstruction = exInstructionIndex === null ? null : instructions[exInstructionIndex];
   const memInstruction = memInstructionIndex === null ? null : instructions[memInstructionIndex];
+  const wbInstruction = wbInstructionIndex === null ? null : instructions[wbInstructionIndex];
   const [rsNumber, rtNumber] = getIdReadRegisterNumbers(idInstruction);
   const immediateValues = getIdImmediateValues(idInstruction);
   const exSignalValues = getExSignalValues(exInstruction, registerValues);
   const memSignalValues = getMemSignalValues(memInstruction, registerValues, memoryWords);
+  const wbSignalValues = getWbSignalValues(wbInstruction, pipelineEffects.WB, registerValues, memoryWords);
 
   return {
     pc: ifInstruction ? `0x${(ifInstruction.pc >>> 0).toString(16).toUpperCase().padStart(8, "0")}` : undefined,
@@ -361,5 +436,7 @@ export function buildPipelineSignalValues(args: {
     memoryAddress: memSignalValues.memoryAddress,
     memoryWriteData: memSignalValues.memoryWriteData,
     memoryReadData: memSignalValues.memoryReadData,
+    writeBackValue: wbSignalValues.writeBackValue,
+    writeBackDest: wbSignalValues.writeBackDest,
   };
 }

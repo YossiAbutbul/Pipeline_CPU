@@ -140,6 +140,7 @@
 
 .pipelineHoverTooltip .tooltipContent {
   min-width: 132px;
+  pointer-events: none;
 }
 
 .pipelineTooltipBody {
