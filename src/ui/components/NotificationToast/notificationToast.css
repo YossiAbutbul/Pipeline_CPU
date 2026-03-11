@@ -11,21 +11,37 @@
 }
 
 .notificationToast {
+  --notification-bg: color-mix(in oklab, var(--surface-3) 52%, var(--surface-1));
+  --notification-title: var(--text);
+  --notification-body: color-mix(in oklab, var(--muted) 90%, var(--text) 10%);
+  --notification-close: color-mix(in oklab, var(--muted) 86%, var(--text) 14%);
   --notification-icon-bg: color-mix(in oklab, var(--surface-3) 76%, #000 24%);
   --notification-icon-fg: var(--muted);
   --notification-progress-bg: color-mix(in oklab, var(--accent) 84%, var(--tab-active));
   position: relative;
   overflow: hidden;
   padding: 10px 12px 12px;
-  border: var(--border-1) solid color-mix(in oklab, var(--border) 76%, #000 24%);
+  border: none;
   border-radius: 10px;
-  background: var(--surface-1);
-  color: var(--text);
+  background: var(--notification-bg);
+  color: var(--notification-title);
   box-shadow:
     0 12px 28px color-mix(in oklab, #000 20%, transparent),
     0 2px 8px color-mix(in oklab, #000 10%, transparent);
   pointer-events: auto;
   animation: notificationToastEnter 180ms ease;
+}
+
+:root:not([data-theme="light"]) .notificationToast {
+  --notification-bg: color-mix(in oklab, var(--surface-3) 62%, var(--surface-1));
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, #ffffff 10%, transparent),
+    0 10px 24px color-mix(in oklab, #000 22%, transparent),
+    0 2px 8px color-mix(in oklab, #ffffff 6%, transparent);
+}
+
+:root[data-theme="light"] .notificationToast {
+  --notification-bg: color-mix(in oklab, var(--surface-1) 94%, #ffffff);
 }
 
 .notificationToastMain {
@@ -80,35 +96,36 @@
   font-weight: var(--font-weight-medium);
   line-height: 1.2;
   margin-bottom: 2px;
+  color: var(--notification-title);
 }
 
 .notificationToast-success {
   --notification-icon-bg: color-mix(in oklab, #2e7d32 82%, var(--surface-2));
   --notification-icon-fg: #f3fff4;
-  border-color: color-mix(in oklab, var(--border) 64%, #000 36%);
 }
 
 .notificationToast-info {
   --notification-icon-bg: color-mix(in oklab, var(--surface-3) 84%, #000 16%);
   --notification-icon-fg: var(--muted);
-  border-color: color-mix(in oklab, var(--border) 64%, #000 36%);
 }
 
 .notificationToast-warning {
+  --notification-body: color-mix(in oklab, var(--text) 38%, var(--muted));
   --notification-icon-bg: color-mix(in oklab, var(--tooltip-warning-border) 28%, var(--surface-2));
   --notification-icon-fg: color-mix(in oklab, var(--text) 82%, var(--tooltip-warning-border));
-  border-color: color-mix(in oklab, var(--tooltip-warning-border) 40%, var(--border));
 }
 
 .notificationToast-error {
+  --notification-title: var(--text);
+  --notification-body: color-mix(in oklab, var(--text) 30%, var(--muted));
+  --notification-close: color-mix(in oklab, var(--text) 28%, var(--muted));
   --notification-icon-bg: color-mix(in oklab, var(--tooltip-error-border) 26%, var(--surface-2));
   --notification-icon-fg: color-mix(in oklab, var(--text) 80%, var(--tooltip-error-border));
-  border-color: color-mix(in oklab, var(--tooltip-error-border) 56%, var(--border));
 }
 
 .notificationToastBody {
   display: block;
-  color: var(--muted);
+  color: var(--notification-body);
   font-size: 12px;
   line-height: var(--line-height-ui);
   white-space: nowrap;
@@ -125,7 +142,7 @@
   padding: 0;
   border: none;
   background: transparent;
-  color: var(--muted);
+  color: var(--notification-close);
   cursor: pointer;
   flex: 0 0 auto;
 }
