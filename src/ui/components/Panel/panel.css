@@ -31,10 +31,12 @@
 
 .panelHeaderToolbarOnly {
   justify-content: stretch;
+  padding: 0;
 }
 .panelHeaderToolbarOnly .panelToolbar {
   width: 100%;
   flex: 1;
+  gap: 0;
 }
 
 .panelBody {
@@ -55,10 +57,10 @@
   padding: var(--space-3) var(--space-3);
 }
 .panelHeader-lg {
-  padding: var(--space-4) var(--space-3);
+  padding: var(--space-4) var(--space-1);
 }
 .panelHeader-xl {
-  padding: calc(var(--space-4) + var(--space-1)) var(--space-3);
+  padding: var(--space-4) var(--space-3) var(--space-3);
 }
 
 /* Title size variants (keep them token-driven) */
@@ -76,9 +78,4 @@
 }
 .panelHeader-xl .panelTitle {
   font-size: 24px;
-}
-
-/* Toolbar-only header alignment */
-.panelHeaderToolbarOnly {
-  justify-content: flex-end;
 }

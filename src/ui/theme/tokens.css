@@ -69,13 +69,15 @@
   --muted: #a6adba;
 
   /* Lines & effects */
-  --border: #2a2f3a;
+  --border: #272c38;
+  --button-border: #3b4352;
   --shadow: 0 16px 44px rgba(0, 0, 0, 0.45);
 
   /* Accent */
   --accent: #2f4f8f;
   --accent-weak: rgba(47, 79, 143, 0.18);
   --accent-border: rgba(47, 79, 143, 0.34);
+  --tab-active: #5f86d8;
 
   /* Controls */
   --control-bg: #1a1d24;
@@ -141,12 +143,14 @@
 
   /* Lines & effects */
   --border: #d9d5ca;
+  --button-border: #c9c4b8;
   --shadow: 0 14px 26px rgba(16, 24, 40, 0.1);
 
   /* Accent */
   --accent: #1e3a8a;
   --accent-weak: rgba(30, 58, 138, 0.14);
   --accent-border: rgba(30, 58, 138, 0.28);
+  --tab-active: #3f67d6;
 
   /* Controls */
   --control-bg: var(--surface-2);

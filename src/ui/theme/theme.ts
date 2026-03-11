@@ -23,7 +23,7 @@ export function storeTheme(theme: Theme) {
 
 export function initTheme() {
   const stored = getStoredTheme();
-  const theme = stored ?? getSystemTheme();
+  const theme = stored ?? "light";
   applyTheme(theme);
   return theme;
 }

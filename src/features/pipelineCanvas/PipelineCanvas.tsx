@@ -1,6 +1,6 @@
 import { Button, Panel, Tooltip } from "@/ui/components";
 import CpuDiagram from "@/assets/cpu/mips_cpu.svg?react";
-import { FastForward, Rewind, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
+import { FastForward, Rewind, RotateCcw, SkipBack, ZoomIn, ZoomOut } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { PATH_SIGNAL_MAP, type HoveredSignalValues } from "./pipelineHoverMap";
 import "./pipelineCanvas.css";
@@ -23,6 +23,7 @@ type HoverTooltipState = {
 type Props = {
   pipeline: PipelineSlots;
   hoveredSignalValues: HoveredSignalValues;
+  onResetTracking: () => void;
   onStepForward: () => void;
   onStepBackward: () => void;
   canStepBackward: boolean;
@@ -30,10 +31,14 @@ type Props = {
 };
 
 const STAGE_ORDER: Array<keyof PipelineSlots> = ["IF", "ID", "EX", "MEM", "WB"];
+const MIN_ZOOM = 0.3;
+const MAX_ZOOM = 2.5;
+const ZOOM_STEP = 0.1;
 
 export default function PipelineCanvas({
   pipeline,
   hoveredSignalValues,
+  onResetTracking,
   onStepForward,
   onStepBackward,
   canStepBackward,
@@ -51,9 +56,6 @@ export default function PipelineCanvas({
     startScrollTop: 0,
   });
 
-  const MIN_ZOOM = 0.3;
-  const MAX_ZOOM = 2.5;
-  const ZOOM_STEP = 0.1;
   const canDrag = zoom > 1;
 
   const handleZoomOut = () => {
@@ -236,7 +238,7 @@ export default function PipelineCanvas({
   }, [hoveredSignalValues]);
 
   return (
-    <Panel title="5 Stages Pipeline CPU Diagram" headerSize="xl">
+    <Panel title="Pipeline CPU Diagram" headerSize="xl">
       <div className="pipelineCanvasLayout">
         <div className="pipelineTracker" aria-label="Pipeline stage tracker">
           {STAGE_ORDER.map((stage) => {
@@ -282,20 +284,28 @@ export default function PipelineCanvas({
           disabled={!canStepBackward}
           className="btn-iconOnly"
           aria-label="Step backward"
-            title="Step backward"
-          >
-            <Rewind size={16} aria-hidden="true" />
-          </Button>
-          <Button
-            variant="primary"
-            onClick={onStepForward}
-            disabled={!canStepForward}
-            className="btn-iconOnly"
-            aria-label="Step forward"
-            title="Step forward"
-          >
-            <FastForward size={16} aria-hidden="true" />
-          </Button>
+          title="Step backward"
+        >
+          <Rewind size={16} aria-hidden="true" />
+        </Button>
+        <Button
+          onClick={onResetTracking}
+          disabled={!canStepBackward && !canStepForward}
+          className="btn-iconOnly"
+          aria-label="Reset pipeline tracking"
+          title="Reset pipeline tracking"
+        >
+          <SkipBack size={16} aria-hidden="true" />
+        </Button>
+        <Button
+          onClick={onStepForward}
+          disabled={!canStepForward}
+          className="btn-iconOnly"
+          aria-label="Step forward"
+          title="Step forward"
+        >
+          <FastForward size={16} aria-hidden="true" />
+        </Button>
         </div>
 
         <div
@@ -304,7 +314,11 @@ export default function PipelineCanvas({
           onMouseDown={handleDragStart}
           onMouseUp={handleDragEnd}
         >
-          <div ref={diagramRef} className="diagramContent" style={{ width: `${90 * zoom}%` }}>
+          <div
+            ref={diagramRef}
+            className="diagramContent"
+            style={{ width: `${95 * zoom}%` }}
+          >
             <CpuDiagram style={{ width: "100%", height: "auto" }} />
             {hoverTooltip && (
               <div

@@ -38,16 +38,14 @@ export default function StatePanel({
     <Panel
       headerSize="xs"
       toolbar={
-        <div style={{ display: "flex", gap: 8, width: "100%", alignItems: "center" }}>
-          <Tabs<TabKey>
-            items={[
-              { key: "registers", label: "Registers" },
-              { key: "memory", label: "Memory" },
-            ]}
-            value={tab}
-            onChange={onTabChange}
-          />
-        </div>
+        <Tabs<TabKey>
+          items={[
+            { key: "registers", label: "Registers" },
+            { key: "memory", label: "Memory" },
+          ]}
+          value={tab}
+          onChange={onTabChange}
+        />
       }
     >
       {tab === "registers" && (

@@ -1,34 +1,44 @@
 .tabs {
   display: flex;
   width: 100%;
-  background: var(--surface-3);
-  /* border: 1px solid var(--border); */
-  border-radius: 12px;
-  padding: 4px;
-  gap: 4px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 88%, transparent);
+  border-radius: 0;
+  padding: 0;
+  gap: 0;
 }
 
 .tab {
   flex: 1;
   width: 0;
   text-align: center;
-
   border: 0;
   background: transparent;
   color: var(--muted);
-  padding: 6px 12px;
-  border-radius: 10px;
+  padding: 18px 12px 14px;
+  border-radius: 0;
   cursor: pointer;
   font: inherit;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   white-space: nowrap;
+  transition:
+    border-color var(--dur-1),
+    color var(--dur-1);
+  border-bottom: 3px solid transparent;
 }
 
 .tab:hover {
-  background: var(--control-hover);
   color: var(--text);
 }
 
 .tabActive {
-  background: var(--surface-1);
-  color: var(--text);
+  color: var(--tab-active);
+  border-bottom-color: var(--tab-active);
+}
+
+.tab:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--accent) 44%, transparent);
+  outline-offset: -2px;
 }
