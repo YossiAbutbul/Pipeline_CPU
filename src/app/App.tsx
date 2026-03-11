@@ -2,12 +2,33 @@ import PipelineCanvas from "@/features/pipelineCanvas/PipelineCanvas";
 import ProgramEditor from "@/features/program/ProgramEditor";
 import { usePipelineRunSession } from "@/features/simulator/hooks/usePipelineRunSession";
 import StatePanel from "@/features/statePanels/StatePanel";
+import { NotificationToast } from "@/ui/components";
+import { useCallback, useState } from "react";
 import { clearPersistedAppState, createDefaultAppState, usePersistedAppState } from "./store/appStore";
 import "./app.css";
 
 export default function App() {
   const [appState, setAppState] = usePersistedAppState();
+  const [notifications, setNotifications] = useState<
+    Array<{ id: number; title: string; message: string; tone: "success" | "error" }>
+  >([]);
   const { program, initialPc, statePanelTab, registers, memory } = appState;
+
+  const pushSuccessNotification = (message: string) => {
+    const id = Date.now() + Math.floor(Math.random() * 1000);
+    const nextNotification = { id, title: "Registers updated", message, tone: "success" as const };
+    setNotifications((prev) => [...prev, nextNotification].slice(-2));
+  };
+
+  const pushErrorNotification = (message: string) => {
+    const id = Date.now() + Math.floor(Math.random() * 1000);
+    const nextNotification = { id, title: "Validation error", message, tone: "error" as const };
+    setNotifications((prev) => [...prev, nextNotification].slice(-2));
+  };
+
+  const dismissNotification = useCallback((id: number) => {
+    setNotifications((prev) => prev.filter((notification) => notification.id !== id));
+  }, []);
 
   const setRegisterValues = (values: Record<string, string>) => {
     setAppState((prev) => ({ ...prev, registers: { ...prev.registers, values } }));
@@ -95,6 +116,8 @@ export default function App() {
           }
           registerValues={registers.values}
           onRegisterValuesChange={setRegisterValues}
+          onNotifySuccess={pushSuccessNotification}
+          onNotifyError={pushErrorNotification}
           registerHighlightCycle={registerHighlightCycle}
           memoryRules={memory.rules}
           onMemoryRulesChange={(rules) =>
@@ -105,6 +128,7 @@ export default function App() {
           isRuntimeLocked={runSessionActive}
         />
       </aside>
+      <NotificationToast notifications={notifications} onDismiss={dismissNotification} />
     </div>
   );
 }

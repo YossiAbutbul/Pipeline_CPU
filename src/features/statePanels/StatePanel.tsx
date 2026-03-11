@@ -12,6 +12,8 @@ type Props = {
   onRegisterIsEditingChange: (value: boolean) => void;
   registerValues: Record<string, string>;
   onRegisterValuesChange: (value: Record<string, string>) => void;
+  onNotifySuccess: (message: string) => void;
+  onNotifyError: (message: string) => void;
   registerHighlightCycle: number;
   memoryRules: MemoryRuleConfig[];
   onMemoryRulesChange: (rules: MemoryRuleConfig[]) => void;
@@ -29,6 +31,8 @@ export default function StatePanel({
   onRegisterIsEditingChange,
   registerValues,
   onRegisterValuesChange,
+  onNotifySuccess,
+  onNotifyError,
   registerHighlightCycle,
   memoryRules,
   onMemoryRulesChange,
@@ -58,6 +62,8 @@ export default function StatePanel({
           onIsEditingChange={onRegisterIsEditingChange}
           values={registerValues}
           onValuesChange={onRegisterValuesChange}
+          onNotifySuccess={onNotifySuccess}
+          onNotifyError={onNotifyError}
           highlightCycle={registerHighlightCycle}
           isRuntimeLocked={isRuntimeLocked}
         />
@@ -66,6 +72,7 @@ export default function StatePanel({
         <MemoryEditor
           rules={memoryRules}
           onRulesChange={onMemoryRulesChange}
+          onNotifyError={onNotifyError}
           runtimeMemoryWords={runtimeMemoryWords}
           runtimeChangedWords={runtimeChangedWords}
           isRuntimeLocked={isRuntimeLocked}

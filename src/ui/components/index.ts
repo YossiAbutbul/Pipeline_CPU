@@ -1,5 +1,5 @@
 export { Button } from "./Button/Button";
-export { ErrorMessage } from "./ErrorMessage/ErrorMessage";
+export { NotificationToast } from "./NotificationToast/NotificationToast";
 export { Panel } from "./Panel/Panel";
 export { Tabs } from "./Tabs/Tabs";
 export { ThemeToggle } from "./ThemeToggle/ThemeToggle";

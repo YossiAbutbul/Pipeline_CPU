@@ -17,6 +17,8 @@ type Props = {
   onIsEditingChange: (value: boolean) => void;
   values: Record<string, string>;
   onValuesChange: (value: Record<string, string>) => void;
+  onNotifySuccess: (message: string) => void;
+  onNotifyError: (message: string) => void;
   highlightCycle: number;
   isRuntimeLocked: boolean;
 };
@@ -28,10 +30,11 @@ export default function RegisterEditor({
   onIsEditingChange,
   values,
   onValuesChange,
+  onNotifySuccess,
+  onNotifyError,
   highlightCycle,
   isRuntimeLocked,
 }: Props) {
-  const [error, setError] = useState<string | null>(null);
   const [recentlyChangedAliases, setRecentlyChangedAliases] = useState<Record<string, true>>({});
   const [isScrollbarVisible, setIsScrollbarVisible] = useState(false);
   const [scrollbarThumbTop, setScrollbarThumbTop] = useState(0);
@@ -58,15 +61,15 @@ export default function RegisterEditor({
         next[reg.alias] = toHex32(computed);
       }
       onValuesChange(next);
-      setError(null);
+      onNotifySuccess("Register formula applied");
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      onNotifyError(err instanceof Error ? err.message : String(err));
     }
   };
 
   const resetAll = () => {
     onValuesChange(createDefaultRegisterValues());
-    setError(null);
+    onNotifySuccess("Registers reset");
   };
 
   const updateRegister = (alias: string, raw: string) => {
@@ -83,9 +86,8 @@ export default function RegisterEditor({
     try {
       const parsed = parseRegisterValue(current);
       onValuesChange({ ...values, [alias]: toHex32(parsed) });
-      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      onNotifyError(err instanceof Error ? err.message : String(err));
     }
   };
 
@@ -110,10 +112,10 @@ export default function RegisterEditor({
         nextValues[reg.alias] = toHex32(parsed);
       }
       onValuesChange(nextValues);
-      setError(null);
+      onNotifySuccess("Registers updated successfully");
       onIsEditingChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      onNotifyError(err instanceof Error ? err.message : String(err));
     }
   };
 
@@ -144,7 +146,6 @@ export default function RegisterEditor({
   useEffect(() => {
     if (isRuntimeLocked && isEditing) {
       onIsEditingChange(false);
-      setError(null);
     }
   }, [isEditing, isRuntimeLocked, onIsEditingChange]);
 
@@ -202,20 +203,6 @@ export default function RegisterEditor({
                 placeholder="num * 0x200"
                 spellCheck={false}
               />
-              {error && (
-                <Tooltip
-                  className="registerFormulaError"
-                  variant="error"
-                  ariaLabel="Formula error details"
-                  align="start"
-                  showTrigger={false}
-                  open
-                  dismissible
-                  autoDismissMs={2800}
-                  onDismiss={() => setError(null)}
-                  content={error}
-                />
-              )}
             </div>
             <Tooltip
               ariaLabel="Formula format help"
@@ -252,7 +239,12 @@ export default function RegisterEditor({
             Clear Values
           </Button>
         )}
-        <Button size="sm" className="registerEditToggle registerActionBtn" onClick={toggleEditMode} disabled={isRuntimeLocked}>
+        <Button
+          size="sm"
+          className="registerEditToggle registerActionBtn"
+          onClick={toggleEditMode}
+          disabled={isRuntimeLocked}
+        >
           {isEditing ? <Check size={14} aria-hidden="true" /> : <Edit size={14} aria-hidden="true" />}
           {isEditing ? "Done Editing" : "Edit Registers"}
         </Button>
