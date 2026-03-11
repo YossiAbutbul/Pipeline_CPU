@@ -8,7 +8,7 @@
   font-size: var(--font-size-sm);
   color: var(--text);
   background: var(--surface-1);
-  cursor: pointer;
+  cursor: var(--cursor-action);
   transition:
     background var(--dur-1),
     border-color var(--dur-1),
@@ -31,7 +31,7 @@
 
 .btn:disabled {
   opacity: 0.5;
-  cursor: not-allowed;
+  cursor: var(--cursor-disabled);
 }
 
 .btn-sm {

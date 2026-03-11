@@ -1,5 +1,15 @@
 @import "../ui/theme/tokens.css";
 
+:root {
+  --cursor-default: default;
+  --cursor-action: pointer;
+  --cursor-text: text;
+  --cursor-help: help;
+  --cursor-drag: grab;
+  --cursor-dragging: grabbing;
+  --cursor-disabled: not-allowed;
+}
+
 *,
 *::before,
 *::after {
@@ -24,6 +34,39 @@ body {
   background: var(--bg);
   color: var(--text);
   overflow: hidden;
+  cursor: var(--cursor-default);
+}
+
+button,
+[role="button"],
+summary,
+select,
+input[type="checkbox"],
+input[type="radio"],
+label:has(input[type="checkbox"]),
+label:has(input[type="radio"]) {
+  cursor: var(--cursor-action);
+}
+
+button:disabled,
+input:disabled,
+textarea:disabled,
+select:disabled,
+[aria-disabled="true"] {
+  cursor: var(--cursor-disabled);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+textarea,
+[contenteditable="true"] {
+  cursor: var(--cursor-text);
+}
+
+.monaco-editor,
+.monaco-editor *,
+.monaco-editor textarea,
+.monaco-editor .inputarea {
+  cursor: var(--cursor-text) !important;
 }
 
 :root,

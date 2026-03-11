@@ -1,6 +1,6 @@
-import type { MemoryRuleConfig, WriteMode } from "@/app/store/appStore";
+﻿import type { MemoryRuleConfig, WriteMode } from "@/app/store/appStore";
 import type { ModalField } from "@/ui/components";
-import { Button, Modal, Tooltip } from "@/ui/components";
+import { Button, Modal } from "@/ui/components";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { evaluateMemoryFormula, parseSignedOrUnsigned32, parseWordNumber, toHex32 } from "./memoryEditorModel";
@@ -9,6 +9,7 @@ import "./memoryEditor.css";
 type Props = {
   rules: MemoryRuleConfig[];
   onRulesChange: (rules: MemoryRuleConfig[]) => void;
+  onNotifyError: (message: string) => void;
   runtimeMemoryWords: Map<number, number>;
   runtimeChangedWords: number[];
   isRuntimeLocked: boolean;
@@ -85,13 +86,13 @@ const ADD_RULE_FIELDS: ModalField[] = [
 export default function MemoryEditor({
   rules,
   onRulesChange,
+  onNotifyError,
   runtimeMemoryWords,
   runtimeChangedWords,
   isRuntimeLocked,
 }: Props) {
   const toHexCompact = (value: number) => `0x${(value >>> 0).toString(16).toUpperCase()}`;
 
-  const [error, setError] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
   const [recentlyChangedWords, setRecentlyChangedWords] = useState<Record<number, true>>({});
@@ -167,7 +168,6 @@ export default function MemoryEditor({
     }
     setIsAddModalOpen(false);
     setEditingRuleId(null);
-    setError(null);
     setRecentlyChangedWords({});
     setWatchedWords([]);
   }, [isRuntimeLocked]);
@@ -243,7 +243,6 @@ export default function MemoryEditor({
   const addRuleFromModal = (rawValues: Record<string, string>) => {
     const rule = buildRuleFromModal(rawValues);
     onRulesChange([...rules, rule]);
-    setError(null);
     setIsAddModalOpen(false);
     setEditingRuleId(null);
   };
@@ -251,7 +250,6 @@ export default function MemoryEditor({
   const updateRuleFromModal = (rawValues: Record<string, string>, ruleId: string) => {
     const updated = buildRuleFromModal(rawValues, ruleId);
     onRulesChange(rules.map((rule) => (rule.id === ruleId ? updated : rule)));
-    setError(null);
     setIsAddModalOpen(false);
     setEditingRuleId(null);
   };
@@ -262,7 +260,6 @@ export default function MemoryEditor({
 
   const clearRules = () => {
     onRulesChange([]);
-    setError(null);
   };
 
   const editingRule = editingRuleId ? rules.find((rule) => rule.id === editingRuleId) ?? null : null;
@@ -300,22 +297,6 @@ export default function MemoryEditor({
           Clear Rules
         </Button>
       </div>
-
-      {error && (
-        <div className="memoryErrorRow">
-          <Tooltip
-            variant="error"
-            ariaLabel="Memory rule error details"
-            align="start"
-            showTrigger={false}
-            open
-            dismissible
-            autoDismissMs={2800}
-            onDismiss={() => setError(null)}
-            content={error}
-          />
-        </div>
-      )}
 
       <div className="memoryRulesHeader">Rules ({rules.length})</div>
       <div className="memoryRulesHelp">Rules initialize runtime memory when you press Run.</div>
@@ -426,7 +407,7 @@ export default function MemoryEditor({
             }
             addRuleFromModal(values);
           } catch (err) {
-            setError(err instanceof Error ? err.message : String(err));
+            onNotifyError(err instanceof Error ? err.message : String(err));
           }
         }}
       />

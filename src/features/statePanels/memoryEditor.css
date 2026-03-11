@@ -36,10 +36,6 @@
   flex: 1 1 0;
 }
 
-.memoryErrorRow {
-  height: 0;
-}
-
 .memoryRulesHeader {
   color: var(--muted);
   font-size: var(--font-size-sm);

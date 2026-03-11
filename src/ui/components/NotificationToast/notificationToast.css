@@ -1,0 +1,186 @@
+.notificationToastViewport {
+  position: fixed;
+  bottom: 14px;
+  right: 14px;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(320px, calc(100vw - 28px));
+  pointer-events: none;
+}
+
+.notificationToast {
+  --notification-bg: color-mix(in oklab, var(--surface-3) 52%, var(--surface-1));
+  --notification-title: var(--text);
+  --notification-body: color-mix(in oklab, var(--muted) 90%, var(--text) 10%);
+  --notification-close: color-mix(in oklab, var(--muted) 86%, var(--text) 14%);
+  --notification-icon-bg: color-mix(in oklab, var(--surface-3) 76%, #000 24%);
+  --notification-icon-fg: var(--muted);
+  --notification-progress-bg: color-mix(in oklab, var(--accent) 84%, var(--tab-active));
+  position: relative;
+  overflow: hidden;
+  padding: 10px 12px 12px;
+  border: none;
+  border-radius: 10px;
+  background: var(--notification-bg);
+  color: var(--notification-title);
+  box-shadow:
+    0 12px 28px color-mix(in oklab, #000 20%, transparent),
+    0 2px 8px color-mix(in oklab, #000 10%, transparent);
+  pointer-events: auto;
+  animation: notificationToastEnter 180ms ease;
+}
+
+:root:not([data-theme="light"]) .notificationToast {
+  --notification-bg: color-mix(in oklab, var(--surface-3) 62%, var(--surface-1));
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, #ffffff 10%, transparent),
+    0 10px 24px color-mix(in oklab, #000 22%, transparent),
+    0 2px 8px color-mix(in oklab, #ffffff 6%, transparent);
+}
+
+:root[data-theme="light"] .notificationToast {
+  --notification-bg: color-mix(in oklab, var(--surface-1) 94%, #ffffff);
+}
+
+.notificationToastMain {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.notificationToastIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--notification-icon-bg);
+  color: var(--notification-icon-fg);
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.notificationToastGlyph {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  transform: translateY(-0.5px);
+}
+
+.notificationToastIcon-success {
+}
+
+.notificationToastText {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.notificationToastHeaderRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.notificationToastHeader {
+  min-width: 0;
+}
+
+.notificationToastTitle {
+  display: block;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.2;
+  margin-bottom: 2px;
+  color: var(--notification-title);
+}
+
+.notificationToast-success {
+  --notification-icon-bg: color-mix(in oklab, #2e7d32 82%, var(--surface-2));
+  --notification-icon-fg: #f3fff4;
+}
+
+.notificationToast-info {
+  --notification-icon-bg: color-mix(in oklab, var(--surface-3) 84%, #000 16%);
+  --notification-icon-fg: var(--muted);
+}
+
+.notificationToast-warning {
+  --notification-body: color-mix(in oklab, var(--text) 38%, var(--muted));
+  --notification-icon-bg: color-mix(in oklab, var(--tooltip-warning-border) 28%, var(--surface-2));
+  --notification-icon-fg: color-mix(in oklab, var(--text) 82%, var(--tooltip-warning-border));
+}
+
+.notificationToast-error {
+  --notification-title: var(--text);
+  --notification-body: color-mix(in oklab, var(--text) 30%, var(--muted));
+  --notification-close: color-mix(in oklab, var(--text) 28%, var(--muted));
+  --notification-icon-bg: color-mix(in oklab, var(--tooltip-error-border) 26%, var(--surface-2));
+  --notification-icon-fg: color-mix(in oklab, var(--text) 80%, var(--tooltip-error-border));
+}
+
+.notificationToastBody {
+  display: block;
+  color: var(--notification-body);
+  font-size: 12px;
+  line-height: var(--line-height-ui);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notificationToastClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--notification-close);
+  cursor: var(--cursor-action);
+  flex: 0 0 auto;
+}
+
+.notificationToastClose:focus-visible {
+  outline: var(--border-1) solid currentColor;
+  outline-offset: 2px;
+}
+
+.notificationToastProgress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--notification-progress-bg);
+  transform-origin: left center;
+  animation: notificationToastProgressShrink var(--notification-duration) linear forwards;
+}
+
+@keyframes notificationToastEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes notificationToastProgressShrink {
+  from {
+    transform: scaleX(1);
+  }
+
+  to {
+    transform: scaleX(0);
+  }
+}

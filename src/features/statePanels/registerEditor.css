@@ -8,6 +8,8 @@
 }
 
 .registerFormulaBar {
+  position: relative;
+  z-index: 8;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
@@ -40,6 +42,7 @@
   width: 100%;
   max-width: 180px;
   min-width: 0;
+  padding-right: 38px;
   border: var(--border-1) solid
     color-mix(in oklab, var(--border) 88%, transparent);
   background: color-mix(in oklab, var(--surface-1) 72%, var(--surface-2));
@@ -51,6 +54,22 @@
   max-width: 180px;
   min-width: 0;
   flex: 1 1 120px;
+}
+
+.registerFormulaHelp {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+}
+
+.registerFormulaHelp .tooltipTrigger {
+  width: 18px;
+  height: 18px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--muted);
 }
 
 .registerValueInput {
@@ -121,6 +140,8 @@
 }
 
 .registerList {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: 0;
