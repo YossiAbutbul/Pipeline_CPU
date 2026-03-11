@@ -1,21 +1,32 @@
 .btn {
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 10px 12px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in oklab, var(--border) 92%, transparent);
+  border-radius: 8px;
   font: inherit;
+  font-weight: 600;
+  font-size: var(--font-size-sm);
   color: var(--text);
-  background: var(--surface-2);
+  background: var(--surface-1);
   cursor: pointer;
-  transition: transform var(--dur-1), background var(--dur-1),
-    border-color var(--dur-1);
+  transition:
+    background var(--dur-1),
+    border-color var(--dur-1),
+    color var(--dur-1);
 }
 
 .btn:hover {
-  background: var(--control-hover);
+  background: color-mix(in oklab, var(--surface-1) 72%, var(--control-hover));
+  border-color: color-mix(in oklab, var(--border) 78%, var(--muted));
 }
 
 .btn:active {
-  transform: translateY(1px);
+  background: color-mix(in oklab, var(--surface-1) 55%, var(--control-hover));
+}
+
+.btn:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--accent) 44%, transparent);
+  outline-offset: 2px;
 }
 
 .btn:disabled {
@@ -24,22 +35,31 @@
 }
 
 .btn-sm {
-  padding: 8px 10px;
-  border-radius: 9px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
 }
 
 .btn-primary {
-  padding: 5px 12px;
-  background: var(--accent-weak);
-  border-color: var(--accent-border);
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: color-mix(in oklab, var(--accent) 88%, white);
+  border-color: color-mix(in oklab, var(--accent) 88%, white);
+}
+
+.btn-primary:active {
+  background: color-mix(in oklab, var(--accent) 78%, black);
 }
 
 .btn-secondary {
-  padding: 5px 12px;
-  background: var(--panel-2);
+  background: var(--surface-1);
 }
 
 .btn-ghost {
-  padding: 5px 12px;
   background: transparent;
+  border-color: transparent;
 }
