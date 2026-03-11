@@ -23,6 +23,10 @@ function toControlBit(value: boolean): string {
   return value ? "0x01" : "0x00";
 }
 
+function toControlCode(value: number): string {
+  return toHex8(value);
+}
+
 function parseMemoryBaseRegister(operand: string): number | null {
   const match = operand.trim().match(/^([-+]?0x[0-9a-fA-F]+|[-+]?\d+)\(([^)]+)\)$/);
   if (!match) {
@@ -79,6 +83,42 @@ function getIdReadRegisterNumbers(instruction: ParsedInstruction | null): [numbe
     }
     if (["mthi", "mtlo"].includes(mnemonic) && operands.length === 1) {
       return [parseRegister(operands[0]), null];
+    }
+  } catch {
+    return [null, null];
+  }
+
+  return [null, null];
+}
+
+function getExForwardRegisterNumbers(instruction: ParsedInstruction | null): [number | null, number | null] {
+  if (!instruction) {
+    return [null, null];
+  }
+
+  const { mnemonic, operands } = instruction;
+
+  try {
+    if (["add", "addu", "sub", "subu", "and", "or", "xor", "nor", "slt", "sltu"].includes(mnemonic) && operands.length === 3) {
+      return [parseRegister(operands[1]), parseRegister(operands[2])];
+    }
+    if (["addi", "addiu", "andi", "ori", "xori", "slti", "sltiu"].includes(mnemonic) && operands.length === 3) {
+      return [parseRegister(operands[1]), null];
+    }
+    if (["lw", "lb", "lbu", "lh", "lhu"].includes(mnemonic) && operands.length === 2) {
+      return [parseMemoryBaseRegister(operands[1]), null];
+    }
+    if (["sw", "sb", "sh"].includes(mnemonic) && operands.length === 2) {
+      return [parseMemoryBaseRegister(operands[1]), parseRegister(operands[0])];
+    }
+    if (["sllv", "srlv", "srav"].includes(mnemonic) && operands.length === 3) {
+      return [parseRegister(operands[2]), parseRegister(operands[1])];
+    }
+    if (["sll", "srl", "sra"].includes(mnemonic) && operands.length === 3) {
+      return [parseRegister(operands[1]), null];
+    }
+    if (mnemonic === "move" && operands.length === 2) {
+      return [parseRegister(operands[1]), null];
     }
   } catch {
     return [null, null];
@@ -342,6 +382,8 @@ function getControlSignalValues(args: {
   idInstruction: ParsedInstruction | null;
   exInstruction: ParsedInstruction | null;
   memInstruction: ParsedInstruction | null;
+  wbInstruction: ParsedInstruction | null;
+  pipelineEffects: PipelineEffectSlots;
   registerValues: Record<string, string>;
   labels: Record<string, number>;
   pcToInstructionIndex: Map<number, number>;
@@ -352,8 +394,10 @@ function getControlSignalValues(args: {
   memReadCtrl?: string;
   memWriteCtrl?: string;
   memToRegCtrl?: string;
+  fwdACtrl?: string;
+  fwdBCtrl?: string;
 } {
-  const { idInstruction, exInstruction, memInstruction, registerValues, labels, pcToInstructionIndex } = args;
+  const { idInstruction, exInstruction, memInstruction, wbInstruction, pipelineEffects, registerValues, labels, pcToInstructionIndex } = args;
 
   const idMnemonic = idInstruction?.mnemonic;
   const memMnemonic = memInstruction?.mnemonic;
@@ -375,6 +419,27 @@ function getControlSignalValues(args: {
     exInstruction !== null
       ? resolveControlFlow(exInstruction, registerValues, labels, pcToInstructionIndex).taken
       : false;
+  const [fwdARegister, fwdBRegister] = getExForwardRegisterNumbers(exInstruction);
+  const memDestRegister = getWriteBackRegisterNumber(memInstruction, pipelineEffects.MEM);
+  const wbDestRegister = getWriteBackRegisterNumber(wbInstruction, pipelineEffects.WB);
+  const memCanForward = memInstruction !== null && memInstruction.mnemonic !== "lw" && memDestRegister !== null && memDestRegister !== 0;
+  const wbCanForward = wbDestRegister !== null && wbDestRegister !== 0;
+  const fwdA =
+    fwdARegister === null
+      ? 0
+      : memCanForward && memDestRegister === fwdARegister
+        ? 0x02
+        : wbCanForward && wbDestRegister === fwdARegister
+          ? 0x01
+          : 0x00;
+  const fwdB =
+    fwdBRegister === null
+      ? 0
+      : memCanForward && memDestRegister === fwdBRegister
+        ? 0x02
+        : wbCanForward && wbDestRegister === fwdBRegister
+          ? 0x01
+          : 0x00;
 
   return {
     pcSrcCtrl: toControlBit(pcSrc),
@@ -383,6 +448,8 @@ function getControlSignalValues(args: {
     memReadCtrl: memInstruction ? toControlBit(memRead) : undefined,
     memWriteCtrl: memInstruction ? toControlBit(memWrite) : undefined,
     memToRegCtrl: memInstruction ? toControlBit(memToReg) : undefined,
+    fwdACtrl: exInstruction ? toControlCode(fwdA) : undefined,
+    fwdBCtrl: exInstruction ? toControlCode(fwdB) : undefined,
   };
 }
 
@@ -488,6 +555,8 @@ export function buildPipelineSignalValues(args: {
     idInstruction,
     exInstruction,
     memInstruction,
+    wbInstruction,
+    pipelineEffects,
     registerValues,
     labels,
     pcToInstructionIndex,
@@ -516,5 +585,7 @@ export function buildPipelineSignalValues(args: {
     memReadCtrl: controlSignalValues.memReadCtrl,
     memWriteCtrl: controlSignalValues.memWriteCtrl,
     memToRegCtrl: controlSignalValues.memToRegCtrl,
+    fwdACtrl: controlSignalValues.fwdACtrl,
+    fwdBCtrl: controlSignalValues.fwdBCtrl,
   };
 }

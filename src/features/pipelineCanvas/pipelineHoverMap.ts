@@ -20,7 +20,9 @@ export type HoverSignalKey =
   | "aluSrcCtrl"
   | "memReadCtrl"
   | "memWriteCtrl"
-  | "memToRegCtrl";
+  | "memToRegCtrl"
+  | "fwdACtrl"
+  | "fwdBCtrl";
 
 export type HoveredSignalValues = Partial<Record<HoverSignalKey, string>>;
 
@@ -60,4 +62,6 @@ export const PATH_SIGNAL_MAP: Partial<Record<string, { key: HoverSignalKey; labe
   ctrl_mem_read: { key: "memReadCtrl", label: "MemRead" },
   ctrl_mem_write: { key: "memWriteCtrl", label: "MemWrite" },
   ctrl_memtoreg: { key: "memToRegCtrl", label: "MemToReg" },
+  ctrl_fwd_a: { key: "fwdACtrl", label: "ForwardA" },
+  ctrl_fwd_b: { key: "fwdBCtrl", label: "ForwardB" },
 };
