@@ -203,25 +203,26 @@ export default function RegisterEditor({
                 placeholder="num * 0x200"
                 spellCheck={false}
               />
+              <Tooltip
+                className="registerFormulaHelp"
+                ariaLabel="Formula format help"
+                align="end"
+                content={
+                  <>
+                    Sets initial values for all registers except <code>$zero</code>.
+                    <br />
+                    <br />
+                    Examples:
+                    <br />
+                    <code>num * 0x200</code>
+                    <br />
+                    <code>i + 4</code>
+                    <br />
+                    <code>=0x200</code> or <code>i = 0x200</code>
+                  </>
+                }
+              />
             </div>
-            <Tooltip
-              ariaLabel="Formula format help"
-              align="end"
-              content={
-                <>
-                  Sets initial values for all registers except <code>$zero</code>.
-                  <br />
-                  <br />
-                  Examples:
-                  <br />
-                  <code>num * 0x200</code>
-                  <br />
-                  <code>i + 4</code>
-                  <br />
-                  <code>=0x200</code> or <code>i = 0x200</code>
-                </>
-              }
-            />
             <div className="registerFormulaActions">
               <Button size="sm" className="registerActionBtn" onClick={applyFormula}>
                 Apply

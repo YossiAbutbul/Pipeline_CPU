@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, FocusEvent } from "react";
-import { X } from "lucide-react";
+import { Info, X } from "lucide-react";
 import type { TooltipProps, TooltipVariant } from "./types";
 import "./tooltip.css";
 
@@ -16,7 +16,7 @@ function getDefaultTriggerLabel(variant: TooltipVariant) {
       return "v";
     case "info":
     default:
-      return "i";
+      return <Info size={12} aria-hidden="true" />;
   }
 }
 

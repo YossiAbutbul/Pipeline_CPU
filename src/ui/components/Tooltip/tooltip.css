@@ -19,8 +19,6 @@
   border-radius: 999px;
   background: var(--tooltip-bg);
   color: var(--muted);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
   line-height: 1;
   cursor: help;
   padding: 0;
@@ -60,7 +58,7 @@
   opacity: 0;
   pointer-events: none;
   overflow: visible;
-  z-index: 300;
+  z-index: 3000;
   transition:
     opacity var(--dur-1),
     transform var(--dur-2),
