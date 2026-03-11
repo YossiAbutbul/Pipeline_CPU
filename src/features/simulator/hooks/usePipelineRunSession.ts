@@ -1,6 +1,6 @@
 import { compileAndLog, compileProgram } from "@/features/compiler";
 import { parseProgram } from "@/features/compiler/parser";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { MemoryRuleConfig } from "@/app/store/appStore";
 import { createMemoryFromRules } from "../runtime/memoryRuntime";
 import { parseInitialPc } from "../core/parse";
@@ -40,6 +40,8 @@ export function usePipelineRunSession({
   const [history, setHistory] = useState<PipelineSnapshot[]>([]);
   const [runSessionActive, setRunSessionActive] = useState(false);
   const [registerHighlightCycle, setRegisterHighlightCycle] = useState(0);
+  const initialRegisterValuesRef = useRef<Record<string, string> | null>(null);
+  const initialMemoryWordsRef = useRef<SparseMemoryWords | null>(null);
 
   const parsedProgram = useMemo(() => {
     try {
@@ -96,15 +98,29 @@ export function usePipelineRunSession({
   }, [encodedInstructionHexByPc, instructions, memoryWords, parsedProgram.labels, pcToInstructionIndex, pipelineEffects, pipelineInstructionIndices, registerValues]);
 
   const resetPipeline = () => {
+    const shouldRestoreRunState =
+      runSessionActive || history.length > 0 || initialRegisterValuesRef.current !== null;
+    const restoredMemory =
+      shouldRestoreRunState && initialMemoryWordsRef.current
+        ? new Map(initialMemoryWordsRef.current)
+        : createMemoryFromRules(memoryRules);
+
     setPipeline(EMPTY_PIPELINE);
     setPipelineInstructionIndices(EMPTY_PIPELINE_INDICES);
     setPipelineEffects(EMPTY_PIPELINE_EFFECTS);
-    setMemoryWords(createMemoryFromRules(memoryRules));
+    setMemoryWords(restoredMemory);
     setChangedMemoryWords([]);
     setNextInstructionIndex(0);
     setHistory([]);
     setRunSessionActive(false);
     setRegisterHighlightCycle(0);
+
+    if (shouldRestoreRunState && initialRegisterValuesRef.current) {
+      onRegisterValuesChange({ ...initialRegisterValuesRef.current });
+    }
+
+    initialRegisterValuesRef.current = null;
+    initialMemoryWordsRef.current = null;
   };
 
   const run = () => {
@@ -127,10 +143,14 @@ export function usePipelineRunSession({
       return;
     }
 
+    const initialMemoryWords = createMemoryFromRules(memoryRules);
+    initialRegisterValuesRef.current = { ...registerValues };
+    initialMemoryWordsRef.current = new Map(initialMemoryWords);
+
     setPipeline(EMPTY_PIPELINE);
     setPipelineInstructionIndices(EMPTY_PIPELINE_INDICES);
     setPipelineEffects(EMPTY_PIPELINE_EFFECTS);
-    setMemoryWords(createMemoryFromRules(memoryRules));
+    setMemoryWords(initialMemoryWords);
     setChangedMemoryWords([]);
     setNextInstructionIndex(0);
     setHistory([]);
