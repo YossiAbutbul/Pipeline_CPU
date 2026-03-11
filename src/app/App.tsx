@@ -23,13 +23,13 @@ export default function App() {
   const { program, initialPc, statePanelTab, registers, memory } = appState;
 
   useEffect(() => {
-    document.documentElement.style.setProperty("--cursor-default", `url("${cursorDefaultLight}") 10 8, default`);
-    document.documentElement.style.setProperty("--cursor-action", `url("${cursorPointerLight}") 14 7, pointer`);
-    document.documentElement.style.setProperty("--cursor-help", `url("${cursorDefaultLight}") 10 8, help`);
-    document.documentElement.style.setProperty("--cursor-drag", `url("${cursorGrabLight}") 15 8, grab`);
-    document.documentElement.style.setProperty("--cursor-dragging", `url("${cursorGrabbingLight}") 16 8, grabbing`);
-    document.documentElement.style.setProperty("--cursor-disabled", `url("${cursorNotAllowedLight}") 10 8, not-allowed`);
-    document.documentElement.style.setProperty("--cursor-text", `url("${cursorTextLight}") 16 16, text`);
+    document.documentElement.style.setProperty("--cursor-default", `url("${cursorDefaultLight}") 13 10, default`);
+    document.documentElement.style.setProperty("--cursor-action", `url("${cursorPointerLight}") 18 9, pointer`);
+    document.documentElement.style.setProperty("--cursor-help", `url("${cursorDefaultLight}") 13 10, help`);
+    document.documentElement.style.setProperty("--cursor-drag", `url("${cursorGrabLight}") 19 10, grab`);
+    document.documentElement.style.setProperty("--cursor-dragging", `url("${cursorGrabbingLight}") 20 10, grabbing`);
+    document.documentElement.style.setProperty("--cursor-disabled", `url("${cursorNotAllowedLight}") 13 10, not-allowed`);
+    document.documentElement.style.setProperty("--cursor-text", `url("${cursorTextLight}") 20 20, text`);
 
     return () => {
       document.documentElement.style.setProperty("--cursor-default", "default");
