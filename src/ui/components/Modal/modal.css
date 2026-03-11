@@ -106,7 +106,7 @@
   border-radius: 8px;
   background: var(--surface-1);
   color: var(--muted);
-  cursor: pointer;
+  cursor: var(--cursor-action);
 }
 
 .modalCloseBtn:hover {
@@ -125,12 +125,14 @@
 .modalField {
   display: grid;
   gap: 6px;
+  cursor: var(--cursor-default);
 }
 
 .modalFieldLabel {
   color: var(--text);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
+  cursor: var(--cursor-default);
 }
 
 .modalInput {

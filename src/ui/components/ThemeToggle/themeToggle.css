@@ -19,7 +19,7 @@
   border-radius: 999px;
   border: 1px solid var(--border);
   background: var(--switch-track);
-  cursor: pointer;
+  cursor: var(--cursor-action);
   position: relative;
   transition: background var(--dur-1), border-color var(--dur-1);
 }

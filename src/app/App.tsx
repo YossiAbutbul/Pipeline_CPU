@@ -2,8 +2,16 @@ import PipelineCanvas from "@/features/pipelineCanvas/PipelineCanvas";
 import ProgramEditor from "@/features/program/ProgramEditor";
 import { usePipelineRunSession } from "@/features/simulator/hooks/usePipelineRunSession";
 import StatePanel from "@/features/statePanels/StatePanel";
+import {
+  cursorDefaultLight,
+  cursorGrabLight,
+  cursorGrabbingLight,
+  cursorNotAllowedLight,
+  cursorPointerLight,
+  cursorTextLight,
+} from "@/ui/cursors";
 import { NotificationToast } from "@/ui/components";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { clearPersistedAppState, createDefaultAppState, usePersistedAppState } from "./store/appStore";
 import "./app.css";
 
@@ -13,6 +21,26 @@ export default function App() {
     Array<{ id: number; title: string; message: string; tone: "success" | "error" }>
   >([]);
   const { program, initialPc, statePanelTab, registers, memory } = appState;
+
+  useEffect(() => {
+    document.documentElement.style.setProperty("--cursor-default", `url("${cursorDefaultLight}") 10 8, default`);
+    document.documentElement.style.setProperty("--cursor-action", `url("${cursorPointerLight}") 14 7, pointer`);
+    document.documentElement.style.setProperty("--cursor-help", `url("${cursorDefaultLight}") 10 8, help`);
+    document.documentElement.style.setProperty("--cursor-drag", `url("${cursorGrabLight}") 15 8, grab`);
+    document.documentElement.style.setProperty("--cursor-dragging", `url("${cursorGrabbingLight}") 16 8, grabbing`);
+    document.documentElement.style.setProperty("--cursor-disabled", `url("${cursorNotAllowedLight}") 10 8, not-allowed`);
+    document.documentElement.style.setProperty("--cursor-text", `url("${cursorTextLight}") 16 16, text`);
+
+    return () => {
+      document.documentElement.style.setProperty("--cursor-default", "default");
+      document.documentElement.style.setProperty("--cursor-action", "pointer");
+      document.documentElement.style.setProperty("--cursor-help", "help");
+      document.documentElement.style.setProperty("--cursor-drag", "grab");
+      document.documentElement.style.setProperty("--cursor-dragging", "grabbing");
+      document.documentElement.style.setProperty("--cursor-disabled", "not-allowed");
+      document.documentElement.style.setProperty("--cursor-text", "text");
+    };
+  }, []);
 
   const pushSuccessNotification = (message: string) => {
     const id = Date.now() + Math.floor(Math.random() * 1000);

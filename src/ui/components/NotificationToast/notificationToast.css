@@ -143,7 +143,7 @@
   border: none;
   background: transparent;
   color: var(--notification-close);
-  cursor: pointer;
+  cursor: var(--cursor-action);
   flex: 0 0 auto;
 }
 

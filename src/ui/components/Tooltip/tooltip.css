@@ -20,7 +20,7 @@
   background: var(--tooltip-bg);
   color: var(--muted);
   line-height: 1;
-  cursor: help;
+  cursor: var(--cursor-help);
   padding: 0;
 }
 
@@ -226,6 +226,6 @@
   background: transparent;
   color: currentColor;
   line-height: 1;
-  cursor: pointer;
+  cursor: var(--cursor-action);
   padding: 0;
 }

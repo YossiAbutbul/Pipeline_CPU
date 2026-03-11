@@ -145,7 +145,7 @@
   stroke: transparent;
   stroke-width: 8px;
   pointer-events: stroke;
-  cursor: pointer;
+  cursor: var(--cursor-action);
 }
 
 .diagramContent svg .cpuPath.cpuPathData.isHovered {
@@ -165,12 +165,12 @@
 }
 
 .diagramViewport.canDrag {
-  cursor: grab;
+  cursor: var(--cursor-drag);
   user-select: none;
 }
 
 .diagramViewport.canDrag.isDragging {
-  cursor: grabbing;
+  cursor: var(--cursor-dragging);
   user-select: none;
 }
 
