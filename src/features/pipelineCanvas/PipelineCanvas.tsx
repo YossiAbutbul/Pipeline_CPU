@@ -30,6 +30,9 @@ type Props = {
 };
 
 const STAGE_ORDER: Array<keyof PipelineSlots> = ["IF", "ID", "EX", "MEM", "WB"];
+const MIN_ZOOM = 0.3;
+const MAX_ZOOM = 2.5;
+const ZOOM_STEP = 0.1;
 
 export default function PipelineCanvas({
   pipeline,
@@ -51,9 +54,6 @@ export default function PipelineCanvas({
     startScrollTop: 0,
   });
 
-  const MIN_ZOOM = 0.3;
-  const MAX_ZOOM = 2.5;
-  const ZOOM_STEP = 0.1;
   const canDrag = zoom > 1;
 
   const handleZoomOut = () => {
@@ -304,7 +304,11 @@ export default function PipelineCanvas({
           onMouseDown={handleDragStart}
           onMouseUp={handleDragEnd}
         >
-          <div ref={diagramRef} className="diagramContent" style={{ width: `${90 * zoom}%` }}>
+          <div
+            ref={diagramRef}
+            className="diagramContent"
+            style={{ width: `${95 * zoom}%` }}
+          >
             <CpuDiagram style={{ width: "100%", height: "auto" }} />
             {hoverTooltip && (
               <div
