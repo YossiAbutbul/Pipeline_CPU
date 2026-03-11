@@ -57,7 +57,7 @@
   padding: var(--space-3) var(--space-3);
 }
 .panelHeader-lg {
-  padding: var(--space-4) var(--space-3);
+  padding: var(--space-4) var(--space-1);
 }
 .panelHeader-xl {
   padding: var(--space-4) var(--space-3) var(--space-3);
@@ -79,4 +79,3 @@
 .panelHeader-xl .panelTitle {
   font-size: 24px;
 }
-

@@ -69,6 +69,7 @@ export default function App() {
         <PipelineCanvas
           pipeline={pipeline}
           hoveredSignalValues={hoveredSignalValues}
+          onResetTracking={resetPipeline}
           onStepForward={stepForward}
           onStepBackward={stepBackward}
           canStepBackward={canStepBackward}

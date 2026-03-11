@@ -44,7 +44,7 @@ export default function ProgramEditor({
         <>
           <Button size="sm">Load</Button>
           {import.meta.env.DEV && (
-            <Button size="sm" variant="ghost" onClick={onResetPersistedData}>
+            <Button size="sm" variant="secondary" onClick={onResetPersistedData}>
               Reset Dbug
             </Button>
           )}

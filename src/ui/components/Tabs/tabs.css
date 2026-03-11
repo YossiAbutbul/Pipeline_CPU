@@ -34,8 +34,8 @@
 }
 
 .tabActive {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
+  color: var(--tab-active);
+  border-bottom-color: var(--tab-active);
 }
 
 .tab:focus-visible {
