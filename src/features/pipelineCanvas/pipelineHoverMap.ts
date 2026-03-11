@@ -22,7 +22,12 @@ export type HoverSignalKey =
   | "memWriteCtrl"
   | "memToRegCtrl"
   | "fwdACtrl"
-  | "fwdBCtrl";
+  | "fwdBCtrl"
+  | "exSourceAReg"
+  | "exSourceBReg"
+  | "memForwardDest"
+  | "wbForwardDest"
+  | "memForwardValue";
 
 export type HoveredSignalValues = Partial<Record<HoverSignalKey, string>>;
 
@@ -64,4 +69,10 @@ export const PATH_SIGNAL_MAP: Partial<Record<string, { key: HoverSignalKey; labe
   ctrl_memtoreg: { key: "memToRegCtrl", label: "MemToReg" },
   ctrl_fwd_a: { key: "fwdACtrl", label: "ForwardA" },
   ctrl_fwd_b: { key: "fwdBCtrl", label: "ForwardB" },
+  w_idex_rs_to_forwarding: { key: "exSourceAReg", label: "EX Source rs" },
+  w_idex_rt_to_forwarding: { key: "exSourceBReg", label: "EX Source rt" },
+  w_exmem_regdst4_to_forwarding: { key: "memForwardDest", label: "MEM Dest Register" },
+  w_memwb_regdst4_to_forwarding: { key: "wbForwardDest", label: "WB Dest Register" },
+  w_exmem_alu_out_to_mux_fwd_a: { key: "memForwardValue", label: "MEM Forward Value" },
+  w_exmem_alu_out4_to_mux_fwd_b: { key: "memForwardValue", label: "MEM Forward Value" },
 };

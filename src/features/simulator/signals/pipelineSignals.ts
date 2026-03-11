@@ -378,6 +378,34 @@ function getWbSignalValues(
   };
 }
 
+function getForwardingDataSignals(args: {
+  exInstruction: ParsedInstruction | null;
+  memInstruction: ParsedInstruction | null;
+  wbInstruction: ParsedInstruction | null;
+  pipelineEffects: PipelineEffectSlots;
+  registerValues: Record<string, string>;
+}): {
+  exSourceAReg?: string;
+  exSourceBReg?: string;
+  memForwardDest?: string;
+  wbForwardDest?: string;
+  memForwardValue?: string;
+} {
+  const { exInstruction, memInstruction, wbInstruction, pipelineEffects, registerValues } = args;
+  const [exSourceARegister, exSourceBRegister] = getExForwardRegisterNumbers(exInstruction);
+  const memDestRegister = getWriteBackRegisterNumber(memInstruction, pipelineEffects.MEM);
+  const wbDestRegister = getWriteBackRegisterNumber(wbInstruction, pipelineEffects.WB);
+  const memForwardValue = getExSignalValues(memInstruction, registerValues).aluResult;
+
+  return {
+    exSourceAReg: exSourceARegister === null ? undefined : toHex8(exSourceARegister),
+    exSourceBReg: exSourceBRegister === null ? undefined : toHex8(exSourceBRegister),
+    memForwardDest: memDestRegister === null ? undefined : toHex8(memDestRegister),
+    wbForwardDest: wbDestRegister === null ? undefined : toHex8(wbDestRegister),
+    memForwardValue,
+  };
+}
+
 function getControlSignalValues(args: {
   idInstruction: ParsedInstruction | null;
   exInstruction: ParsedInstruction | null;
@@ -551,6 +579,13 @@ export function buildPipelineSignalValues(args: {
   const exSignalValues = getExSignalValues(exInstruction, registerValues);
   const memSignalValues = getMemSignalValues(memInstruction, registerValues, memoryWords);
   const wbSignalValues = getWbSignalValues(wbInstruction, pipelineEffects.WB, registerValues, memoryWords);
+  const forwardingDataSignals = getForwardingDataSignals({
+    exInstruction,
+    memInstruction,
+    wbInstruction,
+    pipelineEffects,
+    registerValues,
+  });
   const controlSignalValues = getControlSignalValues({
     idInstruction,
     exInstruction,
@@ -587,5 +622,10 @@ export function buildPipelineSignalValues(args: {
     memToRegCtrl: controlSignalValues.memToRegCtrl,
     fwdACtrl: controlSignalValues.fwdACtrl,
     fwdBCtrl: controlSignalValues.fwdBCtrl,
+    exSourceAReg: forwardingDataSignals.exSourceAReg,
+    exSourceBReg: forwardingDataSignals.exSourceBReg,
+    memForwardDest: forwardingDataSignals.memForwardDest,
+    wbForwardDest: forwardingDataSignals.wbForwardDest,
+    memForwardValue: forwardingDataSignals.memForwardValue,
   };
 }
