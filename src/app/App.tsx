@@ -18,6 +18,8 @@ export default function App() {
     memoryWords,
     changedMemoryWords,
     runSessionActive,
+    registerHighlightCycle,
+    clockCycle,
     canStepForward,
     canStepBackward,
     resetPipeline,
@@ -69,6 +71,7 @@ export default function App() {
         <PipelineCanvas
           pipeline={pipeline}
           hoveredSignalValues={hoveredSignalValues}
+          clockCycle={clockCycle}
           onResetTracking={resetPipeline}
           onStepForward={stepForward}
           onStepBackward={stepBackward}
@@ -91,6 +94,7 @@ export default function App() {
           }
           registerValues={registers.values}
           onRegisterValuesChange={setRegisterValues}
+          registerHighlightCycle={registerHighlightCycle}
           memoryRules={memory.rules}
           onMemoryRulesChange={(rules) =>
             setAppState((prev) => ({ ...prev, memory: { ...prev.memory, rules } }))

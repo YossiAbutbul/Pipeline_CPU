@@ -12,6 +12,7 @@ type Props = {
   onRegisterIsEditingChange: (value: boolean) => void;
   registerValues: Record<string, string>;
   onRegisterValuesChange: (value: Record<string, string>) => void;
+  registerHighlightCycle: number;
   memoryRules: MemoryRuleConfig[];
   onMemoryRulesChange: (rules: MemoryRuleConfig[]) => void;
   runtimeMemoryWords: Map<number, number>;
@@ -28,6 +29,7 @@ export default function StatePanel({
   onRegisterIsEditingChange,
   registerValues,
   onRegisterValuesChange,
+  registerHighlightCycle,
   memoryRules,
   onMemoryRulesChange,
   runtimeMemoryWords,
@@ -56,6 +58,7 @@ export default function StatePanel({
           onIsEditingChange={onRegisterIsEditingChange}
           values={registerValues}
           onValuesChange={onRegisterValuesChange}
+          highlightCycle={registerHighlightCycle}
           isRuntimeLocked={isRuntimeLocked}
         />
       )}

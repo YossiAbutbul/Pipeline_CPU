@@ -23,6 +23,7 @@ type HoverTooltipState = {
 type Props = {
   pipeline: PipelineSlots;
   hoveredSignalValues: HoveredSignalValues;
+  clockCycle: number;
   onResetTracking: () => void;
   onStepForward: () => void;
   onStepBackward: () => void;
@@ -38,6 +39,7 @@ const ZOOM_STEP = 0.1;
 export default function PipelineCanvas({
   pipeline,
   hoveredSignalValues,
+  clockCycle,
   onResetTracking,
   onStepForward,
   onStepBackward,
@@ -252,60 +254,65 @@ export default function PipelineCanvas({
           })}
         </div>
         <div className="pipelineTrackerControls">
-          <Button
-            onClick={handleZoomOut}
-            disabled={zoom <= MIN_ZOOM}
-            className="btn-iconOnly"
-            aria-label="Zoom out diagram"
-            title="Zoom out diagram"
-          >
-            <ZoomOut size={16} aria-hidden="true" />
-          </Button>
-          <Button
-            onClick={handleZoomIn}
-            disabled={zoom >= MAX_ZOOM}
-            className="btn-iconOnly"
-            aria-label="Zoom in diagram"
-            title="Zoom in diagram"
-          >
-            <ZoomIn size={16} aria-hidden="true" />
-          </Button>
-        <Button
-          onClick={handleResetView}
-          className="btn-iconOnly"
-          aria-label="Reset diagram view"
-          title="Reset diagram view"
-        >
-          <RotateCcw size={16} aria-hidden="true" />
-        </Button>
-        <span className="pipelineControlsDivider" aria-hidden="true" />
-        <Button
-          onClick={onStepBackward}
-          disabled={!canStepBackward}
-          className="btn-iconOnly"
-          aria-label="Step backward"
-          title="Step backward"
-        >
-          <Rewind size={16} aria-hidden="true" />
-        </Button>
-        <Button
-          onClick={onResetTracking}
-          disabled={!canStepBackward && !canStepForward}
-          className="btn-iconOnly"
-          aria-label="Reset pipeline tracking"
-          title="Reset pipeline tracking"
-        >
-          <SkipBack size={16} aria-hidden="true" />
-        </Button>
-        <Button
-          onClick={onStepForward}
-          disabled={!canStepForward}
-          className="btn-iconOnly"
-          aria-label="Step forward"
-          title="Step forward"
-        >
-          <FastForward size={16} aria-hidden="true" />
-        </Button>
+          <div className="pipelineCycleCounter" aria-live="polite">
+            Clock Cycle: {clockCycle}
+          </div>
+          <div className="pipelineTrackerButtonGroup">
+            <Button
+              onClick={handleZoomOut}
+              disabled={zoom <= MIN_ZOOM}
+              className="btn-iconOnly"
+              aria-label="Zoom out diagram"
+              title="Zoom out diagram"
+            >
+              <ZoomOut size={16} aria-hidden="true" />
+            </Button>
+            <Button
+              onClick={handleZoomIn}
+              disabled={zoom >= MAX_ZOOM}
+              className="btn-iconOnly"
+              aria-label="Zoom in diagram"
+              title="Zoom in diagram"
+            >
+              <ZoomIn size={16} aria-hidden="true" />
+            </Button>
+            <Button
+              onClick={handleResetView}
+              className="btn-iconOnly"
+              aria-label="Reset diagram view"
+              title="Reset diagram view"
+            >
+              <RotateCcw size={16} aria-hidden="true" />
+            </Button>
+            <span className="pipelineControlsDivider" aria-hidden="true" />
+            <Button
+              onClick={onStepBackward}
+              disabled={!canStepBackward}
+              className="btn-iconOnly"
+              aria-label="Step backward"
+              title="Step backward"
+            >
+              <Rewind size={16} aria-hidden="true" />
+            </Button>
+            <Button
+              onClick={onResetTracking}
+              disabled={!canStepBackward && !canStepForward}
+              className="btn-iconOnly"
+              aria-label="Reset pipeline tracking"
+              title="Reset pipeline tracking"
+            >
+              <SkipBack size={16} aria-hidden="true" />
+            </Button>
+            <Button
+              onClick={onStepForward}
+              disabled={!canStepForward}
+              className="btn-iconOnly"
+              aria-label="Step forward"
+              title="Step forward"
+            >
+              <FastForward size={16} aria-hidden="true" />
+            </Button>
+          </div>
         </div>
 
         <div

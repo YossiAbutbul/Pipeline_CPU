@@ -17,6 +17,7 @@ type Props = {
   onIsEditingChange: (value: boolean) => void;
   values: Record<string, string>;
   onValuesChange: (value: Record<string, string>) => void;
+  highlightCycle: number;
   isRuntimeLocked: boolean;
 };
 
@@ -27,6 +28,7 @@ export default function RegisterEditor({
   onIsEditingChange,
   values,
   onValuesChange,
+  highlightCycle,
   isRuntimeLocked,
 }: Props) {
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +39,6 @@ export default function RegisterEditor({
   const [hasTableOverflow, setHasTableOverflow] = useState(false);
   const tableBodyRef = useRef<HTMLDivElement | null>(null);
   const previousValuesRef = useRef<Record<string, string> | null>(null);
-  const highlightTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const valueRows = useMemo(
     () =>
@@ -162,9 +163,16 @@ export default function RegisterEditor({
   }, [values]);
 
   useEffect(() => {
+    if (highlightCycle === 0) {
+      previousValuesRef.current = values;
+      setRecentlyChangedAliases({});
+      return;
+    }
+
     const previous = previousValuesRef.current;
     previousValuesRef.current = values;
     if (!previous) {
+      setRecentlyChangedAliases({});
       return;
     }
 
@@ -172,43 +180,10 @@ export default function RegisterEditor({
       .map((reg) => reg.alias)
       .filter((alias) => (previous[alias] ?? "0x00000000") !== (values[alias] ?? "0x00000000"));
 
-    if (changedAliases.length === 0) {
-      return;
-    }
-
-    setRecentlyChangedAliases((prev) => {
-      const next = { ...prev };
-      for (const alias of changedAliases) {
-        next[alias] = true;
-      }
-      return next;
-    });
-
-    for (const alias of changedAliases) {
-      const existing = highlightTimeoutsRef.current[alias];
-      if (existing) {
-        clearTimeout(existing);
-      }
-
-      highlightTimeoutsRef.current[alias] = setTimeout(() => {
-        setRecentlyChangedAliases((prev) => {
-          const next = { ...prev };
-          delete next[alias];
-          return next;
-        });
-        delete highlightTimeoutsRef.current[alias];
-      }, 1200);
-    }
-  }, [values]);
-
-  useEffect(
-    () => () => {
-      for (const timeout of Object.values(highlightTimeoutsRef.current)) {
-        clearTimeout(timeout);
-      }
-    },
-    [],
-  );
+    setRecentlyChangedAliases(
+      Object.fromEntries(changedAliases.map((alias) => [alias, true] as const)),
+    );
+  }, [highlightCycle, values]);
 
   return (
     <div className="registerEditor">

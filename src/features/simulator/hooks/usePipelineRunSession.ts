@@ -39,6 +39,7 @@ export function usePipelineRunSession({
   const [nextInstructionIndex, setNextInstructionIndex] = useState(0);
   const [history, setHistory] = useState<PipelineSnapshot[]>([]);
   const [runSessionActive, setRunSessionActive] = useState(false);
+  const [registerHighlightCycle, setRegisterHighlightCycle] = useState(0);
 
   const parsedProgram = useMemo(() => {
     try {
@@ -80,6 +81,7 @@ export function usePipelineRunSession({
   const hasPipelineWork = Object.values(pipelineInstructionIndices).some((value) => value !== null);
   const canStepForward = runSessionActive && (hasInstructionsToInject || hasPipelineWork);
   const canStepBackward = runSessionActive && history.length > 0;
+  const clockCycle = history.length;
   const hoveredSignalValues = useMemo<PipelineSignalValues>(() => {
     return buildPipelineSignalValues({
       instructions,
@@ -102,6 +104,7 @@ export function usePipelineRunSession({
     setNextInstructionIndex(0);
     setHistory([]);
     setRunSessionActive(false);
+    setRegisterHighlightCycle(0);
   };
 
   const run = () => {
@@ -132,6 +135,7 @@ export function usePipelineRunSession({
     setNextInstructionIndex(0);
     setHistory([]);
     setRunSessionActive(true);
+    setRegisterHighlightCycle(0);
   };
 
   const stepForward = () => {
@@ -158,6 +162,7 @@ export function usePipelineRunSession({
     setMemoryWords(result.memoryWords);
     setChangedMemoryWords(result.changedMemoryWords);
     setNextInstructionIndex(result.nextInstructionIndex);
+    setRegisterHighlightCycle((prev) => prev + 1);
 
     if (result.registerValues !== registerValues) {
       onRegisterValuesChange(result.registerValues);
@@ -191,6 +196,7 @@ export function usePipelineRunSession({
       });
       setChangedMemoryWords(previous.changedMemoryWords);
       setNextInstructionIndex(previous.nextInstructionIndex);
+      setRegisterHighlightCycle((currentCycle) => currentCycle + 1);
       onRegisterValuesChange(previous.registerValues);
 
       return prev.slice(0, -1);
@@ -202,6 +208,8 @@ export function usePipelineRunSession({
     memoryWords,
     changedMemoryWords,
     runSessionActive,
+    registerHighlightCycle,
+    clockCycle,
     canStepForward,
     canStepBackward,
     resetPipeline,
