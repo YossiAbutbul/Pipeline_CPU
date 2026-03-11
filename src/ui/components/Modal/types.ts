@@ -55,6 +55,7 @@ export type ModalProps = {
   submitLabel?: string;
   cancelLabel?: string;
   closeOnBackdropClick?: boolean;
+  renderStatus?: (values: Record<string, string>) => ReactNode;
   renderPreview?: (values: Record<string, string>) => ReactNode;
   onClose: () => void;
   onSubmit: (result: ModalSubmitResult) => void;

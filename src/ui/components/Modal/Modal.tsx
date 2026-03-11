@@ -62,6 +62,7 @@ export function Modal({
   submitLabel = "Save",
   cancelLabel = "Cancel",
   closeOnBackdropClick = true,
+  renderStatus,
   renderPreview,
   onClose,
   onSubmit,
@@ -208,6 +209,8 @@ export function Modal({
               {field.helperText && <span className="modalHelperText">{field.helperText}</span>}
             </label>
           ))}
+
+          {renderStatus && <div className="modalStatusLayer">{renderStatus(values)}</div>}
 
           {renderPreview && <div className="modalPreviewBox">{renderPreview(values)}</div>}
 

@@ -204,13 +204,14 @@ export default function RegisterEditor({
               />
               {error && (
                 <Tooltip
+                  className="registerFormulaError"
                   variant="error"
                   ariaLabel="Formula error details"
                   align="start"
                   showTrigger={false}
                   open
-                  autoDismissMs={2500}
                   dismissible
+                  autoDismissMs={2800}
                   onDismiss={() => setError(null)}
                   content={error}
                 />

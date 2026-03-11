@@ -114,12 +114,26 @@
 }
 
 .modalBody {
+  position: relative;
   flex: 1;
   min-height: 0;
   overflow: auto;
   padding: var(--space-3);
   display: grid;
   gap: var(--space-2);
+}
+
+.modalStatusLayer {
+  position: absolute;
+  left: var(--space-3);
+  right: var(--space-3);
+  bottom: calc(var(--space-3) + 46px);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.modalStatusLayer > * {
+  pointer-events: auto;
 }
 
 .modalField {

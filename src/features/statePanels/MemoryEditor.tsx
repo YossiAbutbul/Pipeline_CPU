@@ -1,4 +1,4 @@
-import type { MemoryRuleConfig, WriteMode } from "@/app/store/appStore";
+﻿import type { MemoryRuleConfig, WriteMode } from "@/app/store/appStore";
 import type { ModalField } from "@/ui/components";
 import { Button, Modal, Tooltip } from "@/ui/components";
 import { Pencil, Plus, Trash2 } from "lucide-react";

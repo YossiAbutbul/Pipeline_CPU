@@ -22,6 +22,7 @@ function getDefaultTriggerLabel(variant: TooltipVariant) {
 
 export function Tooltip({
   content,
+  className = "",
   ariaLabel = "More information",
   align = "center",
   variant = "info",
@@ -43,9 +44,10 @@ export function Tooltip({
   const isVisible = (open || hovered || focused) && !closing;
 
   const updateShift = useCallback(() => {
-    if (!contentRef.current) {
+    if (!contentRef.current || !wrapRef.current) {
       return;
     }
+    const anchorRect = wrapRef.current.getBoundingClientRect();
     const rect = contentRef.current.getBoundingClientRect();
     const padding = 10;
     let nextShift = 0;
@@ -63,7 +65,9 @@ export function Tooltip({
     }
     setShiftY((prev) => (prev === nextShiftY ? prev : nextShiftY));
 
-    const nextPlacement = rect.bottom > window.innerHeight - padding ? "top" : "bottom";
+    const spaceBelow = window.innerHeight - anchorRect.bottom - padding;
+    const spaceAbove = anchorRect.top - padding;
+    const nextPlacement = spaceBelow < rect.height && spaceAbove > spaceBelow ? "top" : "bottom";
     setPlacement((prev) => (prev === nextPlacement ? prev : nextPlacement));
   }, []);
 
@@ -81,9 +85,13 @@ export function Tooltip({
     if (!isVisible) {
       return;
     }
-    const onResize = () => updateShift();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    const onViewportChange = () => updateShift();
+    window.addEventListener("resize", onViewportChange);
+    window.addEventListener("scroll", onViewportChange, true);
+    return () => {
+      window.removeEventListener("resize", onViewportChange);
+      window.removeEventListener("scroll", onViewportChange, true);
+    };
   }, [isVisible, updateShift]);
 
   useEffect(() => {
@@ -122,7 +130,7 @@ export function Tooltip({
   return (
     <span
       ref={wrapRef}
-      className={`tooltipWrap ${showTrigger ? "" : "tooltipWrapNoTrigger"} ${isVisible ? "tooltipVisible" : ""} ${closing ? "tooltipClosing" : ""}`}
+      className={`tooltipWrap ${showTrigger ? "" : "tooltipWrapNoTrigger"} ${isVisible ? "tooltipVisible" : ""} ${closing ? "tooltipClosing" : ""} ${className}`.trim()}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocus={() => setFocused(true)}
