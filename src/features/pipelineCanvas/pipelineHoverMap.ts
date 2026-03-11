@@ -14,7 +14,13 @@ export type HoverSignalKey =
   | "memoryWriteData"
   | "memoryReadData"
   | "writeBackValue"
-  | "writeBackDest";
+  | "writeBackDest"
+  | "pcSrcCtrl"
+  | "regDstCtrl"
+  | "aluSrcCtrl"
+  | "memReadCtrl"
+  | "memWriteCtrl"
+  | "memToRegCtrl";
 
 export type HoveredSignalValues = Partial<Record<HoverSignalKey, string>>;
 
@@ -48,4 +54,10 @@ export const PATH_SIGNAL_MAP: Partial<Record<string, { key: HoverSignalKey; labe
   w_mux_memtoreg_to_mux_fwd_b: { key: "writeBackValue", label: "Writeback Value" },
   w_exmem_regdst4_memwb: { key: "writeBackDest", label: "Writeback Register" },
   w_dst2_reg_to_regfile: { key: "writeBackDest", label: "Writeback Register" },
+  ctrl_pcsrc: { key: "pcSrcCtrl", label: "PCSrc" },
+  ctrl_regdst: { key: "regDstCtrl", label: "RegDst" },
+  ctrl_alusrc: { key: "aluSrcCtrl", label: "ALUSrc" },
+  ctrl_mem_read: { key: "memReadCtrl", label: "MemRead" },
+  ctrl_mem_write: { key: "memWriteCtrl", label: "MemWrite" },
+  ctrl_memtoreg: { key: "memToRegCtrl", label: "MemToReg" },
 };

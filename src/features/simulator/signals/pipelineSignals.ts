@@ -6,6 +6,7 @@ import { parseRegisterValue, toHex32 } from "@/features/statePanels/registerEdit
 import { parseImmediate } from "../core/parse";
 import type { HoveredSignalValues } from "@/features/pipelineCanvas/pipelineHoverMap";
 import { readWord } from "../runtime/memoryRuntime";
+import { resolveControlFlow } from "../stages/controlFlow";
 
 export type PipelineSignalValues = HoveredSignalValues;
 
@@ -16,6 +17,10 @@ const REGISTER_ALIAS_BY_NUMBER = Object.entries(REG_INFO).reduce<Record<number, 
 
 function toHex8(value: number): string {
   return `0x${(value & 0xff).toString(16).toUpperCase().padStart(2, "0")}`;
+}
+
+function toControlBit(value: boolean): string {
+  return value ? "0x01" : "0x00";
 }
 
 function parseMemoryBaseRegister(operand: string): number | null {
@@ -333,6 +338,54 @@ function getWbSignalValues(
   };
 }
 
+function getControlSignalValues(args: {
+  idInstruction: ParsedInstruction | null;
+  exInstruction: ParsedInstruction | null;
+  memInstruction: ParsedInstruction | null;
+  registerValues: Record<string, string>;
+  labels: Record<string, number>;
+  pcToInstructionIndex: Map<number, number>;
+}): {
+  pcSrcCtrl?: string;
+  regDstCtrl?: string;
+  aluSrcCtrl?: string;
+  memReadCtrl?: string;
+  memWriteCtrl?: string;
+  memToRegCtrl?: string;
+} {
+  const { idInstruction, exInstruction, memInstruction, registerValues, labels, pcToInstructionIndex } = args;
+
+  const idMnemonic = idInstruction?.mnemonic;
+  const memMnemonic = memInstruction?.mnemonic;
+
+  const regDst =
+    Boolean(idMnemonic) &&
+    ["add", "addu", "sub", "subu", "and", "or", "xor", "nor", "slt", "sltu", "sll", "srl", "sra", "sllv", "srlv", "srav", "move"].includes(
+      idMnemonic!,
+    );
+  const aluSrc =
+    Boolean(idMnemonic) &&
+    ["addi", "addiu", "andi", "ori", "xori", "slti", "sltiu", "lui", "li", "lw", "sw", "lb", "lbu", "lh", "lhu", "sb", "sh"].includes(
+      idMnemonic!,
+    );
+  const memRead = Boolean(memMnemonic) && ["lw"].includes(memMnemonic!);
+  const memWrite = Boolean(memMnemonic) && ["sw"].includes(memMnemonic!);
+  const memToReg = Boolean(memMnemonic) && ["lw"].includes(memMnemonic!);
+  const pcSrc =
+    exInstruction !== null
+      ? resolveControlFlow(exInstruction, registerValues, labels, pcToInstructionIndex).taken
+      : false;
+
+  return {
+    pcSrcCtrl: toControlBit(pcSrc),
+    regDstCtrl: idInstruction ? toControlBit(regDst) : undefined,
+    aluSrcCtrl: idInstruction ? toControlBit(aluSrc) : undefined,
+    memReadCtrl: memInstruction ? toControlBit(memRead) : undefined,
+    memWriteCtrl: memInstruction ? toControlBit(memWrite) : undefined,
+    memToRegCtrl: memInstruction ? toControlBit(memToReg) : undefined,
+  };
+}
+
 function getMemSignalValues(
   instruction: ParsedInstruction | null,
   values: Record<string, string>,
@@ -403,8 +456,19 @@ export function buildPipelineSignalValues(args: {
   encodedInstructionHexByPc: Record<number, string>;
   registerValues: Record<string, string>;
   memoryWords: SparseMemoryWords;
+  labels: Record<string, number>;
+  pcToInstructionIndex: Map<number, number>;
 }): PipelineSignalValues {
-  const { instructions, pipelineInstructionIndices, pipelineEffects, encodedInstructionHexByPc, registerValues, memoryWords } = args;
+  const {
+    instructions,
+    pipelineInstructionIndices,
+    pipelineEffects,
+    encodedInstructionHexByPc,
+    registerValues,
+    memoryWords,
+    labels,
+    pcToInstructionIndex,
+  } = args;
   const ifInstructionIndex = pipelineInstructionIndices.IF;
   const idInstructionIndex = pipelineInstructionIndices.ID;
   const exInstructionIndex = pipelineInstructionIndices.EX;
@@ -420,6 +484,14 @@ export function buildPipelineSignalValues(args: {
   const exSignalValues = getExSignalValues(exInstruction, registerValues);
   const memSignalValues = getMemSignalValues(memInstruction, registerValues, memoryWords);
   const wbSignalValues = getWbSignalValues(wbInstruction, pipelineEffects.WB, registerValues, memoryWords);
+  const controlSignalValues = getControlSignalValues({
+    idInstruction,
+    exInstruction,
+    memInstruction,
+    registerValues,
+    labels,
+    pcToInstructionIndex,
+  });
 
   return {
     pc: ifInstruction ? `0x${(ifInstruction.pc >>> 0).toString(16).toUpperCase().padStart(8, "0")}` : undefined,
@@ -438,5 +510,11 @@ export function buildPipelineSignalValues(args: {
     memoryReadData: memSignalValues.memoryReadData,
     writeBackValue: wbSignalValues.writeBackValue,
     writeBackDest: wbSignalValues.writeBackDest,
+    pcSrcCtrl: controlSignalValues.pcSrcCtrl,
+    regDstCtrl: controlSignalValues.regDstCtrl,
+    aluSrcCtrl: controlSignalValues.aluSrcCtrl,
+    memReadCtrl: controlSignalValues.memReadCtrl,
+    memWriteCtrl: controlSignalValues.memWriteCtrl,
+    memToRegCtrl: controlSignalValues.memToRegCtrl,
   };
 }
