@@ -23,13 +23,14 @@
 
 .registerFormulaInput,
 .registerValueInput {
-  height: 32px;
+  box-sizing: border-box;
+  height: 36px;
   border: none;
-  border-radius: var(--radius);
+  border-radius: 8px;
   background: transparent;
   color: var(--text);
   font-size: var(--font-size-sm);
-  padding: 0 var(--space-1);
+  padding: 0 12px;
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
@@ -39,7 +40,9 @@
   width: 100%;
   max-width: 180px;
   min-width: 0;
-  padding-left: var(--space-2);
+  border: var(--border-1) solid
+    color-mix(in oklab, var(--border) 88%, transparent);
+  background: color-mix(in oklab, var(--surface-1) 72%, var(--surface-2));
 }
 
 .registerFormulaInputWrap {
@@ -63,8 +66,13 @@
 }
 
 .registerValueInputEditable {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 104px;
   border: var(--border-1) solid var(--border);
   background: var(--register-row-bg, var(--surface-2));
+  height: 32px;
+  padding: 0 var(--space-1);
 }
 
 .registerFormulaActions {
@@ -105,10 +113,11 @@
 }
 
 .registerActionBtn {
-  height: 28px;
-  padding: 4px 8px;
+  min-height: 36px;
+  height: 36px;
+  padding: 0 12px;
   border-radius: 8px;
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
 }
 
 .registerList {
@@ -133,8 +142,8 @@
 .registerHeaderRow,
 .registerRow {
   display: grid;
-  grid-template-columns: 72px 56px minmax(0, 1fr);
-  gap: var(--space-2);
+  grid-template-columns: 56px 56px minmax(0, 1fr);
+  gap: var(--space-3);
   align-items: center;
   min-width: 0;
 }
@@ -158,6 +167,10 @@
   font-weight: var(--font-weight-medium);
   justify-self: start;
   letter-spacing: 0.02em;
+}
+
+.registerHeaderRow .registerHeaderCell:nth-child(2) {
+  justify-self: center;
 }
 
 .registerRow {
@@ -195,6 +208,7 @@
   font-size: var(--font-size-xs);
   font-family: var(--font-family-ui);
   font-weight: var(--font-weight-regular);
+  justify-self: center;
 }
 
 .registerFormulaInput:read-only,

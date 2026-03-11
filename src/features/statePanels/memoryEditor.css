@@ -21,10 +21,11 @@
 }
 
 .memoryActionBtn {
-  height: 28px;
-  padding: 4px 8px;
+  min-height: 36px;
+  height: 36px;
+  padding: 0 12px;
   border-radius: 8px;
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
 }
 
 .memoryAddBtn {
@@ -184,17 +185,19 @@
 }
 
 .memoryRuleDelete {
-  min-width: 26px;
-  width: 26px;
-  height: 26px;
+  min-width: 36px;
+  width: 36px;
+  min-height: 36px;
+  height: 36px;
   padding: 0;
   border-radius: 8px;
 }
 
 .memoryRuleEdit {
-  min-width: 26px;
-  width: 26px;
-  height: 26px;
+  min-width: 36px;
+  width: 36px;
+  min-height: 36px;
+  height: 36px;
   padding: 0;
   border-radius: 8px;
 }
