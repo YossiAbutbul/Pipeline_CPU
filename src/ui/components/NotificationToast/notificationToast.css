@@ -128,9 +128,9 @@
   color: var(--notification-body);
   font-size: var(--toast-body-size);
   line-height: var(--line-height-ui);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .notificationToastClose {

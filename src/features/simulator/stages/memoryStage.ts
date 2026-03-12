@@ -2,8 +2,9 @@ import { parseRegister } from "@/features/compiler/registers";
 import type { ParsedInstruction } from "@/features/compiler/types";
 import { parseRegisterValue } from "@/features/statePanels/registerEditorModel";
 import { parseImmediate } from "../core/parse";
-import { readWord, writeWord } from "../runtime/memoryRuntime";
+import { MEMORY_BYTE_COUNT, readWord, writeWord } from "../runtime/memoryRuntime";
 import type { MemoryWordDelta, SparseMemoryWords, StageEffect } from "../core/types";
+import { createRuntimeStageError } from "./runtimeError";
 
 type MemoryStageResult = {
   memoryWords: SparseMemoryWords;
@@ -77,68 +78,69 @@ export function runMemoryStage(
 
   const { mnemonic, operands } = instruction;
 
-  try {
-    if (mnemonic === "sw") {
-      if (operands.length !== 2) {
-        return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
-      }
-
-      const rt = parseRegister(operands[0]);
-      const { offset, base } = parseMemoryOperand(operands[1]);
-      const address = (getRegisterValue(registerValues, base) + offset) >>> 0;
-      if (address % 4 !== 0) {
-        return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
-      }
-
-      const currentValue = readWord(memoryWords, address);
-      const nextValue = getRegisterValue(registerValues, rt);
-      if (currentValue === nextValue) {
-        return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
-      }
-
-      const nextMemory = new Map(memoryWords);
-      writeWord(nextMemory, address, nextValue);
-      return {
-        memoryWords: nextMemory,
-        effect: null,
-        changedMemoryWords: [address / 4],
-        deltas: [
-          {
-            wordIndex: address / 4,
-            previousValue: currentValue,
-            nextValue,
-          },
-        ],
-      };
+  if (mnemonic === "sw") {
+    if (operands.length !== 2) {
+      return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
     }
 
-    if (mnemonic === "lw") {
-      if (operands.length !== 2) {
-        return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
-      }
+    const rt = parseRegister(operands[0]);
+    const { offset, base } = parseMemoryOperand(operands[1]);
+    const address = getRegisterValue(registerValues, base) + offset;
+    if (address % 4 !== 0) {
+      throw createRuntimeStageError("MEM", instruction, `unaligned word store at address ${address}`);
+    }
+    if (address < 0 || address > MEMORY_BYTE_COUNT - 4) {
+      throw createRuntimeStageError("MEM", instruction, `memory store out of range at address ${address}`);
+    }
 
-      const rt = parseRegister(operands[0]);
-      const { offset, base } = parseMemoryOperand(operands[1]);
-      const address = (getRegisterValue(registerValues, base) + offset) >>> 0;
-      if (address % 4 !== 0) {
-        return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
-      }
+    const currentValue = readWord(memoryWords, address);
+    const nextValue = getRegisterValue(registerValues, rt);
+    if (currentValue === nextValue) {
+      return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
+    }
 
-      return {
-        memoryWords,
-        effect: {
-          wbWrite: {
-            registerNumber: rt,
-            value: readWord(memoryWords, address),
-          },
+    const nextMemory = new Map(memoryWords);
+    writeWord(nextMemory, address, nextValue);
+    return {
+      memoryWords: nextMemory,
+      effect: null,
+      changedMemoryWords: [address / 4],
+      deltas: [
+        {
+          wordIndex: address / 4,
+          previousValue: currentValue,
+          nextValue,
         },
-        changedMemoryWords: [],
-        deltas: [],
-      };
+      ],
+    };
+  }
+
+  if (mnemonic === "lw") {
+    if (operands.length !== 2) {
+      return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
     }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.warn(`[Pipeline] MEM execution skipped for "${instruction.source}": ${message}`);
+
+    const rt = parseRegister(operands[0]);
+    const { offset, base } = parseMemoryOperand(operands[1]);
+    const address = getRegisterValue(registerValues, base) + offset;
+    if (address % 4 !== 0) {
+      throw createRuntimeStageError("MEM", instruction, `unaligned word load at address ${address}`);
+    }
+    if (address < 0 || address > MEMORY_BYTE_COUNT - 4) {
+      throw createRuntimeStageError("MEM", instruction, `memory load out of range at address ${address}`);
+    }
+
+    return {
+      memoryWords,
+      effect: {
+        wbWrite: {
+          registerNumber: rt,
+          value: readWord(memoryWords, address),
+        },
+      },
+      changedMemoryWords: [],
+      deltas: [],
+    };
   }
 
   return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };

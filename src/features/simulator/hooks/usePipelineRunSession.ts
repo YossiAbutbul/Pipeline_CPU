@@ -23,6 +23,7 @@ type UsePipelineRunSessionArgs = {
   registerValues: Record<string, string>;
   onRegisterValuesChange: (values: Record<string, string>) => void;
   onRunError: (message: string) => void;
+  onRuntimeError: (message: string) => void;
 };
 
 function hasExecutableSource(program: string) {
@@ -38,6 +39,7 @@ export function usePipelineRunSession({
   registerValues,
   onRegisterValuesChange,
   onRunError,
+  onRuntimeError,
 }: UsePipelineRunSessionArgs) {
   const [pipeline, setPipeline] = useState<PipelineSlots>(EMPTY_PIPELINE);
   const [pipelineInstructionIndices, setPipelineInstructionIndices] =
@@ -185,17 +187,25 @@ export function usePipelineRunSession({
       return;
     }
 
-    const result = stepPipelineForward({
-      pipeline,
-      pipelineInstructionIndices,
-      pipelineEffects,
-      nextInstructionIndex,
-      instructions,
-      labels: parsedProgram.labels,
-      pcToInstructionIndex,
-      registerValues,
-      memoryWords,
-    });
+    let result;
+    try {
+      result = stepPipelineForward({
+        pipeline,
+        pipelineInstructionIndices,
+        pipelineEffects,
+        nextInstructionIndex,
+        instructions,
+        labels: parsedProgram.labels,
+        pcToInstructionIndex,
+        registerValues,
+        memoryWords,
+      });
+    } catch (error) {
+      const appError = notifyAppError(onRuntimeError, error, "runtime", "Runtime execution failed");
+      console.error(`[Pipeline] Runtime execution failed: ${appError.message}`);
+      setRunSessionActive(false);
+      return;
+    }
 
     setHistory((prev) => [...prev, result.snapshot]);
     setPipeline(result.pipeline);

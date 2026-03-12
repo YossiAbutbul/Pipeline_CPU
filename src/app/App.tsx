@@ -93,6 +93,7 @@ export default function App() {
     registerValues: registers.values,
     onRegisterValuesChange: setRegisterValues,
     onRunError: pushErrorNotification,
+    onRuntimeError: pushErrorNotification,
   });
 
   useEffect(() => {
