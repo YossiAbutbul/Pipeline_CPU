@@ -79,7 +79,7 @@ export default function ProgramEditor({
                   setIsSettingsOpen(false);
                 }}
               >
-                <RotateCcw size={14} aria-hidden="true" />
+                <RotateCcw size={18} aria-hidden="true" />
                 Reset Dbug
               </button>
 
