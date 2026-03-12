@@ -3,7 +3,7 @@ import { REG_INFO } from "@/monaco/mips/mipsData";
 export function parseRegister(token: string): number {
   const normalized = token.trim().toLowerCase();
   if (!normalized.startsWith("$")) {
-    throw new Error(`Invalid register "${token}"`);
+    throw new Error(`Invalid register "${token}". Registers must start with "$"`);
   }
 
   const body = normalized.slice(1);
@@ -19,5 +19,5 @@ export function parseRegister(token: string): number {
     return alias.num;
   }
 
-  throw new Error(`Unknown register "${token}"`);
+  throw new Error(`Unknown register "${token}". Use $0-$31 or a valid alias like $t0`);
 }

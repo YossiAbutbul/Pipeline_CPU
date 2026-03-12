@@ -3,6 +3,7 @@ import type { ParsedInstruction } from "@/features/compiler/types";
 import { REGISTERS, parseRegisterValue, toHex32 } from "@/features/statePanels/registerEditorModel";
 import { parseImmediate } from "../core/parse";
 import type { StageEffect } from "../core/types";
+import { createRuntimeStageError } from "./runtimeError";
 
 const REGISTER_ALIAS_BY_NUMBER = REGISTERS.reduce<Record<number, string>>((acc, reg) => {
   acc[reg.num] = reg.alias;
@@ -144,7 +145,7 @@ export function applyWriteBack(
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.warn(`[Pipeline] WB execution skipped for "${instruction.source}": ${message}`);
+    throw createRuntimeStageError("WB", instruction, message);
   }
 
   return values;

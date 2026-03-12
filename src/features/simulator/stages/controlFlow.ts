@@ -1,6 +1,7 @@
 import { parseRegister } from "@/features/compiler/registers";
 import type { ParsedInstruction } from "@/features/compiler/types";
 import { parseRegisterValue } from "@/features/statePanels/registerEditorModel";
+import { createRuntimeStageError } from "./runtimeError";
 
 type ControlFlowResult = {
   taken: boolean;
@@ -156,7 +157,7 @@ export function resolveControlFlow(
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.warn(`[Pipeline] Control-flow evaluation skipped for "${instruction.source}": ${message}`);
+    throw createRuntimeStageError("EX", instruction, message);
   }
 
   return { taken: false, targetInstructionIndex: null };

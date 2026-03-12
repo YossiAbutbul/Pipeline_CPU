@@ -1,5 +1,6 @@
 ﻿import type { MemoryRuleConfig, WriteMode } from "@/app/store/appStore";
 import type { ModalField } from "@/ui/components";
+import { notifyAppError } from "@/app/errors/appError";
 import { Button, GuidedTourTooltip, Modal, Tooltip } from "@/ui/components";
 import { ChevronDown, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -689,7 +690,7 @@ export default function MemoryEditor({
             }
             addRuleFromModal(values);
           } catch (err) {
-            onNotifyError(err instanceof Error ? err.message : String(err));
+            notifyAppError(onNotifyError, err, "memory", "Failed to save memory rule");
           }
         }}
       />

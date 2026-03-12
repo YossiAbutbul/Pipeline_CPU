@@ -4,6 +4,7 @@ import { usePipelineRunSession } from "@/features/simulator/hooks/usePipelineRun
 import StatePanel from "@/features/statePanels/StatePanel";
 import { GuidedTourTooltip, NotificationToast } from "@/ui/components";
 import { useCallback, useEffect, useState } from "react";
+import type { NotificationItem } from "@/ui/components/NotificationToast/NotificationToast";
 import { clearPersistedAppState, createDefaultAppState, usePersistedAppState } from "./store/appStore";
 import "./app.css";
 
@@ -20,23 +21,44 @@ function loadInitialGuidedTourStep() {
 
 export default function App() {
   const [appState, setAppState] = usePersistedAppState();
-  const [notifications, setNotifications] = useState<
-    Array<{ id: number; title: string; message: string; tone: "success" | "error" }>
-  >([]);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [guidedTourStep, setGuidedTourStep] = useState<number | null>(() => loadInitialGuidedTourStep());
   const { program, initialPc, statePanelTab, registers, memory } = appState;
 
-  const pushSuccessNotification = (message: string) => {
+  const pushNotification = useCallback((notification: Omit<NotificationItem, "id">) => {
     const id = Date.now() + Math.floor(Math.random() * 1000);
-    const nextNotification = { id, title: "Registers updated", message, tone: "success" as const };
-    setNotifications((prev) => [...prev, nextNotification].slice(-2));
+    setNotifications((prev) => {
+      const duplicateIndex = prev.findIndex((item) =>
+        item.tone === notification.tone &&
+        item.title === notification.title &&
+        item.message === notification.message
+      );
+
+      if (duplicateIndex !== -1) {
+        const next = [...prev];
+        next[duplicateIndex] = { ...next[duplicateIndex], ...notification, id };
+        return next;
+      }
+
+      return [...prev, { ...notification, id }].slice(-2);
+    });
+  }, []);
+
+  const pushSuccessNotification = (message: string) => {
+    pushNotification({ title: "Registers updated", message, tone: "success" });
   };
 
-  const pushErrorNotification = (message: string) => {
-    const id = Date.now() + Math.floor(Math.random() * 1000);
-    const nextNotification = { id, title: "Validation error", message, tone: "error" as const };
-    setNotifications((prev) => [...prev, nextNotification].slice(-2));
-  };
+  const pushProgramErrorNotification = (message: string) =>
+    pushNotification({ title: "Program error", message, tone: "error" });
+
+  const pushRegisterErrorNotification = (message: string) =>
+    pushNotification({ title: "Register error", message, tone: "error" });
+
+  const pushMemoryErrorNotification = (message: string) =>
+    pushNotification({ title: "Memory rule error", message, tone: "error" });
+
+  const pushRuntimeErrorNotification = (message: string) =>
+    pushNotification({ title: "Runtime error", message, tone: "error" });
 
   const dismissNotification = useCallback((id: number) => {
     setNotifications((prev) => prev.filter((notification) => notification.id !== id));
@@ -92,6 +114,8 @@ export default function App() {
     memoryRules: memory.rules,
     registerValues: registers.values,
     onRegisterValuesChange: setRegisterValues,
+    onRunError: pushProgramErrorNotification,
+    onRuntimeError: pushRuntimeErrorNotification,
   });
 
   useEffect(() => {
@@ -228,7 +252,8 @@ export default function App() {
           registerValues={registers.values}
           onRegisterValuesChange={setRegisterValues}
           onNotifySuccess={pushSuccessNotification}
-          onNotifyError={pushErrorNotification}
+          onRegisterError={pushRegisterErrorNotification}
+          onMemoryError={pushMemoryErrorNotification}
           registerHighlightCycle={registerHighlightCycle}
           memoryRules={memory.rules}
           onMemoryRulesChange={(rules) =>

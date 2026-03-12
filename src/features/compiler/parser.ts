@@ -45,7 +45,11 @@ export function parseProgram(program: string, options: ParseProgramOptions = {})
       if (!labelMatch) {
         break;
       }
-      labels[labelMatch[1]] = pc;
+      const label = labelMatch[1];
+      if (typeof labels[label] === "number") {
+        throw new Error(`Line ${lineNumber}: duplicate label "${label}"`);
+      }
+      labels[label] = pc;
       text = labelMatch[2].trim();
       if (!text) {
         break;

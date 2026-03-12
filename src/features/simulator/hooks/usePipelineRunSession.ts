@@ -2,6 +2,7 @@ import { compileAndLog, compileProgram } from "@/features/compiler";
 import { parseProgram } from "@/features/compiler/parser";
 import { useMemo, useRef, useState } from "react";
 import type { MemoryRuleConfig } from "@/app/store/appStore";
+import { notifyAppError } from "@/app/errors/appError";
 import { createMemoryFromRules } from "../runtime/memoryRuntime";
 import { parseInitialPc } from "../core/parse";
 import { buildPipelineSignalValues, type PipelineSignalValues } from "../signals/pipelineSignals";
@@ -21,7 +22,15 @@ type UsePipelineRunSessionArgs = {
   memoryRules: MemoryRuleConfig[];
   registerValues: Record<string, string>;
   onRegisterValuesChange: (values: Record<string, string>) => void;
+  onRunError: (message: string) => void;
+  onRuntimeError: (message: string) => void;
 };
+
+function hasExecutableSource(program: string) {
+  return program
+    .split(/\r?\n/)
+    .some((line) => line.replace(/#.*$/, "").trim().length > 0);
+}
 
 export function usePipelineRunSession({
   program,
@@ -29,6 +38,8 @@ export function usePipelineRunSession({
   memoryRules,
   registerValues,
   onRegisterValuesChange,
+  onRunError,
+  onRuntimeError,
 }: UsePipelineRunSessionArgs) {
   const [pipeline, setPipeline] = useState<PipelineSlots>(EMPTY_PIPELINE);
   const [pipelineInstructionIndices, setPipelineInstructionIndices] =
@@ -124,12 +135,18 @@ export function usePipelineRunSession({
   };
 
   const run = () => {
+    if (!hasExecutableSource(program)) {
+      onRunError("Program editor is empty");
+      setRunSessionActive(false);
+      return;
+    }
+
     let parsedInitialPc: number;
     try {
       parsedInitialPc = parseInitialPc(initialPc);
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.error(`[MIPS Compiler] Failed to compile: ${message}`);
+      const appError = notifyAppError(onRunError, error, "program", "Initial PC is invalid");
+      console.error(`[MIPS Compiler] Failed to compile: ${appError.message}`);
       setRunSessionActive(false);
       return;
     }
@@ -137,8 +154,8 @@ export function usePipelineRunSession({
     try {
       compileAndLog(program, { initialPc: parsedInitialPc });
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.error(`[MIPS Compiler] Failed to compile: ${message}`);
+      const appError = notifyAppError(onRunError, error, "program", "Program failed to compile");
+      console.error(`[MIPS Compiler] Failed to compile: ${appError.message}`);
       setRunSessionActive(false);
       return;
     }
@@ -170,17 +187,25 @@ export function usePipelineRunSession({
       return;
     }
 
-    const result = stepPipelineForward({
-      pipeline,
-      pipelineInstructionIndices,
-      pipelineEffects,
-      nextInstructionIndex,
-      instructions,
-      labels: parsedProgram.labels,
-      pcToInstructionIndex,
-      registerValues,
-      memoryWords,
-    });
+    let result;
+    try {
+      result = stepPipelineForward({
+        pipeline,
+        pipelineInstructionIndices,
+        pipelineEffects,
+        nextInstructionIndex,
+        instructions,
+        labels: parsedProgram.labels,
+        pcToInstructionIndex,
+        registerValues,
+        memoryWords,
+      });
+    } catch (error) {
+      const appError = notifyAppError(onRuntimeError, error, "runtime", "Runtime execution failed");
+      console.error(`[Pipeline] Runtime execution failed: ${appError.message}`);
+      setRunSessionActive(false);
+      return;
+    }
 
     setHistory((prev) => [...prev, result.snapshot]);
     setPipeline(result.pipeline);
