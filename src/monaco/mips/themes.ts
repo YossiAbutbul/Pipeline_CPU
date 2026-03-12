@@ -9,25 +9,81 @@ function cssVar(name: string) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 
-// Accepts "#rrggbb" and adds alpha (0..1) => "#rrggbbaa"
-function withAlpha(hex: string, alpha: number) {
-  const h = hex.replace("#", "").trim();
-  if (h.length !== 6) return hex;
+function resolveColor(value: string) {
+  if (!value) {
+    return value;
+  }
+
+  const probe = document.createElement("span");
+  probe.style.color = value;
+  document.body.appendChild(probe);
+  const resolved = getComputedStyle(probe).color.trim();
+  probe.remove();
+  return resolved || value;
+}
+
+function toHexColor(value: string) {
+  if (!value) {
+    return value;
+  }
+
+  const normalized = resolveColor(value);
+  if (normalized.startsWith("#")) {
+    const hex = normalized.slice(1);
+    if (hex.length === 3) {
+      return `#${hex.split("").map((char) => `${char}${char}`).join("")}`;
+    }
+    if (hex.length === 6 || hex.length === 8) {
+      return normalized;
+    }
+  }
+
+  const match = normalized.match(
+    /^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)$/i,
+  );
+  if (!match) {
+    return normalized;
+  }
+
+  const [, r, g, b, a] = match;
+  const toByte = (channel: string) =>
+    Math.max(0, Math.min(255, Math.round(Number(channel))))
+      .toString(16)
+      .padStart(2, "0");
+
+  const alphaHex = a === undefined
+    ? ""
+    : Math.max(0, Math.min(255, Math.round(Number(a) * 255)))
+        .toString(16)
+        .padStart(2, "0");
+
+  return `#${toByte(r)}${toByte(g)}${toByte(b)}${alphaHex}`;
+}
+
+// Accepts any CSS color and adds alpha (0..1) => "#rrggbbaa"
+function withAlpha(color: string, alpha: number) {
+  const hex = toHexColor(color).replace("#", "").trim();
+  if (hex.length !== 6 && hex.length !== 8) {
+    return color;
+  }
+
+  const rgb = hex.slice(0, 6);
   const a = Math.round(Math.max(0, Math.min(1, alpha)) * 255)
     .toString(16)
     .padStart(2, "0");
-  return `#${h}${a}`;
+  return `#${rgb}${a}`;
 }
 
 export function defineMipsThemeFromTokens(monaco: typeof Monaco, mode: ThemeMode) {
   // App tokens
-  const bg = cssVar("--bg");
-  const surface1 = cssVar("--surface-1");
-  const surface2 = cssVar("--surface-2");
-  const text = cssVar("--text");
-  const muted = cssVar("--muted");
-  const border = cssVar("--border");
-  const accent = cssVar("--accent");
+  const bg = toHexColor(cssVar("--bg"));
+  const surface1 = toHexColor(cssVar("--surface-1"));
+  const surface2 = toHexColor(cssVar("--surface-2"));
+  const editorSurface = toHexColor(cssVar("--editor-surface"));
+  const text = toHexColor(cssVar("--text"));
+  const muted = toHexColor(cssVar("--muted"));
+  const border = toHexColor(cssVar("--border"));
+  const accent = toHexColor(cssVar("--accent"));
 
   const name = mode === "dark" ? MIPS_THEME_DARK : MIPS_THEME_LIGHT;
   const base = mode === "dark" ? "vs-dark" : "vs";
@@ -36,6 +92,7 @@ export function defineMipsThemeFromTokens(monaco: typeof Monaco, mode: ThemeMode
   const _bg = bg || (mode === "dark" ? "#0f1115" : "#ffffff");
   const _surface1 = surface1 || (mode === "dark" ? "#14161b" : "#ffffff");
   const _surface2 = surface2 || (mode === "dark" ? "#1a1d24" : "#f4f6fb");
+  const _editorSurface = editorSurface || (mode === "dark" ? "#1d2129" : "#f1efea");
   const _text = text || (mode === "dark" ? "#e7e9ee" : "#111827");
   const _muted = muted || (mode === "dark" ? "#a6adba" : "#6b7280");
   const _border = border || (mode === "dark" ? "#2a2f3a" : "#cbd5e1");
@@ -69,8 +126,8 @@ export function defineMipsThemeFromTokens(monaco: typeof Monaco, mode: ThemeMode
 
     colors: {
       // Editor surfaces
-      "editor.background": _surface1,
-      "editorGutter.background": _surface1,
+      "editor.background": _editorSurface,
+      "editorGutter.background": _editorSurface,
 
       // Text + caret
       "editor.foreground": _text,

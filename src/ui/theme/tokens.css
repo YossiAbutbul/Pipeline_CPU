@@ -82,6 +82,8 @@
   /* Controls */
   --control-bg: #1a1d24;
   --control-hover: #242936;
+  --editor-surface: #171b21;
+  --editor-surface-border: #2a303b;
 
   /* Radius / motion */
   --radius: 12px;
@@ -136,10 +138,22 @@
     color-mix(in oklab, #a78bfa 16%, var(--surface-1)) 100%
   );
   --register-tooltip-card-code: color-mix(in oklab, #60a5fa 78%, var(--text));
-  --register-tooltip-card-text: color-mix(in oklab, var(--text) 72%, var(--muted));
+  --register-tooltip-card-text: color-mix(
+    in oklab,
+    var(--text) 72%,
+    var(--muted)
+  );
   --register-tooltip-footer: var(--muted);
-  --register-tooltip-chip-bg: color-mix(in oklab, var(--surface-3) 78%, var(--surface-2));
-  --register-tooltip-chip-fg: color-mix(in oklab, var(--text) 86%, var(--muted));
+  --register-tooltip-chip-bg: color-mix(
+    in oklab,
+    var(--surface-3) 78%,
+    var(--surface-2)
+  );
+  --register-tooltip-chip-fg: color-mix(
+    in oklab,
+    var(--text) 86%,
+    var(--muted)
+  );
 }
 
 /* -----------------------------
@@ -170,6 +184,8 @@
   /* Controls */
   --control-bg: var(--surface-2);
   --control-hover: #e6e2d8;
+  --editor-surface: #f7f8fa;
+  --editor-surface-border: #d8dde6;
 
   /* Toggle Switch */
   --switch-track: var(--surface-3);

@@ -104,6 +104,9 @@ export function MipsMonaco({ value, onChange, themeMode, height = "100%" }: Prop
 
         renderLineHighlight: "all",
         renderLineHighlightOnlyWhenFocus: false,
+        padding: {
+          top: 10,
+        },
 
         cursorBlinking: "smooth",
         cursorSmoothCaretAnimation: "on",
