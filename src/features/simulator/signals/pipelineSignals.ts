@@ -7,8 +7,12 @@ import { parseImmediate } from "../core/parse";
 import type { HoveredSignalValues } from "@/features/pipelineCanvas/pipelineHoverMap";
 import { readWord } from "../runtime/memoryRuntime";
 import { resolveControlFlow } from "../stages/controlFlow";
+import { shouldStallForLoadUseHazard } from "../stages/hazards";
 
 export type PipelineSignalValues = HoveredSignalValues;
+
+const UNKNOWN_VALUE = "Unknown";
+const EXCEPTION_PC_VALUE = "0x80000180";
 
 const REGISTER_ALIAS_BY_NUMBER = Object.entries(REG_INFO).reduce<Record<number, string>>((acc, [alias, info]) => {
   acc[info.num] = alias;
@@ -203,6 +207,356 @@ function getRegisterNumericValue(values: Record<string, string>, registerNumber:
   } catch {
     return null;
   }
+}
+
+function toHexRegister(registerNumber: number | null): string | undefined {
+  return registerNumber === null ? undefined : toHex8(registerNumber);
+}
+
+function getInstructionFieldRegisters(instruction: ParsedInstruction | null): {
+  rs: number | null;
+  rt: number | null;
+  rd: number | null;
+} {
+  if (!instruction) {
+    return { rs: null, rt: null, rd: null };
+  }
+
+  const { mnemonic, operands } = instruction;
+
+  try {
+    if (["add", "addu", "sub", "subu", "and", "or", "xor", "nor", "slt", "sltu"].includes(mnemonic) && operands.length === 3) {
+      return {
+        rs: parseRegister(operands[1]),
+        rt: parseRegister(operands[2]),
+        rd: parseRegister(operands[0]),
+      };
+    }
+    if (["sllv", "srlv", "srav"].includes(mnemonic) && operands.length === 3) {
+      return {
+        rs: parseRegister(operands[2]),
+        rt: parseRegister(operands[1]),
+        rd: parseRegister(operands[0]),
+      };
+    }
+    if (["sll", "srl", "sra"].includes(mnemonic) && operands.length === 3) {
+      return {
+        rs: 0,
+        rt: parseRegister(operands[1]),
+        rd: parseRegister(operands[0]),
+      };
+    }
+    if (["addi", "addiu", "andi", "ori", "xori", "slti", "sltiu"].includes(mnemonic) && operands.length === 3) {
+      return {
+        rs: parseRegister(operands[1]),
+        rt: parseRegister(operands[0]),
+        rd: null,
+      };
+    }
+    if (mnemonic === "move" && operands.length === 2) {
+      return {
+        rs: parseRegister(operands[1]),
+        rt: 0,
+        rd: parseRegister(operands[0]),
+      };
+    }
+    if (mnemonic === "lui" && operands.length === 2) {
+      return {
+        rs: 0,
+        rt: parseRegister(operands[0]),
+        rd: null,
+      };
+    }
+    if (mnemonic === "li" && operands.length === 2) {
+      return {
+        rs: 0,
+        rt: parseRegister(operands[0]),
+        rd: null,
+      };
+    }
+    if (["lw", "lb", "lbu", "lh", "lhu", "sw", "sb", "sh"].includes(mnemonic) && operands.length === 2) {
+      return {
+        rs: parseMemoryBaseRegister(operands[1]),
+        rt: parseRegister(operands[0]),
+        rd: null,
+      };
+    }
+    if ((mnemonic === "beq" || mnemonic === "bne") && operands.length === 3) {
+      return {
+        rs: parseRegister(operands[0]),
+        rt: parseRegister(operands[1]),
+        rd: null,
+      };
+    }
+    if (["blez", "bgtz", "bltz", "bgez", "jr"].includes(mnemonic) && operands.length >= 1) {
+      return {
+        rs: parseRegister(operands[0]),
+        rt: 0,
+        rd: null,
+      };
+    }
+    if (mnemonic === "jalr") {
+      if (operands.length === 1) {
+        return {
+          rs: parseRegister(operands[0]),
+          rt: 0,
+          rd: 31,
+        };
+      }
+      if (operands.length === 2) {
+        return {
+          rs: parseRegister(operands[1]),
+          rt: 0,
+          rd: parseRegister(operands[0]),
+        };
+      }
+    }
+    if (["mult", "multu", "div", "divu"].includes(mnemonic) && operands.length === 2) {
+      return {
+        rs: parseRegister(operands[0]),
+        rt: parseRegister(operands[1]),
+        rd: null,
+      };
+    }
+    if (["mthi", "mtlo"].includes(mnemonic) && operands.length === 1) {
+      return {
+        rs: parseRegister(operands[0]),
+        rt: 0,
+        rd: null,
+      };
+    }
+  } catch {
+    return { rs: null, rt: null, rd: null };
+  }
+
+  return { rs: null, rt: null, rd: null };
+}
+
+function getSignExtendedImmediateHex(instruction: ParsedInstruction | null): string | undefined {
+  return getIdImmediateValues(instruction).signExtendedImmValue;
+}
+
+function getShiftedImmediateHex(instruction: ParsedInstruction | null): string | undefined {
+  const signExtendedImmediate = getSignExtendedImmediateHex(instruction);
+  if (!signExtendedImmediate) {
+    return undefined;
+  }
+
+  const value = Number.parseInt(signExtendedImmediate, 16);
+  return Number.isNaN(value) ? undefined : toHex32((value << 2) >>> 0);
+}
+
+function getBranchTargetHex(instruction: ParsedInstruction | null): string | undefined {
+  if (!instruction) {
+    return undefined;
+  }
+
+  const shiftedImmediate = getShiftedImmediateHex(instruction);
+  if (!shiftedImmediate) {
+    return undefined;
+  }
+
+  const offsetValue = Number.parseInt(shiftedImmediate, 16);
+  return Number.isNaN(offsetValue) ? undefined : toHex32(((instruction.pc >>> 0) + 4 + offsetValue) >>> 0);
+}
+
+type InstructionControlBundle = {
+  regWrite: boolean;
+  memToReg: boolean;
+  memRead: boolean;
+  memWrite: boolean;
+  regDst: boolean;
+  aluSrc: boolean;
+};
+
+function getInstructionControlBundle(instruction: ParsedInstruction | null): InstructionControlBundle | null {
+  if (!instruction) {
+    return null;
+  }
+
+  const { mnemonic } = instruction;
+  const regWrite = getWriteBackRegisterNumber(instruction, null) !== null;
+  const memRead = mnemonic === "lw";
+  const memWrite = mnemonic === "sw";
+  const memToReg = mnemonic === "lw";
+  const regDst = [
+    "add",
+    "addu",
+    "sub",
+    "subu",
+    "and",
+    "or",
+    "xor",
+    "nor",
+    "slt",
+    "sltu",
+    "sll",
+    "srl",
+    "sra",
+    "sllv",
+    "srlv",
+    "srav",
+    "move",
+  ].includes(mnemonic);
+  const aluSrc = [
+    "addi",
+    "addiu",
+    "andi",
+    "ori",
+    "xori",
+    "slti",
+    "sltiu",
+    "lui",
+    "li",
+    "lw",
+    "sw",
+    "lb",
+    "lbu",
+    "lh",
+    "lhu",
+    "sb",
+    "sh",
+  ].includes(mnemonic);
+
+  return { regWrite, memToReg, memRead, memWrite, regDst, aluSrc };
+}
+
+function formatExControlBundle(bundle: InstructionControlBundle | null): string | undefined {
+  return bundle ? `RegDst=${bundle.regDst ? 1 : 0}, ALUSrc=${bundle.aluSrc ? 1 : 0}` : undefined;
+}
+
+function formatMControlBundle(bundle: InstructionControlBundle | null): string | undefined {
+  return bundle ? `MemRead=${bundle.memRead ? 1 : 0}, MemWrite=${bundle.memWrite ? 1 : 0}` : undefined;
+}
+
+function formatWbControlBundle(bundle: InstructionControlBundle | null): string | undefined {
+  return bundle ? `RegWrite=${bundle.regWrite ? 1 : 0}, MemToReg=${bundle.memToReg ? 1 : 0}` : undefined;
+}
+
+function formatFullControlBundle(bundle: InstructionControlBundle | null): string | undefined {
+  if (!bundle) {
+    return undefined;
+  }
+  return `EX{${formatExControlBundle(bundle)}} M{${formatMControlBundle(bundle)}} WB{${formatWbControlBundle(bundle)}}`;
+}
+
+function resolveForwardedExOperands(args: {
+  exInstruction: ParsedInstruction | null;
+  memInstruction: ParsedInstruction | null;
+  wbInstruction: ParsedInstruction | null;
+  pipelineEffects: PipelineEffectSlots;
+  registerValues: Record<string, string>;
+  memoryWords: SparseMemoryWords;
+}): {
+  rawAValue?: string;
+  rawBValue?: string;
+  forwardedAValue?: string;
+  forwardedBValue?: string;
+  aluInputBValue?: string;
+  aluResult?: string;
+  exRtRegister?: string;
+  exRdRegister?: string;
+  exDestRegister?: string;
+  memForwardValue?: string;
+  wbForwardValue?: string;
+} {
+  const { exInstruction, memInstruction, wbInstruction, pipelineEffects, registerValues, memoryWords } = args;
+  if (!exInstruction) {
+    return {};
+  }
+
+  const exFields = getInstructionFieldRegisters(exInstruction);
+  const rawAValue = getRegisterHexValue(registerValues, exFields.rs);
+  const rawBValue = getRegisterHexValue(registerValues, exFields.rt);
+  const memDestRegister = getWriteBackRegisterNumber(memInstruction, pipelineEffects.MEM);
+  const wbDestRegister = getWriteBackRegisterNumber(wbInstruction, pipelineEffects.WB);
+  const memCanForward = memInstruction !== null && memInstruction.mnemonic !== "lw" && memDestRegister !== null && memDestRegister !== 0;
+  const wbCanForward = wbDestRegister !== null && wbDestRegister !== 0;
+  const memForwardValue = getExSignalValues(memInstruction, registerValues).aluResult;
+  const wbForwardValue = getWbSignalValues(wbInstruction, pipelineEffects.WB, registerValues, memoryWords).writeBackValue;
+
+  const [sourceARegister, sourceBRegister] = getExForwardRegisterNumbers(exInstruction);
+
+  const forwardedAValue =
+    sourceARegister === null
+      ? rawAValue
+      : memCanForward && memDestRegister === sourceARegister
+        ? memForwardValue ?? rawAValue
+        : wbCanForward && wbDestRegister === sourceARegister
+          ? wbForwardValue ?? rawAValue
+          : rawAValue;
+
+  const forwardedBValue =
+    sourceBRegister === null
+      ? rawBValue
+      : memCanForward && memDestRegister === sourceBRegister
+        ? memForwardValue ?? rawBValue
+        : wbCanForward && wbDestRegister === sourceBRegister
+          ? wbForwardValue ?? rawBValue
+          : rawBValue;
+
+  const signExtendedImmediate = getSignExtendedImmediateHex(exInstruction);
+  const bundle = getInstructionControlBundle(exInstruction);
+  const aluInputBValue = bundle?.aluSrc ? signExtendedImmediate ?? forwardedBValue : forwardedBValue;
+
+  const actualValues = getExSignalValues(exInstruction, {
+    ...registerValues,
+  });
+
+  const aNumeric = forwardedAValue ? Number.parseInt(forwardedAValue, 16) >>> 0 : null;
+  const forwardedBNumeric = forwardedBValue ? Number.parseInt(forwardedBValue, 16) >>> 0 : null;
+  const finalBNumeric = aluInputBValue ? Number.parseInt(aluInputBValue, 16) >>> 0 : null;
+  let aluResult = actualValues.aluResult;
+
+  try {
+    const { mnemonic, operands } = exInstruction;
+    if (aNumeric !== null && finalBNumeric !== null) {
+      if (["add", "addu", "addi", "addiu", "lw", "sw", "lb", "lbu", "lh", "lhu", "sb", "sh"].includes(mnemonic)) {
+        aluResult = toHex32((aNumeric + finalBNumeric) >>> 0);
+      } else if (["sub", "subu"].includes(mnemonic)) {
+        aluResult = toHex32((aNumeric - finalBNumeric) >>> 0);
+      } else if (mnemonic === "and" || mnemonic === "andi") {
+        aluResult = toHex32(aNumeric & finalBNumeric);
+      } else if (mnemonic === "or" || mnemonic === "ori") {
+        aluResult = toHex32(aNumeric | finalBNumeric);
+      } else if (mnemonic === "xor" || mnemonic === "xori") {
+        aluResult = toHex32(aNumeric ^ finalBNumeric);
+      } else if (mnemonic === "nor") {
+        aluResult = toHex32((~(aNumeric | finalBNumeric)) >>> 0);
+      } else if (mnemonic === "slt") {
+        aluResult = toHex32((aNumeric >> 0) < (finalBNumeric >> 0) ? 1 : 0);
+      } else if (mnemonic === "sltu" || mnemonic === "sltiu") {
+        aluResult = toHex32(aNumeric < finalBNumeric ? 1 : 0);
+      } else if (mnemonic === "slti") {
+        aluResult = toHex32((aNumeric >> 0) < (finalBNumeric >> 0) ? 1 : 0);
+      } else if (mnemonic === "sll" && operands.length === 3 && forwardedBNumeric !== null) {
+        const shamt = parseImmediate(operands[2]) & 0x1f;
+        aluResult = toHex32((forwardedBNumeric << shamt) >>> 0);
+      } else if (mnemonic === "srl" && operands.length === 3 && forwardedBNumeric !== null) {
+        const shamt = parseImmediate(operands[2]) & 0x1f;
+        aluResult = toHex32(forwardedBNumeric >>> shamt);
+      } else if (mnemonic === "sra" && operands.length === 3 && forwardedBNumeric !== null) {
+        const shamt = parseImmediate(operands[2]) & 0x1f;
+        aluResult = toHex32((forwardedBNumeric >> shamt) >>> 0);
+      }
+    }
+  } catch {
+    // Fall back to the non-forwarded ALU estimate when recomputation fails.
+  }
+
+  return {
+    rawAValue,
+    rawBValue,
+    forwardedAValue,
+    forwardedBValue,
+    aluInputBValue,
+    aluResult,
+    exRtRegister: toHexRegister(exFields.rt),
+    exRdRegister: toHexRegister(exFields.rd),
+    exDestRegister: toHexRegister(getWriteBackRegisterNumber(exInstruction, null)),
+    memForwardValue,
+    wbForwardValue,
+  };
 }
 
 function getExSignalValues(
@@ -575,8 +929,16 @@ export function buildPipelineSignalValues(args: {
   const memInstruction = memInstructionIndex === null ? null : instructions[memInstructionIndex];
   const wbInstruction = wbInstructionIndex === null ? null : instructions[wbInstructionIndex];
   const [rsNumber, rtNumber] = getIdReadRegisterNumbers(idInstruction);
+  const idFields = getInstructionFieldRegisters(idInstruction);
   const immediateValues = getIdImmediateValues(idInstruction);
-  const exSignalValues = getExSignalValues(exInstruction, registerValues);
+  const exResolvedValues = resolveForwardedExOperands({
+    exInstruction,
+    memInstruction,
+    wbInstruction,
+    pipelineEffects,
+    registerValues,
+    memoryWords,
+  });
   const memSignalValues = getMemSignalValues(memInstruction, registerValues, memoryWords);
   const wbSignalValues = getWbSignalValues(wbInstruction, pipelineEffects.WB, registerValues, memoryWords);
   const forwardingDataSignals = getForwardingDataSignals({
@@ -596,24 +958,59 @@ export function buildPipelineSignalValues(args: {
     labels,
     pcToInstructionIndex,
   });
+  const idBundle = getInstructionControlBundle(idInstruction);
+  const exBundle = getInstructionControlBundle(exInstruction);
+  const memBundle = getInstructionControlBundle(memInstruction);
+  const wbBundle = getInstructionControlBundle(wbInstruction);
+  const hasLoadUseHazard = shouldStallForLoadUseHazard(exInstruction, idInstruction);
+  const controlFlow = resolveControlFlow(exInstruction, registerValues, labels, pcToInstructionIndex);
+  const branchTaken = !hasLoadUseHazard && controlFlow.taken && controlFlow.targetInstructionIndex !== null;
+  const branchTargetInstruction =
+    controlFlow.targetInstructionIndex === null ? null : instructions[controlFlow.targetInstructionIndex] ?? null;
+  const sequentialNextPc = ifInstruction ? toHex32(((ifInstruction.pc >>> 0) + 4) >>> 0) : undefined;
+  const selectedNextPc = hasLoadUseHazard
+    ? (ifInstruction ? toHex32(ifInstruction.pc >>> 0) : undefined)
+    : branchTaken
+      ? (branchTargetInstruction ? toHex32(branchTargetInstruction.pc >>> 0) : undefined)
+      : sequentialNextPc;
 
   return {
     pc: ifInstruction ? `0x${(ifInstruction.pc >>> 0).toString(16).toUpperCase().padStart(8, "0")}` : undefined,
     pcPlus4: ifInstruction ? `0x${(((ifInstruction.pc >>> 0) + 4) >>> 0).toString(16).toUpperCase().padStart(8, "0")}` : undefined,
     constant4: ifInstruction ? "0x00000004" : undefined,
+    nextPcSequential: sequentialNextPc,
+    nextPcSelected: selectedNextPc,
+    exceptionVector: EXCEPTION_PC_VALUE,
     instructionWord: ifInstruction ? encodedInstructionHexByPc[ifInstruction.pc >>> 0] : undefined,
+    idInstructionWord: idInstruction ? encodedInstructionHexByPc[idInstruction.pc >>> 0] : undefined,
+    idRsRegister: toHexRegister(idFields.rs),
+    idRtRegister: toHexRegister(idFields.rt),
+    idRdRegister: toHexRegister(idFields.rd),
     rsValue: getRegisterHexValue(registerValues, rsNumber),
     rtValue: getRegisterHexValue(registerValues, rtNumber),
     imm16Value: immediateValues.imm16Value,
     signExtendedImmValue: immediateValues.signExtendedImmValue,
-    aluInputA: exSignalValues.aluInputA,
-    aluInputB: exSignalValues.aluInputB,
-    aluResult: exSignalValues.aluResult,
+    idBranchBasePcPlus4: idInstruction ? toHex32(((idInstruction.pc >>> 0) + 4) >>> 0) : undefined,
+    idBranchOffsetShifted: getShiftedImmediateHex(idInstruction),
+    idBranchTarget: getBranchTargetHex(idInstruction),
+    exRawAValue: exResolvedValues.rawAValue,
+    exRawBValue: exResolvedValues.rawBValue,
+    exSignExtendedImmValue: getSignExtendedImmediateHex(exInstruction),
+    aluInputA: exResolvedValues.forwardedAValue,
+    aluInputB: exResolvedValues.aluInputBValue,
+    aluResult: exResolvedValues.aluResult,
+    exRtRegister: exResolvedValues.exRtRegister,
+    exRdRegister: exResolvedValues.exRdRegister,
+    exDestRegister: exResolvedValues.exDestRegister,
+    exForwardBValue: exResolvedValues.forwardedBValue,
+    epcValue: exInstruction ? UNKNOWN_VALUE : undefined,
     memoryAddress: memSignalValues.memoryAddress,
     memoryWriteData: memSignalValues.memoryWriteData,
     memoryReadData: memSignalValues.memoryReadData,
     writeBackValue: wbSignalValues.writeBackValue,
     writeBackDest: wbSignalValues.writeBackDest,
+    pcWriteCtrl: (ifInstruction || idInstruction || exInstruction) ? toControlBit(!hasLoadUseHazard) : undefined,
+    ifIdWriteCtrl: (ifInstruction || idInstruction || exInstruction) ? toControlBit(!hasLoadUseHazard) : undefined,
     pcSrcCtrl: controlSignalValues.pcSrcCtrl,
     regDstCtrl: controlSignalValues.regDstCtrl,
     aluSrcCtrl: controlSignalValues.aluSrcCtrl,
@@ -622,10 +1019,28 @@ export function buildPipelineSignalValues(args: {
     memToRegCtrl: controlSignalValues.memToRegCtrl,
     fwdACtrl: controlSignalValues.fwdACtrl,
     fwdBCtrl: controlSignalValues.fwdBCtrl,
+    ifFlushCtrl: exInstruction ? toControlBit(branchTaken) : undefined,
+    exFlushCtrl: exInstruction ? toControlBit(false) : undefined,
+    idFlushCtrl: (idInstruction || exInstruction) ? toControlBit(branchTaken || hasLoadUseHazard) : undefined,
+    hazardFlushCtrl: (idInstruction || exInstruction) ? toControlBit(hasLoadUseHazard) : undefined,
+    controlFlushCtrl: (idInstruction || exInstruction) ? toControlBit(branchTaken || hasLoadUseHazard) : undefined,
+    wbFlushCtrl: exInstruction ? toControlBit(false) : undefined,
+    mFlushCtrl: exInstruction ? toControlBit(false) : undefined,
+    idControlBundle: formatFullControlBundle(idBundle),
+    zeroControlBundle: idInstruction ? "EX{RegDst=0, ALUSrc=0} M{MemRead=0, MemWrite=0} WB{RegWrite=0, MemToReg=0}" : undefined,
+    flushedMControlBundle: idInstruction ? (branchTaken || hasLoadUseHazard ? "MemRead=0, MemWrite=0" : formatMControlBundle(idBundle)) : undefined,
+    flushedWbControlBundle: idInstruction ? (branchTaken || hasLoadUseHazard ? "RegWrite=0, MemToReg=0" : formatWbControlBundle(idBundle)) : undefined,
+    flushedExControlBundle: idInstruction ? (branchTaken || hasLoadUseHazard ? "RegDst=0, ALUSrc=0" : formatExControlBundle(idBundle)) : undefined,
+    zeroMControlBundle: exInstruction ? "MemRead=0, MemWrite=0" : undefined,
+    zeroWbControlBundle: exInstruction ? "RegWrite=0, MemToReg=0" : undefined,
+    exmemWbControlBundle: (exInstruction || memInstruction) ? formatWbControlBundle(memBundle ?? exBundle) : undefined,
+    memwbWbControlBundle: wbInstruction ? formatWbControlBundle(wbBundle) : undefined,
+    exmemMControlBundle: exInstruction ? formatMControlBundle(exBundle) : undefined,
+    wbRegWriteCtrl: wbInstruction ? toControlBit(Boolean(wbBundle?.regWrite)) : undefined,
     exSourceAReg: forwardingDataSignals.exSourceAReg,
     exSourceBReg: forwardingDataSignals.exSourceBReg,
     memForwardDest: forwardingDataSignals.memForwardDest,
     wbForwardDest: forwardingDataSignals.wbForwardDest,
-    memForwardValue: forwardingDataSignals.memForwardValue,
+    memForwardValue: exResolvedValues.memForwardValue ?? forwardingDataSignals.memForwardValue,
   };
 }
