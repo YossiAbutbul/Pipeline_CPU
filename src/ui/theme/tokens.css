@@ -84,6 +84,9 @@
   --control-hover: #242936;
   --editor-surface: #171b21;
   --editor-surface-border: #2a303b;
+  --input-surface: #1b1f26;
+  --input-surface-hover: #21252d;
+  --input-focus-ring: var(--border);
 
   /* Radius / motion */
   --radius: 12px;
@@ -189,8 +192,11 @@
   /* Controls */
   --control-bg: var(--surface-2);
   --control-hover: #e6e2d8;
-  --editor-surface: #f7f8fa;
-  --editor-surface-border: #d8dde6;
+  --editor-surface: #f3f3f3;
+  --editor-surface-border: #d9d5ca;
+  --input-surface: #f3f3f3;
+  --input-surface-hover: #ececec;
+  --input-focus-ring: var(--border);
 
   /* Toggle Switch */
   --switch-track: var(--surface-3);
