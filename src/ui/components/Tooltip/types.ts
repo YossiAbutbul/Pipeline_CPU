@@ -4,6 +4,7 @@ export type TooltipAlign = "start" | "center" | "end";
 export type TooltipVariant = "info" | "error" | "warning" | "success";
 
 export type TooltipProps = {
+  children?: ReactNode;
   content: ReactNode;
   className?: string;
   ariaLabel?: string;

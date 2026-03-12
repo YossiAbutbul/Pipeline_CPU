@@ -1,4 +1,5 @@
 export { Button } from "./Button/Button";
+export { ButtonTooltip } from "./ButtonTooltip/ButtonTooltip";
 export { NotificationToast } from "./NotificationToast/NotificationToast";
 export { Panel } from "./Panel/Panel";
 export { SettingsPanel } from "./SettingsPanel/SettingsPanel";

@@ -1,0 +1,47 @@
+.buttonTitleTooltip {
+  position: fixed;
+  z-index: 10000;
+  min-width: 0;
+  width: max-content;
+  max-width: min(220px, calc(100vw - 24px));
+  padding: 8px 10px;
+  border: 1px solid var(--register-tooltip-border);
+  border-radius: 8px;
+  background: var(--register-tooltip-bg);
+  color: var(--register-tooltip-title);
+  box-shadow: var(--shadow);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px) scale(0.94);
+  transition:
+    opacity 180ms ease-out,
+    transform 180ms ease-out,
+    visibility 0s linear 180ms;
+}
+
+.buttonTitleTooltip.isVisible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity 180ms ease-out,
+    transform 180ms ease-out,
+    visibility 0s linear 0s;
+}
+
+.buttonTitleTooltip-top {
+  transform: translateY(-8px) scale(0.94);
+}
+
+.buttonTitleTooltip-top.isVisible {
+  transform: translateY(0) scale(1);
+}
+
+.buttonTitleTooltipText {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}

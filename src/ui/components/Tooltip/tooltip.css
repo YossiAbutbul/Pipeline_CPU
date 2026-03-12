@@ -60,7 +60,7 @@
   opacity: 0;
   pointer-events: none;
   overflow: visible;
-  z-index: 3000;
+  z-index: 10000;
   transition:
     opacity var(--dur-1),
     transform var(--dur-2),

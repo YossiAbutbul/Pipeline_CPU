@@ -21,6 +21,7 @@ function getDefaultTriggerLabel(variant: TooltipVariant) {
 }
 
 export function Tooltip({
+  children,
   content,
   className = "",
   ariaLabel = "More information",
@@ -42,6 +43,8 @@ export function Tooltip({
   const [placement, setPlacement] = useState<"top" | "bottom">("bottom");
   const [closing, setClosing] = useState(false);
   const isVisible = (open || hovered || focused) && !closing;
+  const hasCustomTrigger = children !== undefined && children !== null;
+  const shouldCollapseWrapper = !showTrigger && !hasCustomTrigger;
 
   const updateShift = useCallback(() => {
     if (!contentRef.current || !wrapRef.current) {
@@ -130,17 +133,17 @@ export function Tooltip({
   return (
     <span
       ref={wrapRef}
-      className={`tooltipWrap ${showTrigger ? "" : "tooltipWrapNoTrigger"} ${isVisible ? "tooltipVisible" : ""} ${closing ? "tooltipClosing" : ""} ${className}`.trim()}
+      className={`tooltipWrap ${shouldCollapseWrapper ? "tooltipWrapNoTrigger" : ""} ${isVisible ? "tooltipVisible" : ""} ${closing ? "tooltipClosing" : ""} ${className}`.trim()}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocus={() => setFocused(true)}
       onBlur={handleBlur}
     >
-      {showTrigger && (
+      {children ?? (showTrigger && (
         <button type="button" className={`tooltipTrigger tooltipTrigger-${variant}`} aria-label={ariaLabel}>
           {triggerLabel ?? getDefaultTriggerLabel(variant)}
         </button>
-      )}
+      ))}
       <span
         ref={contentRef}
         role="tooltip"
