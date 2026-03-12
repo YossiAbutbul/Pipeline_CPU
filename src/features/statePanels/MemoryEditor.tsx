@@ -97,9 +97,38 @@ export default function MemoryEditor({
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
   const [recentlyChangedWords, setRecentlyChangedWords] = useState<Record<number, true>>({});
   const [watchedWords, setWatchedWords] = useState<number[]>([]);
+  const [isRuntimeScrollbarVisible, setIsRuntimeScrollbarVisible] = useState(false);
+  const [runtimeScrollbarThumbTop, setRuntimeScrollbarThumbTop] = useState(0);
+  const [runtimeScrollbarThumbHeight, setRuntimeScrollbarThumbHeight] = useState(0);
+  const [hasRuntimeOverflow, setHasRuntimeOverflow] = useState(false);
+  const runtimeListRef = useRef<HTMLDivElement | null>(null);
   const highlightTimeoutsRef = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
 
   const readWord = (words: Map<number, number>, wordIndex: number) => (words.get(wordIndex) ?? 0) >>> 0;
+
+  const updateRuntimeOverlayScrollbar = () => {
+    const listEl = runtimeListRef.current;
+    if (!listEl) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = listEl;
+    const hasOverflow = scrollHeight > clientHeight + 1;
+    setHasRuntimeOverflow(hasOverflow);
+
+    if (!hasOverflow) {
+      setRuntimeScrollbarThumbTop(0);
+      setRuntimeScrollbarThumbHeight(0);
+      return;
+    }
+
+    const minThumbHeight = 24;
+    const thumbHeight = Math.max(minThumbHeight, (clientHeight / scrollHeight) * clientHeight);
+    const maxThumbTop = clientHeight - thumbHeight;
+    const maxScrollTop = scrollHeight - clientHeight;
+    const thumbTop = maxScrollTop > 0 ? (scrollTop / maxScrollTop) * maxThumbTop : 0;
+
+    setRuntimeScrollbarThumbHeight(thumbHeight);
+    setRuntimeScrollbarThumbTop(thumbTop);
+  };
 
   useEffect(() => {
     if (runtimeChangedWords.length === 0) {
@@ -152,6 +181,20 @@ export default function MemoryEditor({
       setWatchedWords(initialNonZero);
     }
   }, [runtimeMemoryWords, watchedWords.length]);
+
+  useEffect(() => {
+    updateRuntimeOverlayScrollbar();
+
+    const listEl = runtimeListRef.current;
+    if (!listEl) return;
+
+    const resizeObserver = new ResizeObserver(() => updateRuntimeOverlayScrollbar());
+    resizeObserver.observe(listEl);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [recentlyChangedWords, runtimeMemoryWords, watchedWords]);
 
   useEffect(
     () => () => {
@@ -411,26 +454,50 @@ export default function MemoryEditor({
             Value
           </div>
         </div>
-        {runtimeRows.length === 0 && (
-          <div className="memoryRulesEmpty">No runtime updates yet. Run and step to populate values.</div>
-        )}
-        {runtimeRows.map((row) => (
+        <div
+          className="memoryRuntimeBodyWrap"
+          onMouseEnter={() => setIsRuntimeScrollbarVisible(true)}
+          onMouseLeave={() => setIsRuntimeScrollbarVisible(false)}
+        >
           <div
-            key={row.wordIndex}
-            className={`memoryRuntimeRow${row.changed ? " memoryRuntimeRowChanged" : ""}`}
-            role="row"
+            ref={runtimeListRef}
+            className="memoryRuntimeBody"
+            onScroll={updateRuntimeOverlayScrollbar}
           >
-            <div className="memoryRuntimeCell memoryRuntimeCellWord" role="cell">
-              W[{row.wordIndex}]
-            </div>
-            <div className="memoryRuntimeCell memoryRuntimeCellAddress" role="cell">
-              {toHex32(row.address)}
-            </div>
-            <div className="memoryRuntimeCell memoryRuntimeCellValue" role="cell">
-              {toHex32(row.value)}
-            </div>
+            {runtimeRows.length === 0 && (
+              <div className="memoryRulesEmpty">No runtime updates yet. Run and step to populate values.</div>
+            )}
+            {runtimeRows.map((row) => (
+              <div
+                key={row.wordIndex}
+                className={`memoryRuntimeRow${row.changed ? " memoryRuntimeRowChanged" : ""}`}
+                role="row"
+              >
+                <div className="memoryRuntimeCell memoryRuntimeCellWord" role="cell">
+                  W[{row.wordIndex}]
+                </div>
+                <div className="memoryRuntimeCell memoryRuntimeCellAddress" role="cell">
+                  {toHex32(row.address)}
+                </div>
+                <div className="memoryRuntimeCell memoryRuntimeCellValue" role="cell">
+                  {toHex32(row.value)}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+          <div
+            className={`memoryOverlayScrollbar${isRuntimeScrollbarVisible && hasRuntimeOverflow ? " isVisible" : ""}`}
+            aria-hidden="true"
+          >
+            <div
+              className="memoryOverlayThumb"
+              style={{
+                height: `${runtimeScrollbarThumbHeight}px`,
+                transform: `translateY(${runtimeScrollbarThumbTop}px)`,
+              }}
+            />
+          </div>
+        </div>
       </div>
 
       <Modal
