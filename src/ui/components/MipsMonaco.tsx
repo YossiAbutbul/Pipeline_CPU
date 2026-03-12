@@ -113,8 +113,8 @@ export function MipsMonaco({ value, onChange, themeMode, height = "100%" }: Prop
         cursorSmoothCaretAnimation: "on",
         smoothScrolling: true,
 
-        fontSize: 14,
-        lineHeight: 20,
+        fontSize: 18,
+        lineHeight: 26,
         fontFamily:
           'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace',
 
