@@ -40,8 +40,8 @@
 
 .buttonTitleTooltipText {
   display: block;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
   line-height: 1.2;
   white-space: nowrap;
 }

@@ -16,10 +16,11 @@
   border: 0;
   background: transparent;
   color: var(--muted);
-  padding: 18px 12px 14px;
+  padding: var(--tab-padding-top) var(--tab-padding-x) var(--tab-padding-bottom);
   border-radius: 0;
   cursor: var(--cursor-action);
   font: inherit;
+  font-size: var(--tab-font-size);
   font-weight: 600;
   letter-spacing: 0.01em;
   white-space: nowrap;

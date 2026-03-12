@@ -64,7 +64,7 @@ export default function ProgramEditor({
               title="Settings"
               aria-expanded={isSettingsOpen}
             >
-              <Settings size={14} aria-hidden="true" />
+              <Settings size={18} aria-hidden="true" />
             </Button>
             <SettingsPanel
               open={isSettingsOpen}
@@ -79,7 +79,7 @@ export default function ProgramEditor({
                   setIsSettingsOpen(false);
                 }}
               >
-                <RotateCcw size={14} aria-hidden="true" />
+                <RotateCcw size={18} aria-hidden="true" />
                 Reset Dbug
               </button>
 

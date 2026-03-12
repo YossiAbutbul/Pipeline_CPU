@@ -14,10 +14,10 @@
 
 .pipelineStage {
   border: var(--border-1) solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--surface-2);
   padding: var(--space-2);
-  min-height: 70px;
+  min-height: 88px;
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
@@ -34,8 +34,9 @@
 }
 
 .pipelineStageName {
-  /* font-size: var(--font-size-sm); */
+  font-size: var(--stage-label-size);
   font-weight: var(--font-weight-medium);
+  letter-spacing: var(--stage-label-letter-spacing);
   color: var(--muted);
 }
 
@@ -54,7 +55,7 @@
   align-items: center;
   gap: var(--space-2);
   margin-bottom: var(--space-3);
-  margin: 0 5px 0 5px;
+  margin: 0 6px;
 }
 
 .pipelineTrackerControls.hasCycleCounter {
@@ -74,11 +75,11 @@
 }
 
 .pipelineTrackerControls .btn-iconOnly {
-  min-width: 34px;
-  min-height: 34px;
+  min-width: 42px;
+  min-height: 42px;
   padding: 0;
   border: 0;
-  border-radius: 6px;
+  border-radius: 8px;
   background: transparent;
 }
 
@@ -101,7 +102,7 @@
 
 .pipelineControlsDivider {
   width: 1px;
-  height: 24px;
+  height: 30px;
   background: var(--border);
   margin: 0 var(--space-1);
 }
@@ -133,7 +134,7 @@
 
 .diagramContent svg .cpuPath {
   pointer-events: none;
-  stroke-width: 2.5px;
+  stroke-width: 3px;
   transition:
     stroke 120ms ease,
     stroke-width 120ms ease,
@@ -144,24 +145,24 @@
 .diagramContent svg .cpuHitPath {
   fill: none;
   stroke: transparent;
-  stroke-width: 8px;
+  stroke-width: 10px;
   pointer-events: stroke;
   cursor: var(--cursor-action);
 }
 
 .diagramContent svg .cpuPath.cpuPathData.isHovered {
   stroke: var(--dp) !important;
-  stroke-width: 3px !important;
+  stroke-width: 3.75px !important;
   paint-order: stroke fill;
-  filter: drop-shadow(0 0 4px color-mix(in oklab, var(--dp) 56%, transparent));
+  filter: drop-shadow(0 0 5px color-mix(in oklab, var(--dp) 56%, transparent));
 }
 
 .diagramContent svg .cpuPath.cpuPathControl.isHovered {
   stroke: var(--ctrl) !important;
-  stroke-width: 3px !important;
+  stroke-width: 3.75px !important;
   paint-order: stroke fill;
   filter: drop-shadow(
-    0 0 4px color-mix(in oklab, var(--ctrl) 56%, transparent)
+    0 0 5px color-mix(in oklab, var(--ctrl) 56%, transparent)
   );
 }
 
@@ -184,19 +185,19 @@
 }
 
 .pipelineHoverTooltip .tooltipContent {
-  min-width: 132px;
+  min-width: 165px;
   pointer-events: none;
 }
 
 .pipelineTooltipBody {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .pipelineTooltipLabel {
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--tooltip-caption-size);
   letter-spacing: 0.02em;
 }
 
@@ -205,7 +206,7 @@
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New",
     monospace;
-  font-size: 12px;
+  font-size: var(--tooltip-body-size);
 }
 
 @media (max-width: 980px) {

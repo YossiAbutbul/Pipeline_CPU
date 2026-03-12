@@ -72,7 +72,7 @@ export function SettingsPanel({
           aria-label="Close settings"
           onClick={onClose}
         >
-          <X size={12} aria-hidden="true" />
+          <X size={18} aria-hidden="true" />
         </button>
       </header>
       <div className="settingsPanelBody">{children}</div>

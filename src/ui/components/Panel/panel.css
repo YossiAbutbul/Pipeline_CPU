@@ -16,7 +16,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 14px;
+  padding: var(--space-2) var(--space-3);
   gap: var(--space-3);
 }
 
@@ -25,7 +25,7 @@
   font-family: var(--font-family-ui);
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-ui);
-  padding: 5px 12px;
+  padding: var(--panel-title-padding-y) var(--panel-title-padding-x);
 }
 
 .panelToolbar {
@@ -80,11 +80,11 @@
   font-size: var(--font-size-md);
 }
 .panelHeader-md .panelTitle {
-  font-size: 16px;
-} /* if you prefer, add --font-size-lg token */
+  font-size: var(--font-size-sm);
+}
 .panelHeader-lg .panelTitle {
-  font-size: 18px;
+  font-size: var(--panel-title-size-lg);
 }
 .panelHeader-xl .panelTitle {
-  font-size: 24px;
+  font-size: var(--panel-title-size-xl);
 }

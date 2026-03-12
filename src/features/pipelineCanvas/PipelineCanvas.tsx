@@ -269,7 +269,7 @@ export default function PipelineCanvas({
               aria-label="Zoom out diagram"
               title="Zoom out diagram"
             >
-              <ZoomOut size={16} aria-hidden="true" />
+              <ZoomOut size={20} aria-hidden="true" />
             </Button>
             <Button
               onClick={handleZoomIn}
@@ -278,7 +278,7 @@ export default function PipelineCanvas({
               aria-label="Zoom in diagram"
               title="Zoom in diagram"
             >
-              <ZoomIn size={16} aria-hidden="true" />
+              <ZoomIn size={20} aria-hidden="true" />
             </Button>
             <Button
               onClick={handleResetView}
@@ -286,7 +286,7 @@ export default function PipelineCanvas({
               aria-label="Reset diagram view"
               title="Reset diagram view"
             >
-              <RotateCcw size={16} aria-hidden="true" />
+              <RotateCcw size={20} aria-hidden="true" />
             </Button>
             <span className="pipelineControlsDivider" aria-hidden="true" />
             <Button
@@ -296,7 +296,7 @@ export default function PipelineCanvas({
               aria-label="Step backward"
               title="Step backward"
             >
-              <Rewind size={16} aria-hidden="true" />
+              <Rewind size={20} aria-hidden="true" />
             </Button>
             <Button
               onClick={onResetTracking}
@@ -305,7 +305,7 @@ export default function PipelineCanvas({
               aria-label="Reset pipeline tracking"
               title="Reset pipeline tracking"
             >
-              <SkipBack size={16} aria-hidden="true" />
+              <SkipBack size={20} aria-hidden="true" />
             </Button>
             <Button
               onClick={onStepForward}
@@ -314,7 +314,7 @@ export default function PipelineCanvas({
               aria-label="Step forward"
               title="Step forward"
             >
-              <FastForward size={16} aria-hidden="true" />
+              <FastForward size={20} aria-hidden="true" />
             </Button>
           </div>
         </div>

@@ -16,7 +16,7 @@ function getDefaultTriggerLabel(variant: TooltipVariant) {
       return "v";
     case "info":
     default:
-      return <Info size={12} aria-hidden="true" />;
+      return <Info size={18} aria-hidden="true" />;
   }
 }
 
@@ -157,7 +157,7 @@ export function Tooltip({
             aria-label="Close tooltip"
             onClick={requestDismiss}
           >
-            <X size={12} aria-hidden="true" />
+            <X size={18} aria-hidden="true" />
           </button>
         )}
         <span className="tooltipBody">{content}</span>

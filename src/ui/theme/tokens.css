@@ -2,12 +2,15 @@
   /* Typography */
   --font-family-ui:
     ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  --font-size-xs: 12px;
-  --font-size-sm: 13px;
-  --font-size-md: 14px;
+  --font-size-xs: 15px;
+  --font-size-sm: 16px;
+  --font-size-md: 18px;
+  --font-size-lg: 22px;
+  --font-size-xl: 30px;
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;
+  --font-weight-large: 600;
 
   --line-height-ui: 1.35;
 
@@ -33,27 +36,27 @@
   /* -----------------------------
      PCV Diagram (geometry / interaction)
   ------------------------------ */
-  --pcv-diagram-pad: 60px;
-  --pcv-fit-inset: 16px;
-  --pcv-edge-width: 2px;
-  --pcv-route-lead: 18px;
+  --pcv-diagram-pad: 75px;
+  --pcv-fit-inset: 20px;
+  --pcv-edge-width: 2.5px;
+  --pcv-route-lead: 22px;
   --pcv-zoom-min: 0.2;
   --pcv-zoom-max: 4;
-  --pcv-label-line: 16px;
+  --pcv-label-line: 20px;
 
   /* Program editor sizing */
-  --program-editor-height: 360px;
-  --program-editor-min-height: 260px;
-  --program-editor-max-height: 440px;
+  --program-editor-height: 450px;
+  --program-editor-min-height: 325px;
+  --program-editor-max-height: 550px;
 
   /* Diagram geometry / interaction */
-  --diagram-pad: 60px; /* template coord padding around bounds */
-  --diagram-fit-inset: 16px; /* screen inset for fit-to-view */
-  --diagram-edge-width: 2px;
-  --diagram-route-lead: 18px; /* lead-out/lead-in length */
+  --diagram-pad: 75px; /* template coord padding around bounds */
+  --diagram-fit-inset: 20px; /* screen inset for fit-to-view */
+  --diagram-edge-width: 2.5px;
+  --diagram-route-lead: 22px; /* lead-out/lead-in length */
   --diagram-zoom-min: 0.2;
   --diagram-zoom-max: 4;
-  --diagram-label-line: 16px;
+  --diagram-label-line: 20px;
 
   /* -----------------------------
    DARK MODE
@@ -97,15 +100,72 @@
   --button-primary-active: color-mix(in oklab, var(--accent) 78%, black);
 
   /* Radius / motion */
-  --radius: 12px;
+  --radius: 15px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
   --dur-1: 120ms;
   --dur-2: 200ms;
 
+  /* Shared component sizing */
+  --app-shell-pane-width: 400px;
+  --app-shell-gap: 12px;
+  --app-shell-padding: 12px;
+  --control-height: 45px;
+  --control-height-sm: 38px;
+  --control-height-lg: 50px;
+  --control-padding-x: 15px;
+  --icon-button-size: 45px;
+  --icon-button-size-sm: 38px;
+  --icon-size-sm: 20px;
+  --icon-size-md: 28px;
+  --icon-size-lg: 24px;
+  --icon-size-close: 30px;
+  --tooltip-gap: 15px;
+  --tooltip-shift: 12px;
+  --tooltip-panel-padding: 20px;
+  --tooltip-panel-radius: 10px;
+  --tooltip-arrow-size: 20px;
+  --tooltip-arrow-edge-offset: 32px;
+  --tooltip-arrow-edge-offset-sm: 28px;
+  --tooltip-bias: 21px;
+  --tooltip-bias-sm: 15px;
+  --panel-title-padding-x: var(--space-2);
+  --panel-title-padding-y: 6px;
+  --panel-title-size-xl: var(--font-size-xl);
+  --panel-title-size-lg: var(--font-size-lg);
+  --tab-padding-x: var(--space-2);
+  --tab-padding-top: 24px;
+  --tab-padding-bottom: 19px;
+  --tab-font-size: var(--font-size-lg);
+  --stage-label-size: var(--font-size-lg);
+  --stage-label-letter-spacing: 0.02em;
+  --settings-panel-width: 320px;
+  --settings-panel-header-padding: 20px;
+  --settings-panel-body-padding: 16px;
+  --toast-width: 460px;
+  --toast-padding: 18px;
+  --toast-icon-size: 38px;
+  --toast-title-size: var(--font-size-md);
+  --toast-body-size: var(--font-size-sm);
+  --toast-close-size: 32px;
+  --toast-close-icon-size: 18px;
+  --toast-progress-height: 5px;
+  --tooltip-font-size: var(--font-size-md);
+  --tooltip-title-size: var(--font-size-md);
+  --tooltip-body-size: var(--font-size-sm);
+  --tooltip-code-size: var(--font-size-md);
+  --tooltip-caption-size: var(--font-size-sm);
+  --tooltip-footnote-size: var(--font-size-xs);
+  --settings-title-size: var(--font-size-lg);
+  --modal-title-size: var(--font-size-lg);
+  --modal-description-size: var(--font-size-md);
+
   /* Spacing */
-  --space-1: 6px;
-  --space-2: 10px;
-  --space-3: 14px;
-  --space-4: 18px;
+  --space-1: 8px;
+  --space-2: 12px;
+  --space-3: 18px;
+  --space-4: 22px;
 
   /* Toggle Switch */
   --switch-track: var(--surface-3);
@@ -113,8 +173,8 @@
   --switch-thumb-active: var(--accent);
 
   /* Scroll Bar */
-  --scrollbar-size: 8px;
-  --scrollbar-arrow-size: 9px;
+  --scrollbar-size: 10px;
+  --scrollbar-arrow-size: 11px;
   --scrollbar-fade-duration: 220ms;
   --scrollbar-track: color-mix(in oklab, var(--surface-2) 78%, transparent);
   --scrollbar-track-border: color-mix(in oklab, var(--border) 68%, transparent);
@@ -143,6 +203,13 @@
   --tooltip-success-bg: color-mix(in oklab, var(--ctrl) 90%, transparent);
   --tooltip-success-border: color-mix(in oklab, var(--ctrl) 72%, var(--border));
   /* --tooltip-success-fg: var(--text); */
+
+  --trash-icon-color: #dc2626;
+  --trash-icon-color-hover: #b91c1c;
+  --memory-rule-edit-icon: color-mix(in oklab, var(--accent) 78%, var(--text));
+  --memory-rule-edit-hover-bg: color-mix(in oklab, var(--accent) 16%, transparent);
+  --memory-rule-delete-icon: #ff3b30;
+  --memory-rule-delete-hover-bg: color-mix(in oklab, #ff3b30 16%, transparent);
 
   /* Register formula tooltip */
   --register-tooltip-bg: var(--surface-1);
@@ -210,7 +277,11 @@
   --button-surface-hover: #f5f6f8;
   --button-surface-active: #eceff3;
   --button-ghost-hover: color-mix(in oklab, var(--surface-2) 88%, transparent);
-  --button-ghost-active: color-mix(in oklab, var(--border) 18%, var(--surface-2));
+  --button-ghost-active: color-mix(
+    in oklab,
+    var(--border) 18%,
+    var(--surface-2)
+  );
   --button-primary-hover: color-mix(in oklab, var(--accent) 88%, white);
   --button-primary-active: color-mix(in oklab, var(--accent) 78%, black);
 
@@ -220,8 +291,8 @@
   --switch-thumb-active: var(--accent);
 
   /* Scroll Bar */
-  --scrollbar-size: 8px;
-  --scrollbar-arrow-size: 9px;
+  --scrollbar-size: 10px;
+  --scrollbar-arrow-size: 11px;
   --scrollbar-fade-duration: 220ms;
   --scrollbar-track: color-mix(in oklab, var(--surface-2) 82%, transparent);
   --scrollbar-track-border: color-mix(in oklab, var(--border) 72%, transparent);

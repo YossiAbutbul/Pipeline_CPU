@@ -26,13 +26,13 @@
 .registerFormulaInput,
 .registerValueInput {
   box-sizing: border-box;
-  height: 36px;
+  height: var(--control-height);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--text);
   font-size: var(--font-size-sm);
-  padding: 0 12px;
+  padding: 0 var(--control-padding-x);
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
@@ -40,7 +40,7 @@
 
 .registerFormulaInput {
   width: 100%;
-  max-width: 180px;
+  max-width: 225px;
   min-width: 0;
   border: none;
   background: var(--input-surface);
@@ -49,20 +49,20 @@
 
 .registerFormulaInputWrap {
   width: 100%;
-  max-width: 180px;
+  max-width: 225px;
   min-width: 0;
-  flex: 1 1 120px;
+  flex: 1 1 150px;
 }
 
 .registerFormulaHelp {
   position: relative;
-  top: 1px;
+  top: 2px;
   flex: 0 0 auto;
 }
 
 .registerFormulaHelp .tooltipTrigger {
-  width: 18px;
-  height: 18px;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -75,15 +75,17 @@
 .registerFormulaTooltip .tooltipContent {
   --tooltip-panel-bg: var(--register-tooltip-bg);
   --tooltip-panel-border: var(--register-tooltip-border);
-  --tooltip-arrow-offset: calc(100% - 26px - var(--tooltip-shift-x, 0px));
-  --tooltip-bias-x: 17px;
-  top: calc(100% + 12px);
+  --tooltip-arrow-offset: calc(
+    100% - var(--tooltip-arrow-edge-offset) - var(--tooltip-shift-x, 0px)
+  );
+  --tooltip-bias-x: var(--tooltip-bias);
+  top: calc(100% + var(--tooltip-gap));
   box-sizing: border-box;
-  width: 312px;
+  width: 430px;
   max-height: none;
-  padding: 16px;
+  padding: var(--tooltip-panel-padding);
   border: 1px solid var(--tooltip-panel-border);
-  border-radius: 8px;
+  border-radius: var(--tooltip-panel-radius);
   background: var(--tooltip-panel-bg);
   color: var(--register-tooltip-title);
   box-shadow: var(--shadow);
@@ -91,7 +93,7 @@
   transform: translateX(
       calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
   transform-origin: top center;
   transition:
     opacity 200ms ease-out,
@@ -108,15 +110,15 @@
 .registerFormulaTooltip .tooltipContent::before,
 .registerFormulaTooltip .tooltipContent::after {
   left: var(--tooltip-arrow-offset);
-  width: 16px;
-  height: 16px;
+  width: var(--tooltip-arrow-size);
+  height: var(--tooltip-arrow-size);
   border: none;
   border-radius: 2px 0 0 0;
   transform: translateX(-50%) rotate(45deg);
 }
 
 .registerFormulaTooltip .tooltipContent::before {
-  top: -8px;
+  top: calc(var(--tooltip-arrow-size) / -2);
   background: var(--register-tooltip-bg);
   border-top: 1px solid var(--register-tooltip-border);
   border-left: 1px solid var(--register-tooltip-border);
@@ -128,7 +130,7 @@
 
 .registerFormulaTooltip .tooltipPlace-top::before {
   top: auto;
-  bottom: -8px;
+  bottom: calc(var(--tooltip-arrow-size) / -2);
   border-top: none;
   border-left: none;
   border-right: 1px solid var(--register-tooltip-border);
@@ -136,15 +138,17 @@
 }
 
 .registerFormulaTooltip .tooltipPlace-top {
-  bottom: calc(100% + 12px);
+  bottom: calc(100% + var(--tooltip-gap));
 }
 
 .registerFormulaTooltip .tooltipAlign-end {
-  --tooltip-arrow-offset: calc(100% - 26px - var(--tooltip-shift-x, 0px));
+  --tooltip-arrow-offset: calc(
+    100% - var(--tooltip-arrow-edge-offset) - var(--tooltip-shift-x, 0px)
+  );
   transform: translateX(
       calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .registerFormulaTooltip.tooltipVisible .tooltipContent,
@@ -171,14 +175,14 @@
   transform: translateX(
       calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .registerFormulaTooltip.tooltipClosing .tooltipAlign-end {
   transform: translateX(
       calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .registerFormulaTooltip.tooltipVisible .tooltipPlace-top,
@@ -217,24 +221,24 @@
 }
 
 .registerFormulaTooltipTitle {
-  margin-bottom: 12px;
+  margin-bottom: 15px;
   color: var(--register-tooltip-title);
-  font-size: 1rem;
+  font-size: var(--tooltip-title-size);
   font-weight: 600;
 }
 
 .registerFormulaTooltipList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 15px;
 }
 
 .registerFormulaTooltipCard {
-  padding: 12px;
-  border-radius: 6px;
+  padding: 15px;
+  border-radius: 8px;
   background: var(--register-tooltip-card-bg);
   opacity: 0;
-  transform: translateX(-10px);
+  transform: translateX(-12px);
   transition: box-shadow 180ms ease;
 }
 
@@ -270,7 +274,7 @@
 
 .registerFormulaTooltipCard code {
   color: var(--register-tooltip-card-code);
-  font-size: 0.875rem;
+  font-size: var(--tooltip-code-size);
   font-weight: 600;
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
@@ -278,17 +282,17 @@
 }
 
 .registerFormulaTooltipDescription {
-  margin-top: 4px;
+  margin-top: 5px;
   color: var(--register-tooltip-card-text);
-  font-size: 0.75rem;
+  font-size: var(--tooltip-body-size);
 }
 
 .registerFormulaTooltipFooter {
-  margin-top: 16px;
-  padding-top: 12px;
+  margin-top: 20px;
+  padding-top: 15px;
   border-top: 1px solid var(--register-tooltip-border);
   color: var(--register-tooltip-footer);
-  font-size: 0.6875rem;
+  font-size: var(--tooltip-footnote-size);
 }
 
 .registerFormulaTooltipFooterItems {
@@ -297,7 +301,7 @@
 
 .registerFormulaTooltipFooter code {
   display: inline;
-  padding: 1px 4px;
+  padding: 2px 5px;
   border-radius: 4px;
   background: var(--register-tooltip-chip-bg);
   color: var(--register-tooltip-chip-fg);
@@ -310,8 +314,8 @@
 .registerValueInput {
   width: 100%;
   max-width: none;
-  height: 40px;
-  padding: 0 12px;
+  height: var(--control-height-lg);
+  padding: 0 var(--control-padding-x);
   justify-self: start;
   text-align: left;
 }
@@ -319,12 +323,12 @@
 .registerValueInputEditable {
   box-sizing: border-box;
   width: 100%;
-  max-width: 168px;
+  max-width: 210px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--input-surface);
-  height: 36px;
-  padding: 0 12px;
+  height: var(--control-height);
+  padding: 0 var(--control-padding-x);
   transition: background-color var(--dur-1) ease;
 }
 
@@ -367,7 +371,7 @@
 
 .registerFormulaHint code {
   display: inline;
-  padding: 1px 4px;
+  padding: 2px 5px;
   border-radius: 4px;
   background: var(--register-tooltip-chip-bg);
   color: var(--register-tooltip-chip-fg);
@@ -415,10 +419,10 @@
 }
 
 .registerActionBtn {
-  min-height: 36px;
-  height: 36px;
-  padding: 0 12px;
-  border-radius: 8px;
+  min-height: var(--control-height);
+  height: var(--control-height);
+  padding: 0 var(--control-padding-x);
+  border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
 }
 
@@ -453,18 +457,18 @@
 .registerHeaderRow,
 .registerRow {
   display: grid;
-  grid-template-columns: 56px 80px minmax(0, 1fr);
+  grid-template-columns: 70px 100px minmax(0, 1fr);
   gap: var(--space-3);
   align-items: center;
   min-width: 0;
 }
 
 .registerHeaderRow {
-  min-height: 40px;
+  min-height: 50px;
 }
 
 .registerRow {
-  min-height: 46px;
+  min-height: 58px;
 }
 
 .registerStickyHeader {
@@ -478,7 +482,7 @@
   background: color-mix(in oklab, var(--surface-2) 84%, var(--surface-1));
   border-bottom: var(--border-1) solid
     color-mix(in oklab, var(--border) 76%, transparent);
-  padding: 0 12px;
+  padding: 0 15px;
 }
 
 .registerHeaderCell {
@@ -497,7 +501,7 @@
 .registerHeaderRow .registerHeaderCell:nth-child(3) {
   justify-self: start;
   text-align: left;
-  margin-left: 8px;
+  margin-left: 10px;
 }
 
 .registerRow {
@@ -509,7 +513,7 @@
   background: var(--register-row-bg);
   border-bottom: var(--border-1) solid
     color-mix(in oklab, var(--border) 58%, transparent);
-  padding: 0 12px;
+  padding: 0 15px;
   transition:
     background-color 180ms ease,
     border-color 180ms ease,
@@ -527,7 +531,7 @@
 .registerRowChanged {
   --register-row-bg: color-mix(in oklab, var(--accent) 12%, var(--surface-1));
   background: var(--register-row-bg);
-  box-shadow: inset 2px 0 0 color-mix(in oklab, var(--accent) 60%, transparent);
+  box-shadow: inset 3px 0 0 color-mix(in oklab, var(--accent) 60%, transparent);
 }
 
 .registerName {
@@ -563,7 +567,7 @@
 
 .registerOverlayScrollbar {
   position: absolute;
-  top: 2px;
+  top: 3px;
   right: 1px;
   bottom: 0;
   width: var(--scrollbar-size);
@@ -589,14 +593,14 @@
 }
 
 .registerOverlayScrollbar::before {
-  top: 2px;
-  border-bottom: calc(var(--scrollbar-arrow-size) - 2px) solid
+  top: 3px;
+  border-bottom: calc(var(--scrollbar-arrow-size) - 3px) solid
     var(--scrollbar-arrow);
 }
 
 .registerOverlayScrollbar::after {
-  bottom: 2px;
-  border-top: calc(var(--scrollbar-arrow-size) - 2px) solid
+  bottom: 3px;
+  border-top: calc(var(--scrollbar-arrow-size) - 3px) solid
     var(--scrollbar-arrow);
 }
 
@@ -607,11 +611,11 @@
 
 .registerOverlayThumb {
   position: absolute;
-  inset-inline-start: 1px;
+  inset-inline-start: 2px;
   inline-size: 100%;
   background-color: var(--scrollbar-thumb);
   border-radius: 999px;
-  width: calc(var(--scrollbar-size) - 2px);
+  width: calc(var(--scrollbar-size) - 3px);
   box-shadow: inset 0 0 0 1px
     color-mix(in oklab, var(--scrollbar-thumb-hover) 44%, transparent);
   transition:

@@ -28,6 +28,30 @@ export function parseRegisterValue(raw: string): number {
   return parsed >>> 0;
 }
 
+function validateFormulaExpression(expression: string): void {
+  if (/[+\-*/%&|^]\s*$/.test(expression)) {
+    const trailingOperator = expression.match(/([+\-*/%&|^])\s*$/)?.[1] ?? "";
+    throw new Error(`Expression cannot end with operator "${trailingOperator}"`);
+  }
+
+  let parenBalance = 0;
+  for (const char of expression) {
+    if (char === "(") {
+      parenBalance += 1;
+    } else if (char === ")") {
+      parenBalance -= 1;
+    }
+
+    if (parenBalance < 0) {
+      throw new Error('Expression has an unexpected ")"');
+    }
+  }
+
+  if (parenBalance > 0) {
+    throw new Error('Expression is missing a closing ")"');
+  }
+}
+
 export function evaluateRegisterFormula(formula: string, registerNumber: number): number {
   const normalized = formula.trim();
   if (!normalized) {
@@ -50,11 +74,21 @@ export function evaluateRegisterFormula(formula: string, registerNumber: number)
     throw new Error("Formula is empty");
   }
 
+  validateFormulaExpression(expression);
+
   const resolved = constantMode
     ? expression
     : expression.replace(/\b(index|num|number)\b/g, String(registerNumber)).replace(/\bi\b/g, String(registerNumber));
 
-  const result = Function(`"use strict"; return (${resolved});`)();
+  let result: unknown;
+  try {
+    result = Function(`"use strict"; return (${resolved});`)();
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new Error("Formula syntax is invalid");
+    }
+    throw error;
+  }
   if (!Number.isFinite(result) || !Number.isInteger(result)) {
     throw new Error("Formula must produce an integer");
   }

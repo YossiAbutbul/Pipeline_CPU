@@ -1,8 +1,8 @@
 .btn {
-  min-height: 36px;
-  padding: 0 12px;
+  min-height: var(--control-height);
+  padding: 0 var(--control-padding-x);
   border: 1px solid var(--button-border-subtle);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font: inherit;
   font-weight: 600;
   font-size: var(--font-size-sm);
@@ -36,9 +36,9 @@
 }
 
 .btn-sm {
-  min-height: 36px;
-  padding: 0 12px;
-  border-radius: 8px;
+  min-height: var(--control-height-sm);
+  padding: 0 var(--control-padding-x);
+  border-radius: var(--radius-md);
 }
 
 .btn-primary {

@@ -414,14 +414,16 @@ export default function MemoryEditor({
       </div>
 
       <div className="memoryRulesHeaderRow">
-        <button
-          type="button"
-          className="memoryRulesToggle"
-          aria-expanded={isRulesExpanded}
-          aria-controls="memory-rules-list"
-          onClick={() => setIsRulesExpanded((prev) => !prev)}
-        >
-          <span className="memoryRulesHeader">Rules ({rules.length})</span>
+        <div className="memoryRulesHeaderCluster">
+          <button
+            type="button"
+            className="memoryRulesLabelButton"
+            aria-expanded={isRulesExpanded}
+            aria-controls="memory-rules-list"
+            onClick={() => setIsRulesExpanded((prev) => !prev)}
+          >
+            <span className="memoryRulesHeader">Rules ({rules.length})</span>
+          </button>
           <Tooltip
             className="memoryRulesInfoTooltip"
             ariaLabel="About memory rules"
@@ -438,8 +440,17 @@ export default function MemoryEditor({
               </div>
             }
           />
+        </div>
+        <button
+          type="button"
+          className="memoryRulesChevronButton"
+          aria-expanded={isRulesExpanded}
+          aria-controls="memory-rules-list"
+          aria-label={isRulesExpanded ? "Collapse memory rules" : "Expand memory rules"}
+          onClick={() => setIsRulesExpanded((prev) => !prev)}
+        >
           <span className="memoryRulesChevron" aria-hidden="true">
-            <ChevronDown size={14} />
+            <ChevronDown size={18} />
           </span>
         </button>
       </div>
@@ -475,7 +486,7 @@ export default function MemoryEditor({
                       }}
                       aria-label={`Edit rule ${idx + 1}`}
                     >
-                      <Pencil size={12} aria-hidden="true" />
+                      <Pencil size={16} aria-hidden="true" />
                     </Button>
                     <Button
                       size="sm"
@@ -485,7 +496,7 @@ export default function MemoryEditor({
                       onClick={() => removeRule(rule.id)}
                       aria-label={`Remove rule ${idx + 1}`}
                     >
-                      <Trash2 size={12} aria-hidden="true" />
+                      <Trash2 size={16} aria-hidden="true" />
                     </Button>
                   </div>
                 </div>
