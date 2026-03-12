@@ -36,7 +36,7 @@
   flex: 1;
   min-height: 0;
   margin: 0 20px 20px;
-  border: var(--border-1) solid var(--editor-surface-border);
+  border: none;
   border-radius: var(--radius);
   background: var(--editor-surface);
   overflow: hidden; /* keeps Monaco inside rounded border */

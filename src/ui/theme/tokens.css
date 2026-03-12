@@ -88,9 +88,9 @@
   --input-surface-hover: #21252d;
   --input-focus-ring: var(--border);
   --button-border-subtle: color-mix(in oklab, var(--border) 42%, transparent);
-  --button-surface: #171b21;
-  --button-surface-hover: #1d2229;
-  --button-surface-active: #242a33;
+  --button-surface: var(--surface-1);
+  --button-surface-hover: #181c23;
+  --button-surface-active: #1e232b;
   --button-ghost-hover: color-mix(in oklab, var(--surface-2) 82%, transparent);
   --button-ghost-active: color-mix(in oklab, var(--surface-3) 78%, transparent);
   --button-primary-hover: color-mix(in oklab, var(--accent) 88%, white);
@@ -206,9 +206,9 @@
   --input-surface-hover: #ececec;
   --input-focus-ring: var(--border);
   --button-border-subtle: color-mix(in oklab, var(--border) 44%, transparent);
-  --button-surface: #fafafb;
-  --button-surface-hover: #f2f4f7;
-  --button-surface-active: #e8ebf0;
+  --button-surface: var(--surface-1);
+  --button-surface-hover: #f5f6f8;
+  --button-surface-active: #eceff3;
   --button-ghost-hover: color-mix(in oklab, var(--surface-2) 88%, transparent);
   --button-ghost-active: color-mix(in oklab, var(--border) 18%, var(--surface-2));
   --button-primary-hover: color-mix(in oklab, var(--accent) 88%, white);
