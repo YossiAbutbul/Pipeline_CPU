@@ -91,6 +91,7 @@ export default function MemoryEditor({
   runtimeChangedWords,
   isRuntimeLocked,
 }: Props) {
+  const overlayInset = 12;
   const toHexCompact = (value: number) => `0x${(value >>> 0).toString(16).toUpperCase()}`;
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -120,11 +121,14 @@ export default function MemoryEditor({
       return;
     }
 
+    const trackHeight = Math.max(0, clientHeight - (overlayInset * 2));
     const minThumbHeight = 24;
-    const thumbHeight = Math.max(minThumbHeight, (clientHeight / scrollHeight) * clientHeight);
-    const maxThumbTop = clientHeight - thumbHeight;
+    const thumbHeight = Math.max(minThumbHeight, (clientHeight / scrollHeight) * trackHeight);
+    const maxThumbOffset = Math.max(0, trackHeight - thumbHeight);
     const maxScrollTop = scrollHeight - clientHeight;
-    const thumbTop = maxScrollTop > 0 ? (scrollTop / maxScrollTop) * maxThumbTop : 0;
+    const thumbTop = maxScrollTop > 0
+      ? overlayInset + ((scrollTop / maxScrollTop) * maxThumbOffset)
+      : overlayInset;
 
     setRuntimeScrollbarThumbHeight(thumbHeight);
     setRuntimeScrollbarThumbTop(thumbTop);

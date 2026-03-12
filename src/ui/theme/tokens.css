@@ -102,9 +102,14 @@
   --switch-thumb-active: var(--accent);
 
   /* Scroll Bar */
-  --scrollbar-track: transparent;
-  --scrollbar-thumb: #2f3440;
-  --scrollbar-thumb-hover: #3a404d;
+  --scrollbar-size: 8px;
+  --scrollbar-arrow-size: 9px;
+  --scrollbar-fade-duration: 220ms;
+  --scrollbar-track: color-mix(in oklab, var(--surface-2) 78%, transparent);
+  --scrollbar-track-border: color-mix(in oklab, var(--border) 68%, transparent);
+  --scrollbar-thumb: #3a404d;
+  --scrollbar-thumb-hover: #4a5260;
+  --scrollbar-arrow: color-mix(in oklab, var(--muted) 78%, var(--text));
 
   /* CPU Diagram */
   --dp: #b3b3b3; /* data paths border and text color */
@@ -193,9 +198,14 @@
   --switch-thumb-active: var(--accent);
 
   /* Scroll Bar */
-  --scrollbar-track: transparent;
-  --scrollbar-thumb: #c7c3b9;
-  --scrollbar-thumb-hover: #b6b2a8;
+  --scrollbar-size: 8px;
+  --scrollbar-arrow-size: 9px;
+  --scrollbar-fade-duration: 220ms;
+  --scrollbar-track: color-mix(in oklab, var(--surface-2) 82%, transparent);
+  --scrollbar-track-border: color-mix(in oklab, var(--border) 72%, transparent);
+  --scrollbar-thumb: #c5cbd6;
+  --scrollbar-thumb-hover: #b0b8c5;
+  --scrollbar-arrow: color-mix(in oklab, var(--muted) 72%, var(--text));
 
   /* CPU Diagram */
   --dp: #16181d; /* data paths border and text color */

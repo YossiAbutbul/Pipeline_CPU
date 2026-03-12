@@ -35,6 +35,7 @@ export default function RegisterEditor({
   highlightCycle,
   isRuntimeLocked,
 }: Props) {
+  const overlayInset = 12;
   const [recentlyChangedAliases, setRecentlyChangedAliases] = useState<Record<string, true>>({});
   const [isScrollbarVisible, setIsScrollbarVisible] = useState(false);
   const [scrollbarThumbTop, setScrollbarThumbTop] = useState(0);
@@ -133,11 +134,14 @@ export default function RegisterEditor({
       return;
     }
 
+    const trackHeight = Math.max(0, clientHeight - (overlayInset * 2));
     const minThumbHeight = 24;
-    const thumbHeight = Math.max(minThumbHeight, (clientHeight / scrollHeight) * clientHeight);
-    const maxThumbTop = clientHeight - thumbHeight;
+    const thumbHeight = Math.max(minThumbHeight, (clientHeight / scrollHeight) * trackHeight);
+    const maxThumbOffset = Math.max(0, trackHeight - thumbHeight);
     const maxScrollTop = scrollHeight - clientHeight;
-    const thumbTop = maxScrollTop > 0 ? (scrollTop / maxScrollTop) * maxThumbTop : 0;
+    const thumbTop = maxScrollTop > 0
+      ? overlayInset + ((scrollTop / maxScrollTop) * maxThumbOffset)
+      : overlayInset;
 
     setScrollbarThumbHeight(thumbHeight);
     setScrollbarThumbTop(thumbTop);

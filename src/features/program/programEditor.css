@@ -475,37 +475,12 @@
 /* Thin themed scrollbar     */
 /* ========================= */
 
-.programEditorSection * {
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: var(--border) transparent;
-}
-
-/* Chrome / Edge / Safari */
-.programEditorSection *::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-.programEditorSection *::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.programEditorSection *::-webkit-scrollbar-thumb {
-  background-color: var(--border);
-  border-radius: 20px;
-  background-clip: padding-box;
-}
-
-.programEditorSection *::-webkit-scrollbar-thumb:hover {
-  background-color: var(--text-muted);
-}
-
-.programEditorSection .monaco-editor .scrollbar .slider:hover {
-  background: var(--text-muted);
-}
-
 .programEditorSection .monaco-editor .scrollbar.vertical {
-  width: 6px !important;
+  display: none !important;
+}
+
+.programEditorSection .monaco-editor .scrollbar.horizontal {
+  display: none !important;
 }
 
 .programEditorSection .monaco-editor .current-line {
@@ -525,16 +500,6 @@
 .programEditorSection .monaco-editor .margin .current-line {
   background: color-mix(in oklab, var(--surface-2) 65%, transparent) !important;
   border: none !important;
-}
-
-/* ===== Rounded  Monaco scrollbar slider ===== */
-.programEditorSection .monaco-editor .scrollbar .slider {
-  border-radius: 999px !important;
-}
-
-/* On Hover effect */
-.programEditorSection .monaco-editor .scrollbar .slider:hover {
-  background: color-mix(in oklab, var(--text) 22%, transparent) !important;
 }
 
 /* ===== line-number padding a bit ===== */
