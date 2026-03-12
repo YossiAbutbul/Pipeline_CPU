@@ -196,6 +196,9 @@
   --tooltip-success-border: color-mix(in oklab, var(--ctrl) 72%, var(--border));
   /* --tooltip-success-fg: var(--text); */
 
+  --trash-icon-color: #dc2626;
+  --trash-icon-color-hover: #b91c1c;
+
   /* Register formula tooltip */
   --register-tooltip-bg: var(--surface-1);
   --register-tooltip-border: color-mix(in oklab, var(--border) 88%, white 12%);

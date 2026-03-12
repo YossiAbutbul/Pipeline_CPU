@@ -470,11 +470,11 @@
   padding: 0;
   border-radius: var(--radius-md);
   flex: 0 0 auto;
-  color: #e53935;
+  color: var(--trash-icon-color);
 }
 
 .clearProgramButton:hover {
-  color: #d32f2f;
+  color: var(--trash-icon-color-hover);
 }
 
 .clearProgramButton:disabled {
