@@ -53,7 +53,7 @@
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
-  padding: 20px 30px;
+  padding: 20px 22px 20px 30px;
   margin-bottom: 30px;
   border-bottom: var(--border-1) solid
     color-mix(in oklab, var(--border) 78%, transparent);
@@ -105,9 +105,9 @@
 
 .initialPcRow {
   display: grid;
-  grid-template-columns: auto minmax(0, 245px) auto;
+  grid-template-columns: auto minmax(0, 200px) auto;
   align-items: center;
-  gap: 10px;
+  gap: 20px;
   width: min(100%, 410px);
   max-width: 100%;
   margin-left: auto;
