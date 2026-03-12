@@ -5,6 +5,21 @@ import { useEffect, useRef, useState } from "react";
 import { PATH_SIGNAL_MAP, type HoveredSignalValues } from "./pipelineHoverMap";
 import "./pipelineCanvas.css";
 
+declare global {
+  interface Window {
+    __pipelinePathDebug?: {
+      getRows: () => Array<{
+        id: string;
+        label: string;
+        key: string;
+        value: string;
+        mapped: boolean;
+      }>;
+      dumpAllPaths: () => void;
+    };
+  }
+}
+
 type PipelineSlots = {
   IF: string | null;
   ID: string | null;
@@ -203,15 +218,9 @@ export default function PipelineCanvas({
           return;
         }
 
-        const value = hoveredSignalValues[signal.key];
-        if (!value) {
-          setHoverTooltip(null);
-          return;
-        }
-
         setHoverTooltip({
           label: signal.label,
-          value,
+          value: hoveredSignalValues[signal.key] ?? "Unknown",
           left: event.clientX - diagramBounds.left + 18,
           top: event.clientY - diagramBounds.top - 18,
         });
@@ -250,6 +259,35 @@ export default function PipelineCanvas({
         path.classList.remove("cpuPath", "cpuPathControl", "cpuPathData", "isHovered");
       });
       setHoverTooltip(null);
+    };
+  }, [hoveredSignalValues]);
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) {
+      return;
+    }
+
+    const getRows = () =>
+      Object.entries(PATH_SIGNAL_MAP)
+        .filter((entry): entry is [string, NonNullable<(typeof PATH_SIGNAL_MAP)[string]>] => Boolean(entry[1]))
+        .map(([id, signal]) => ({
+          id,
+          label: signal.label,
+          key: signal.key,
+          value: hoveredSignalValues[signal.key] ?? "Unknown",
+          mapped: true,
+        }))
+        .sort((a, b) => a.id.localeCompare(b.id));
+
+    window.__pipelinePathDebug = {
+      getRows,
+      dumpAllPaths: () => {
+        console.table(getRows());
+      },
+    };
+
+    return () => {
+      delete window.__pipelinePathDebug;
     };
   }, [hoveredSignalValues]);
 
@@ -385,8 +423,8 @@ export default function PipelineCanvas({
                     ariaLabel={`${hoverTooltip.label} value`}
                     content={
                       <div className="pipelineTooltipBody">
-                        <div className="pipelineTooltipLabel">{hoverTooltip.label}</div>
-                        <div className="pipelineTooltipValue">{hoverTooltip.value}</div>
+                        <div className="pipelineTooltipHeader">{hoverTooltip.label}</div>
+                        <div className="pipelineTooltipContent">{hoverTooltip.value}</div>
                       </div>
                     }
                   />
