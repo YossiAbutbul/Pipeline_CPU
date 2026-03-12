@@ -119,8 +119,8 @@
   --notification-title: var(--text);
   --notification-body: color-mix(in oklab, var(--text) 30%, var(--muted));
   --notification-close: color-mix(in oklab, var(--text) 28%, var(--muted));
-  --notification-icon-bg: color-mix(in oklab, var(--tooltip-error-border) 26%, var(--surface-2));
-  --notification-icon-fg: color-mix(in oklab, var(--text) 80%, var(--tooltip-error-border));
+  --notification-icon-bg: color-mix(in oklab, #a53a34 68%, var(--surface-2));
+  --notification-icon-fg: #fff;
 }
 
 .notificationToastBody {
