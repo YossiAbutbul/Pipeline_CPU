@@ -88,10 +88,10 @@
   color: var(--register-tooltip-title);
   box-shadow: var(--shadow);
   overflow: visible;
-  transform:
-    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
-    scale(0.9);
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
   transform-origin: top center;
   transition:
     opacity 200ms ease-out,
@@ -141,18 +141,18 @@
 
 .registerFormulaTooltip .tooltipAlign-end {
   --tooltip-arrow-offset: calc(100% - 26px - var(--tooltip-shift-x, 0px));
-  transform:
-    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
-    scale(0.9);
+  transform: translateX(
+      calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .registerFormulaTooltip.tooltipVisible .tooltipContent,
 .registerFormulaTooltip .tooltipOpen {
-  transform:
-    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(var(--tooltip-shift-y, 0px))
-    scale(1);
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(var(--tooltip-shift-y, 0px)) scale(1);
   transition:
     opacity 200ms ease-out,
     transform 200ms ease-out,
@@ -161,54 +161,54 @@
 
 .registerFormulaTooltip.tooltipVisible .tooltipAlign-end,
 .registerFormulaTooltip .tooltipOpen.tooltipAlign-end {
-  transform:
-    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(var(--tooltip-shift-y, 0px))
-    scale(1);
+  transform: translateX(
+      calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(var(--tooltip-shift-y, 0px)) scale(1);
 }
 
 .registerFormulaTooltip.tooltipClosing .tooltipContent {
-  transform:
-    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
-    scale(0.9);
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .registerFormulaTooltip.tooltipClosing .tooltipAlign-end {
-  transform:
-    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
-    scale(0.9);
+  transform: translateX(
+      calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .registerFormulaTooltip.tooltipVisible .tooltipPlace-top,
 .registerFormulaTooltip .tooltipOpen.tooltipPlace-top {
-  transform:
-    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(var(--tooltip-shift-y, 0px))
-    scale(1);
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(var(--tooltip-shift-y, 0px)) scale(1);
 }
 
 .registerFormulaTooltip.tooltipVisible .tooltipPlace-top.tooltipAlign-end,
 .registerFormulaTooltip .tooltipOpen.tooltipPlace-top.tooltipAlign-end {
-  transform:
-    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(var(--tooltip-shift-y, 0px))
-    scale(1);
+  transform: translateX(
+      calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(var(--tooltip-shift-y, 0px)) scale(1);
 }
 
 .registerFormulaTooltip.tooltipClosing .tooltipPlace-top {
-  transform:
-    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
-    scale(0.9);
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .registerFormulaTooltip.tooltipClosing .tooltipPlace-top.tooltipAlign-end {
-  transform:
-    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
-    scale(0.9);
+  transform: translateX(
+      calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .registerFormulaTooltipPanel {
@@ -236,12 +236,6 @@
   opacity: 0;
   transform: translateX(-10px);
   transition: box-shadow 180ms ease;
-}
-
-.registerFormulaTooltipCard:hover {
-  box-shadow:
-    0 10px 15px -3px rgb(15 23 42 / 0.12),
-    0 4px 6px -4px rgb(15 23 42 / 0.12);
 }
 
 .registerFormulaTooltip.tooltipVisible .registerFormulaTooltipCard,

@@ -43,6 +43,18 @@
   margin-bottom: 0;
 }
 
+.memoryRulesHeaderRow {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  line-height: 1;
+}
+
+.memoryRulesInfoTooltip {
+  position: relative;
+  top: 2px;
+}
+
 .memoryRuntimeHeader {
   color: var(--muted);
   font-size: var(--font-size-sm);
@@ -50,9 +62,496 @@
   margin-bottom: 0;
 }
 
-.memoryRulesHelp {
+.memoryRuntimeHeaderRowWrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  line-height: 1;
+}
+
+.memoryRulesInfoTooltip .tooltipTrigger {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  box-shadow: none;
   color: var(--muted);
-  font-size: var(--font-size-xs);
+  vertical-align: middle;
+}
+
+.memoryRulesInfoTooltip .tooltipContent {
+  --tooltip-panel-bg: var(--register-tooltip-bg);
+  --tooltip-panel-border: var(--register-tooltip-border);
+  --tooltip-arrow-offset: calc(100% - 22px - var(--tooltip-shift-x, 0px));
+  --tooltip-bias-x: 12px;
+  top: calc(100% + 12px);
+  box-sizing: border-box;
+  width: 280px;
+  max-height: none;
+  padding: 16px;
+  border: 1px solid var(--tooltip-panel-border);
+  border-radius: 8px;
+  background: var(--tooltip-panel-bg);
+  color: var(--register-tooltip-title);
+  box-shadow: var(--shadow);
+  overflow: visible;
+  transform:
+    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
+  transform-origin: top center;
+  transition:
+    opacity 200ms ease-out,
+    transform 200ms ease-out,
+    visibility 0s linear 200ms;
+}
+
+.memoryRulesInfoTooltip .tooltipBody {
+  overflow: visible;
+  max-height: none;
+  padding-right: 0;
+}
+
+.memoryRulesInfoTooltip .tooltipContent::before,
+.memoryRulesInfoTooltip .tooltipContent::after {
+  left: var(--tooltip-arrow-offset);
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 2px 0 0 0;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.memoryRulesInfoTooltip .tooltipContent::before {
+  top: -8px;
+  background: var(--register-tooltip-bg);
+  border-top: 1px solid var(--register-tooltip-border);
+  border-left: 1px solid var(--register-tooltip-border);
+}
+
+.memoryRulesInfoTooltip .tooltipContent::after {
+  display: none;
+}
+
+.memoryRulesInfoTooltip .tooltipPlace-top {
+  bottom: calc(100% + 12px);
+}
+
+.memoryRulesInfoTooltip .tooltipPlace-top::before {
+  top: auto;
+  bottom: -8px;
+  border-top: none;
+  border-left: none;
+  border-right: 1px solid var(--register-tooltip-border);
+  border-bottom: 1px solid var(--register-tooltip-border);
+}
+
+.memoryRulesInfoTooltip .tooltipAlign-end {
+  --tooltip-arrow-offset: calc(100% - 22px - var(--tooltip-shift-x, 0px));
+  transform:
+    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
+}
+
+.memoryRulesInfoTooltip.tooltipVisible .tooltipContent,
+.memoryRulesInfoTooltip .tooltipOpen {
+  transform:
+    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+    translateY(var(--tooltip-shift-y, 0px))
+    scale(1);
+  transition:
+    opacity 200ms ease-out,
+    transform 200ms ease-out,
+    visibility 0s linear 0s;
+}
+
+.memoryRulesInfoTooltip.tooltipVisible .tooltipAlign-end,
+.memoryRulesInfoTooltip .tooltipOpen.tooltipAlign-end {
+  transform:
+    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+    translateY(var(--tooltip-shift-y, 0px))
+    scale(1);
+}
+
+.memoryRulesInfoTooltip.tooltipClosing .tooltipContent {
+  transform:
+    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
+}
+
+.memoryRulesInfoTooltip.tooltipClosing .tooltipAlign-end {
+  transform:
+    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
+}
+
+.memoryRulesInfoTooltip.tooltipVisible .tooltipPlace-top,
+.memoryRulesInfoTooltip .tooltipOpen.tooltipPlace-top {
+  transform:
+    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+    translateY(var(--tooltip-shift-y, 0px))
+    scale(1);
+}
+
+.memoryRulesInfoTooltip.tooltipVisible .tooltipPlace-top.tooltipAlign-end,
+.memoryRulesInfoTooltip .tooltipOpen.tooltipPlace-top.tooltipAlign-end {
+  transform:
+    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+    translateY(var(--tooltip-shift-y, 0px))
+    scale(1);
+}
+
+.memoryRulesInfoTooltip.tooltipClosing .tooltipPlace-top,
+.memoryRulesInfoTooltip.tooltipClosing .tooltipPlace-top.tooltipAlign-end {
+  transform:
+    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
+}
+
+.memoryRulesTooltipPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.memoryRulesTooltipTitle {
+  color: var(--register-tooltip-title);
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.memoryRulesTooltipText {
+  color: var(--register-tooltip-card-text);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.memoryRulesTooltipFooter {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--register-tooltip-border);
+  color: var(--register-tooltip-footer);
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.memoryRulesTooltipFooter code {
+  display: inline;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: var(--register-tooltip-chip-bg);
+  color: var(--register-tooltip-chip-fg);
+  font-size: inherit;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+}
+
+.memoryRulesInfoTooltip.tooltipVisible .memoryRulesTooltipTitle,
+.memoryRulesInfoTooltip .tooltipOpen .memoryRulesTooltipTitle {
+  animation: memoryTooltipItemIn 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 40ms;
+}
+
+.memoryRulesInfoTooltip.tooltipVisible .memoryRulesTooltipText,
+.memoryRulesInfoTooltip .tooltipOpen .memoryRulesTooltipText {
+  animation: memoryTooltipItemIn 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 90ms;
+}
+
+.memoryRulesInfoTooltip.tooltipVisible .memoryRulesTooltipFooter,
+.memoryRulesInfoTooltip .tooltipOpen .memoryRulesTooltipFooter {
+  animation: memoryTooltipItemIn 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 140ms;
+}
+
+.memoryRuntimeInfoTooltip {
+  position: relative;
+  top: 2px;
+}
+
+.memoryRuntimeInfoTooltip .tooltipTrigger {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--muted);
+  vertical-align: middle;
+}
+
+.memoryRuntimeInfoTooltip .tooltipContent {
+  --tooltip-panel-bg: var(--register-tooltip-bg);
+  --tooltip-panel-border: var(--register-tooltip-border);
+  --tooltip-arrow-offset: calc(100% - 22px - var(--tooltip-shift-x, 0px));
+  --tooltip-bias-x: 12px;
+  top: calc(100% + 12px);
+  box-sizing: border-box;
+  width: 300px;
+  max-height: none;
+  padding: 16px;
+  border: 1px solid var(--tooltip-panel-border);
+  border-radius: 8px;
+  background: var(--tooltip-panel-bg);
+  color: var(--register-tooltip-title);
+  box-shadow: var(--shadow);
+  overflow: visible;
+  transform:
+    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
+  transform-origin: top center;
+  transition:
+    opacity 200ms ease-out,
+    transform 200ms ease-out,
+    visibility 0s linear 200ms;
+}
+
+.memoryRuntimeInfoTooltip .tooltipBody {
+  overflow: visible;
+  max-height: none;
+  padding-right: 0;
+}
+
+.memoryRuntimeInfoTooltip .tooltipContent::before,
+.memoryRuntimeInfoTooltip .tooltipContent::after {
+  left: var(--tooltip-arrow-offset);
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 2px 0 0 0;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.memoryRuntimeInfoTooltip .tooltipContent::before {
+  top: -8px;
+  background: var(--register-tooltip-bg);
+  border-top: 1px solid var(--register-tooltip-border);
+  border-left: 1px solid var(--register-tooltip-border);
+}
+
+.memoryRuntimeInfoTooltip .tooltipContent::after {
+  display: none;
+}
+
+.memoryRuntimeInfoTooltip .tooltipPlace-top {
+  bottom: calc(100% + 12px);
+}
+
+.memoryRuntimeInfoTooltip .tooltipPlace-top::before {
+  top: auto;
+  bottom: -8px;
+  border-top: none;
+  border-left: none;
+  border-right: 1px solid var(--register-tooltip-border);
+  border-bottom: 1px solid var(--register-tooltip-border);
+}
+
+.memoryRuntimeInfoTooltip .tooltipAlign-end {
+  --tooltip-arrow-offset: calc(100% - 22px - var(--tooltip-shift-x, 0px));
+  transform:
+    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
+}
+
+.memoryRuntimeInfoTooltip.tooltipVisible .tooltipContent,
+.memoryRuntimeInfoTooltip .tooltipOpen {
+  transform:
+    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+    translateY(var(--tooltip-shift-y, 0px))
+    scale(1);
+  transition:
+    opacity 200ms ease-out,
+    transform 200ms ease-out,
+    visibility 0s linear 0s;
+}
+
+.memoryRuntimeInfoTooltip.tooltipVisible .tooltipAlign-end,
+.memoryRuntimeInfoTooltip .tooltipOpen.tooltipAlign-end {
+  transform:
+    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+    translateY(var(--tooltip-shift-y, 0px))
+    scale(1);
+}
+
+.memoryRuntimeInfoTooltip.tooltipClosing .tooltipContent {
+  transform:
+    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
+}
+
+.memoryRuntimeInfoTooltip.tooltipClosing .tooltipAlign-end {
+  transform:
+    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
+}
+
+.memoryRuntimeInfoTooltip.tooltipVisible .tooltipPlace-top,
+.memoryRuntimeInfoTooltip .tooltipOpen.tooltipPlace-top {
+  transform:
+    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+    translateY(var(--tooltip-shift-y, 0px))
+    scale(1);
+}
+
+.memoryRuntimeInfoTooltip.tooltipVisible .tooltipPlace-top.tooltipAlign-end,
+.memoryRuntimeInfoTooltip .tooltipOpen.tooltipPlace-top.tooltipAlign-end {
+  transform:
+    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+    translateY(var(--tooltip-shift-y, 0px))
+    scale(1);
+}
+
+.memoryRuntimeInfoTooltip.tooltipClosing .tooltipPlace-top,
+.memoryRuntimeInfoTooltip.tooltipClosing .tooltipPlace-top.tooltipAlign-end {
+  transform:
+    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
+}
+
+.memoryRuntimeTooltipPanel {
+  display: flex;
+  flex-direction: column;
+}
+
+.memoryRuntimeTooltipTitle {
+  margin-bottom: 12px;
+  color: var(--register-tooltip-title);
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.memoryRuntimeTooltipText {
+  color: var(--register-tooltip-card-text);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.memoryRuntimeTooltipList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.memoryRuntimeTooltipCard {
+  padding: 12px;
+  border-radius: 6px;
+  background: var(--register-tooltip-card-bg);
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.memoryRuntimeTooltipCard code {
+  color: var(--register-tooltip-card-code);
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+}
+
+.memoryRuntimeTooltipDescription {
+  margin-top: 4px;
+  color: var(--register-tooltip-card-text);
+  font-size: 0.75rem;
+}
+
+.memoryRuntimeTooltipFooter {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--register-tooltip-border);
+  color: var(--register-tooltip-footer);
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.memoryRuntimeTooltipFooter code {
+  display: inline;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: var(--register-tooltip-chip-bg);
+  color: var(--register-tooltip-chip-fg);
+  font-size: inherit;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+}
+
+.memoryRuntimeInfoTooltip.tooltipVisible .memoryRuntimeTooltipTitle,
+.memoryRuntimeInfoTooltip .tooltipOpen .memoryRuntimeTooltipTitle {
+  animation: memoryTooltipItemIn 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 40ms;
+}
+
+.memoryRuntimeInfoTooltip.tooltipVisible .memoryRuntimeTooltipText,
+.memoryRuntimeInfoTooltip .tooltipOpen .memoryRuntimeTooltipText {
+  animation: memoryTooltipItemIn 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 90ms;
+}
+
+.memoryRuntimeInfoTooltip.tooltipVisible .memoryRuntimeTooltipCard,
+.memoryRuntimeInfoTooltip .tooltipOpen .memoryRuntimeTooltipCard {
+  animation: memoryTooltipItemIn 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.memoryRuntimeInfoTooltip.tooltipVisible .memoryRuntimeTooltipCard:nth-child(1),
+.memoryRuntimeInfoTooltip .tooltipOpen .memoryRuntimeTooltipCard:nth-child(1) {
+  animation-delay: 140ms;
+}
+
+.memoryRuntimeInfoTooltip.tooltipVisible .memoryRuntimeTooltipCard:nth-child(2),
+.memoryRuntimeInfoTooltip .tooltipOpen .memoryRuntimeTooltipCard:nth-child(2) {
+  animation-delay: 190ms;
+}
+
+.memoryRuntimeInfoTooltip.tooltipVisible .memoryRuntimeTooltipCard:nth-child(3),
+.memoryRuntimeInfoTooltip .tooltipOpen .memoryRuntimeTooltipCard:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+.memoryRuntimeInfoTooltip.tooltipVisible .memoryRuntimeTooltipFooter,
+.memoryRuntimeInfoTooltip .tooltipOpen .memoryRuntimeTooltipFooter {
+  animation: memoryTooltipItemIn 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 290ms;
+}
+
+@keyframes memoryTooltipItemIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .memorySectionDivider {
