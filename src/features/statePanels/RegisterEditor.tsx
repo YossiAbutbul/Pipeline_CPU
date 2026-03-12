@@ -204,22 +204,41 @@ export default function RegisterEditor({
                 spellCheck={false}
               />
               <Tooltip
-                className="registerFormulaHelp"
+                className="registerFormulaHelp registerFormulaTooltip"
                 ariaLabel="Formula format help"
                 align="end"
                 content={
-                  <>
-                    Sets initial values for all registers except <code>$zero</code>.
-                    <br />
-                    <br />
-                    Examples:
-                    <br />
-                    <code>num * 0x200</code>
-                    <br />
-                    <code>i + 4</code>
-                    <br />
-                    <code>=0x200</code> or <code>i = 0x200</code>
-                  </>
+                  <div className="registerFormulaTooltipPanel">
+                    <div className="registerFormulaTooltipTitle">Available Formulas</div>
+                    <div className="registerFormulaTooltipList">
+                      <div className="registerFormulaTooltipCard">
+                        <code>num * 0x200</code>
+                        <div className="registerFormulaTooltipDescription">Multiply by hex value</div>
+                      </div>
+                      <div className="registerFormulaTooltipCard">
+                        <code>number + 100</code>
+                        <div className="registerFormulaTooltipDescription">Add constant</div>
+                      </div>
+                      <div className="registerFormulaTooltipCard">
+                        <code>index * 2</code>
+                        <div className="registerFormulaTooltipDescription">Double the index</div>
+                      </div>
+                      <div className="registerFormulaTooltipCard">
+                        <code>i % 10</code>
+                        <div className="registerFormulaTooltipDescription">Modulo operation</div>
+                      </div>
+                      <div className="registerFormulaTooltipCard">
+                        <code>num ** 2</code>
+                        <div className="registerFormulaTooltipDescription">Power operation</div>
+                      </div>
+                    </div>
+                    <div className="registerFormulaTooltipFooter">
+                      Use variables:{" "}
+                      <span className="registerFormulaTooltipFooterItems">
+                        <code>num</code>, <code>number</code>, <code>index</code>, or <code>i</code>
+                      </span>
+                    </div>
+                  </div>
                 }
               />
             </div>
@@ -229,7 +248,13 @@ export default function RegisterEditor({
               </Button>
             </div>
           </div>
-          <div className="registerFormulaHint">Use variables: `num`, `number`, `index`, or `i`.</div>
+          <div className="registerFormulaHint">
+            Use variables:{" "}
+            <span className="registerFormulaHintItems">
+              <code>num</code>, <code>number</code>, <code>index</code>, or <code>i</code>
+            </span>
+            .
+          </div>
         </>
       )}
 

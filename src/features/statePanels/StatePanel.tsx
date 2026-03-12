@@ -42,7 +42,9 @@ export default function StatePanel({
 }: Props) {
   return (
     <Panel
+      className="panelOverflowVisible"
       headerSize="xs"
+      bodyClassName="panelBodyVisible"
       toolbar={
         <Tabs<TabKey>
           items={[

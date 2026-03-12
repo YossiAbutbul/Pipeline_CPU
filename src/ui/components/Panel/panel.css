@@ -7,6 +7,10 @@
   overflow: hidden; /* header stays fixed, body handles overflow */
 }
 
+.panelOverflowVisible {
+  overflow: visible;
+}
+
 .panelHeader {
   display: flex;
   align-items: center;
@@ -44,6 +48,10 @@
   min-height: 0;
   padding: var(--space-3);
   overflow: hidden;
+}
+
+.panelBodyVisible {
+  overflow: visible;
 }
 
 /* Header size variants */
