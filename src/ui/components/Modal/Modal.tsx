@@ -127,7 +127,7 @@ export function Modal({
             )}
           </div>
           <button type="button" className="modalCloseBtn" aria-label="Close modal" onClick={onClose}>
-            <X size={14} aria-hidden="true" />
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
 

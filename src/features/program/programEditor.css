@@ -6,7 +6,7 @@
 
 .programPanel .panelTitle {
   padding: 0;
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
   line-height: 1.2;
 }
 
@@ -28,7 +28,7 @@
 }
 
 .programTopSection {
-  padding: 15px 30px 30px;
+  padding: 30px 30px 15px;
 }
 
 /* Editor container */
@@ -55,8 +55,6 @@
   gap: 10px;
   padding: 20px 30px;
   margin-bottom: 30px;
-  border-top: var(--border-1) solid
-    color-mix(in oklab, var(--border) 78%, transparent);
   border-bottom: var(--border-1) solid
     color-mix(in oklab, var(--border) 78%, transparent);
 }
@@ -107,10 +105,10 @@
 
 .initialPcRow {
   display: grid;
-  grid-template-columns: auto minmax(0, 275px) auto;
+  grid-template-columns: auto minmax(0, 245px) auto;
   align-items: center;
-  gap: 15px;
-  width: min(100%, 450px);
+  gap: 10px;
+  width: min(100%, 410px);
   max-width: 100%;
   margin-left: auto;
 }
@@ -191,7 +189,8 @@
   transform: translateX(
       calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
   transform-origin: top center;
   transition:
     opacity 200ms ease-out,
@@ -246,7 +245,8 @@
   transform: translateX(
       calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
 }
 
 .initialPcTooltip.tooltipVisible .tooltipContent,
@@ -273,14 +273,16 @@
   transform: translateX(
       calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
 }
 
 .initialPcTooltip.tooltipClosing .tooltipAlign-end {
   transform: translateX(
       calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
 }
 
 .initialPcTooltip.tooltipVisible .tooltipPlace-top,
