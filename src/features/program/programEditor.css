@@ -474,6 +474,8 @@
 }
 
 .clearProgramButton:hover {
+  background: var(--memory-rule-delete-hover-bg);
+  border-color: transparent;
   color: var(--trash-icon-color-hover);
 }
 
