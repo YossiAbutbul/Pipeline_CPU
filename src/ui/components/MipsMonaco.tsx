@@ -1,6 +1,6 @@
 import Editor from "@monaco-editor/react";
 import { useEffect, useMemo, useRef } from "react";
-import { setupMipsMonaco, type MipsMonacoDisposables } from "@/monaco/mips";
+import { ensureMipsMonaco, setupMipsMonaco, type MipsMonacoDisposables } from "@/monaco/mips";
 import { MIPS_THEME_DARK, MIPS_THEME_LIGHT, defineMipsThemeFromTokens } from "@/monaco/mips/themes";
 import "@/monaco/mips/style.css";
 
@@ -47,12 +47,20 @@ export function MipsMonaco({ value, onChange, themeMode, height = "100%" }: Prop
       path="mips://program"
       value={value}
       onChange={(v) => onChange(v ?? "")}
-      onMount={(_editor, monaco) => {
+      beforeMount={(monaco) => {
+        ensureMipsMonaco(monaco as any, themeMode);
+      }}
+      onMount={(editor, monaco) => {
         monacoRef.current = monaco;
 
         // Register language/providers once per mount (and avoid duplicates)
         disposablesRef.current?.dispose();
         disposablesRef.current = setupMipsMonaco(monaco as any, themeMode);
+
+        const model = editor.getModel();
+        if (model) {
+          monaco.editor.setModelLanguage(model, "mips");
+        }
 
         // Define theme from current tokens + apply
         defineMipsThemeFromTokens(monaco as any, themeMode);

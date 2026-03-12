@@ -56,6 +56,23 @@ export const REG_INFO: Record<string, { num: number; desc: string }> = {
   ra: { num: 31, desc: "return address" },
 };
 
+const REG_INFO_BY_NUMBER = Object.fromEntries(
+  Object.entries(REG_INFO).map(([alias, info]) => [String(info.num), { ...info, alias }]),
+) as Record<string, { num: number; desc: string; alias: string }>;
+
+export function getRegisterInfo(token: string) {
+  const normalized = token.trim().toLowerCase();
+  const aliasInfo = REG_INFO[normalized];
+  if (aliasInfo) {
+    return {
+      alias: normalized,
+      ...aliasInfo,
+    };
+  }
+
+  return REG_INFO_BY_NUMBER[normalized] ?? null;
+}
+
 export type InsDoc = { sig: string; summary: string };
 
 export const INSTRUCTION_DOCS: Record<string, InsDoc> = {
