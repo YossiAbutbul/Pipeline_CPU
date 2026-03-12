@@ -102,7 +102,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: var(--border-1) solid var(--border);
+  border: none;
   border-radius: 8px;
   background: var(--surface-1);
   color: var(--muted);
