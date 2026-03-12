@@ -1,4 +1,4 @@
-import { Button, Panel, SettingsPanel, Tooltip } from "@/ui/components";
+import { Button, GuidedTourTooltip, Panel, SettingsPanel, Tooltip } from "@/ui/components";
 import { MipsMonaco } from "@/ui/components/MipsMonaco";
 import "@/ui/components/ThemeToggle/themeToggle.css";
 import { useTheme } from "@/ui/theme/ThemeProvider";
@@ -18,6 +18,13 @@ type Props = {
   initialPc: string;
   onInitialPcChange: (value: string) => void;
   onResetPersistedData: () => void;
+  showInitialPcTourStep: boolean;
+  onBackInitialPcTourStep?: () => void;
+  onNextInitialPcTourStep: () => void;
+  showRunTourStep: boolean;
+  onBackRunTourStep: () => void;
+  onNextRunTourStep: () => void;
+  onDismissRunTour: () => void;
 };
 
 export default function ProgramEditor({
@@ -30,6 +37,13 @@ export default function ProgramEditor({
   initialPc,
   onInitialPcChange,
   onResetPersistedData,
+  showInitialPcTourStep,
+  onBackInitialPcTourStep,
+  onNextInitialPcTourStep,
+  showRunTourStep,
+  onBackRunTourStep,
+  onNextRunTourStep,
+  onDismissRunTour,
 }: Props) {
   const { theme, themeMode, toggleTheme } = useTheme();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -107,16 +121,30 @@ export default function ProgramEditor({
             <label htmlFor="initialPc" className="initialPcLabel">
               Initial PC:
             </label>
-            <input
-              id="initialPc"
-              type="text"
-              className="initialPcInput"
-              value={initialPc}
-              onChange={(event) => onInitialPcChange(event.target.value)}
-              spellCheck={false}
-              autoComplete="off"
-              aria-label="Initial PC"
-            />
+            <GuidedTourTooltip
+              open={showInitialPcTourStep}
+              step={1}
+              totalSteps={7}
+              align="end"
+              className="initialPcTourAnchor"
+              title="Set The Initial PC"
+              description="Choose the address where instruction fetch starts. The default is the standard text segment start."
+              onBack={onBackInitialPcTourStep}
+              onNext={onNextInitialPcTourStep}
+              onSkip={onDismissRunTour}
+              onClose={onDismissRunTour}
+            >
+              <input
+                id="initialPc"
+                type="text"
+                className="initialPcInput"
+                value={initialPc}
+                onChange={(event) => onInitialPcChange(event.target.value)}
+                spellCheck={false}
+                autoComplete="off"
+                aria-label="Initial PC"
+              />
+            </GuidedTourTooltip>
             <Tooltip
               className="initialPcHelp initialPcTooltip"
               ariaLabel="Initial PC format help"
@@ -145,14 +173,28 @@ export default function ProgramEditor({
 
         <div className="programControlsSection">
           <div className="programActions">
-            <Button
-              onClick={isRunActive ? onStop : onRun}
-              variant="primary"
-              className="programActionButton"
+            <GuidedTourTooltip
+              open={showRunTourStep}
+              step={4}
+              totalSteps={7}
+              align="start"
+              fullWidth
+              title="Run The Program"
+              description="Start here on first use. Press Run to initialize the simulator and load the first instruction into the IF stage."
+              onBack={onBackRunTourStep}
+              onSkip={onDismissRunTour}
+              onNext={onNextRunTourStep}
+              onClose={onDismissRunTour}
             >
-              {isRunActive ? <Square size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
-              {isRunActive ? "Stop" : "Run"}
-            </Button>
+              <Button
+                onClick={isRunActive ? onStop : onRun}
+                variant="primary"
+                className="programActionButton"
+              >
+                {isRunActive ? <Square size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
+                {isRunActive ? "Stop" : "Run"}
+              </Button>
+            </GuidedTourTooltip>
             <Button onClick={onReset} variant="secondary" className="programActionButton">
               <RotateCcw size={14} aria-hidden="true" />
               Reset

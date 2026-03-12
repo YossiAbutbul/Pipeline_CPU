@@ -1,4 +1,4 @@
-import { Button, Tooltip } from "@/ui/components";
+import { Button, GuidedTourTooltip, Tooltip } from "@/ui/components";
 import { Check, Edit, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -21,6 +21,10 @@ type Props = {
   onNotifyError: (message: string) => void;
   highlightCycle: number;
   isRuntimeLocked: boolean;
+  showEditRegistersTourStep: boolean;
+  onBackEditRegistersTourStep: () => void;
+  onNextEditRegistersTourStep: () => void;
+  onDismissTour: () => void;
 };
 
 export default function RegisterEditor({
@@ -34,6 +38,10 @@ export default function RegisterEditor({
   onNotifyError,
   highlightCycle,
   isRuntimeLocked,
+  showEditRegistersTourStep,
+  onBackEditRegistersTourStep,
+  onNextEditRegistersTourStep,
+  onDismissTour,
 }: Props) {
   const overlayInset = 12;
   const [recentlyChangedAliases, setRecentlyChangedAliases] = useState<Record<string, true>>({});
@@ -269,15 +277,28 @@ export default function RegisterEditor({
             Clear Values
           </Button>
         )}
-        <Button
-          size="sm"
-          className="registerEditToggle registerActionBtn"
-          onClick={toggleEditMode}
-          disabled={isRuntimeLocked}
+        <GuidedTourTooltip
+          open={showEditRegistersTourStep}
+          step={2}
+          totalSteps={7}
+          align="end"
+          title="Edit Register Values"
+          description="Use this to switch into register editing mode and customize the starting register state before running the program."
+          onBack={onBackEditRegistersTourStep}
+          onNext={onNextEditRegistersTourStep}
+          onSkip={onDismissTour}
+          onClose={onDismissTour}
         >
-          {isEditing ? <Check size={14} aria-hidden="true" /> : <Edit size={14} aria-hidden="true" />}
-          {isEditing ? "Done Editing" : "Edit Registers"}
-        </Button>
+          <Button
+            size="sm"
+            className="registerEditToggle registerActionBtn"
+            onClick={toggleEditMode}
+            disabled={isRuntimeLocked}
+          >
+            {isEditing ? <Check size={14} aria-hidden="true" /> : <Edit size={14} aria-hidden="true" />}
+            {isEditing ? "Done Editing" : "Edit Registers"}
+          </Button>
+        </GuidedTourTooltip>
       </div>
 
       <div className="registerList" role="table" aria-label="Registers initial values">

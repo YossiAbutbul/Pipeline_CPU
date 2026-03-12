@@ -394,17 +394,34 @@
 }
 
 .registerTableToolbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
-  justify-content: stretch;
   gap: var(--space-2);
   padding-bottom: var(--space-1);
+}
+
+.registerTableToolbar > * {
+  min-width: 0;
+}
+
+.registerTableToolbar > :only-child {
+  grid-column: 1 / -1;
 }
 
 .registerTableToolbar .btn {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
+  width: 100%;
+}
+
+.registerTableToolbar > .guidedTourTooltip {
+  width: 100%;
+}
+
+.registerTableToolbar > .guidedTourTooltip > .btn {
+  width: 100%;
 }
 
 .registerEditToggle {

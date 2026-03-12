@@ -8,9 +8,18 @@
 }
 
 .memoryTableToolbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
   gap: var(--space-2);
+}
+
+.memoryTableToolbar > * {
+  min-width: 0;
+}
+
+.memoryTableToolbar > :only-child {
+  grid-column: 1 / -1;
 }
 
 .memoryTableToolbar .btn {
@@ -18,6 +27,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-1);
+  width: 100%;
 }
 
 .memoryActionBtn {
@@ -29,11 +39,11 @@
 }
 
 .memoryAddBtn {
-  flex: 1 1 0;
+  width: 100%;
 }
 
 .memoryClearBtn {
-  flex: 1 1 0;
+  width: 100%;
 }
 
 .memoryRulesHeader {
@@ -633,6 +643,7 @@
 }
 
 .memoryRuntimeList {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -645,6 +656,20 @@
   background: color-mix(in oklab, var(--surface-1) 96%, var(--surface-2));
   box-shadow: inset 0 1px 0
     color-mix(in oklab, var(--surface-1) 72%, transparent);
+}
+
+.memoryRuntimeTableTour.tooltipWrap {
+  position: absolute;
+  top: 56px;
+  left: 18px;
+  z-index: 6;
+  width: auto;
+}
+
+.memoryRuntimeTableTourAnchor {
+  display: block;
+  width: 1px;
+  height: 1px;
 }
 
 .memoryRuntimeBodyWrap {
