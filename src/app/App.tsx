@@ -2,13 +2,13 @@ import PipelineCanvas from "@/features/pipelineCanvas/PipelineCanvas";
 import ProgramEditor from "@/features/program/ProgramEditor";
 import { usePipelineRunSession } from "@/features/simulator/hooks/usePipelineRunSession";
 import StatePanel from "@/features/statePanels/StatePanel";
-import { NotificationToast } from "@/ui/components";
+import { GuidedTourTooltip, NotificationToast } from "@/ui/components";
 import { useCallback, useEffect, useState } from "react";
 import { clearPersistedAppState, createDefaultAppState, usePersistedAppState } from "./store/appStore";
 import "./app.css";
 
 const GUIDED_TOUR_STORAGE_KEY = "pipeline-cpu.guided-tour-completed";
-const GUIDED_TOUR_TOTAL_STEPS = 7;
+const GUIDED_TOUR_TOTAL_STEPS = 8;
 
 function loadInitialGuidedTourStep() {
   if (typeof window === "undefined") {
@@ -95,11 +95,11 @@ export default function App() {
   });
 
   useEffect(() => {
-    if (guidedTourStep === 1 && statePanelTab !== "registers") {
+    if (guidedTourStep === 2 && statePanelTab !== "registers") {
       setAppState((prev) => ({ ...prev, statePanelTab: "registers" }));
     }
 
-    if ((guidedTourStep === 2 || guidedTourStep === 5) && statePanelTab !== "memory") {
+    if ((guidedTourStep === 3 || guidedTourStep === 6) && statePanelTab !== "memory") {
       setAppState((prev) => ({ ...prev, statePanelTab: "memory" }));
     }
   }, [guidedTourStep, setAppState, statePanelTab]);
@@ -126,7 +126,7 @@ export default function App() {
 
   const handleRun = () => {
     run();
-    setGuidedTourStep((currentStep) => (currentStep === 3 ? 4 : currentStep));
+    setGuidedTourStep((currentStep) => (currentStep === 4 ? 5 : currentStep));
   };
 
   const handleStop = () => {
@@ -135,7 +135,7 @@ export default function App() {
       if (currentStep === null) {
         return currentStep;
       }
-      return currentStep >= 4 ? 3 : currentStep;
+      return currentStep >= 5 ? 4 : currentStep;
     });
   };
 
@@ -145,13 +145,13 @@ export default function App() {
       if (currentStep === null) {
         return currentStep;
       }
-      return currentStep >= 4 ? 3 : currentStep;
+      return currentStep >= 5 ? 4 : currentStep;
     });
   };
 
   const handleStepForward = () => {
-    if (guidedTourStep === 4) {
-      setGuidedTourStep(5);
+    if (guidedTourStep === 5) {
+      setGuidedTourStep(6);
     }
     stepForward();
   };
@@ -169,9 +169,9 @@ export default function App() {
           initialPc={initialPc}
           onInitialPcChange={handleInitialPcChange}
           onResetPersistedData={handleResetPersistedData}
-          showInitialPcTourStep={guidedTourStep === 0}
+          showInitialPcTourStep={guidedTourStep === 1}
           onNextInitialPcTourStep={goToNextTourStep}
-          showRunTourStep={guidedTourStep === 3}
+          showRunTourStep={guidedTourStep === 4}
           onBackRunTourStep={goToPreviousTourStep}
           onNextRunTourStep={goToNextTourStep}
           onDismissRunTour={completeGuidedTour}
@@ -179,6 +179,21 @@ export default function App() {
       </aside>
 
       <main className="centerPane">
+        <GuidedTourTooltip
+          open={guidedTourStep === 0}
+          step={1}
+          totalSteps={GUIDED_TOUR_TOTAL_STEPS}
+        align="start"
+        className="welcomeTourTooltip"
+        title="Welcome to Pipeline CPU"
+        description="This quick tour shows how to set up, run, and inspect the simulator."
+          onNext={goToNextTourStep}
+          nextLabel="Start"
+          onSkip={completeGuidedTour}
+          onClose={completeGuidedTour}
+        >
+          <span className="welcomeTourAnchor" aria-hidden="true" />
+        </GuidedTourTooltip>
         <PipelineCanvas
           pipeline={pipeline}
           hoveredSignalValues={hoveredSignalValues}
@@ -189,10 +204,10 @@ export default function App() {
           onStepBackward={stepBackward}
           canStepBackward={canStepBackward}
           canStepForward={canStepForward}
-          showStepForwardTourStep={guidedTourStep === 4}
+          showStepForwardTourStep={guidedTourStep === 5}
           onBackStepForwardTourStep={goToPreviousTourStep}
           onNextStepForwardTourStep={goToNextTourStep}
-          showHoverDiagramTourStep={guidedTourStep === 6}
+          showHoverDiagramTourStep={guidedTourStep === 7}
           onBackHoverDiagramTourStep={goToPreviousTourStep}
           onDismissTour={completeGuidedTour}
         />
@@ -222,13 +237,13 @@ export default function App() {
           runtimeMemoryWords={memoryWords}
           runtimeChangedWords={changedMemoryWords}
           isRuntimeLocked={runSessionActive}
-          showEditRegistersTourStep={guidedTourStep === 1}
+          showEditRegistersTourStep={guidedTourStep === 2}
           onBackEditRegistersTourStep={goToPreviousTourStep}
           onNextEditRegistersTourStep={goToNextTourStep}
-          showAddRulesTourStep={guidedTourStep === 2}
+          showAddRulesTourStep={guidedTourStep === 3}
           onBackAddRulesTourStep={goToPreviousTourStep}
           onNextAddRulesTourStep={goToNextTourStep}
-          showRuntimeMemoryTourStep={guidedTourStep === 5}
+          showRuntimeMemoryTourStep={guidedTourStep === 6}
           onBackRuntimeMemoryTourStep={goToPreviousTourStep}
           onNextRuntimeMemoryTourStep={goToNextTourStep}
           onDismissTour={completeGuidedTour}

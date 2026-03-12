@@ -123,12 +123,12 @@ export default function ProgramEditor({
             </label>
             <GuidedTourTooltip
               open={showInitialPcTourStep}
-              step={1}
-              totalSteps={7}
+              step={2}
+              totalSteps={8}
               align="end"
               className="initialPcTourAnchor"
               title="Set The Initial PC"
-              description="Choose the address where instruction fetch starts. The default is the standard text segment start."
+              description="Set the address where instruction fetch starts."
               onBack={onBackInitialPcTourStep}
               onNext={onNextInitialPcTourStep}
               onSkip={onDismissRunTour}
@@ -175,12 +175,12 @@ export default function ProgramEditor({
           <div className="programActions">
             <GuidedTourTooltip
               open={showRunTourStep}
-              step={4}
-              totalSteps={7}
+              step={5}
+              totalSteps={8}
               align="start"
               fullWidth
               title="Run The Program"
-              description="Start here on first use. Press Run to initialize the simulator and load the first instruction into the IF stage."
+              description="Press Run to start the simulator and load the first IF instruction."
               onBack={onBackRunTourStep}
               onSkip={onDismissRunTour}
               onNext={onNextRunTourStep}

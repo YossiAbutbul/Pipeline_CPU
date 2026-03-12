@@ -279,11 +279,11 @@ export default function RegisterEditor({
         )}
         <GuidedTourTooltip
           open={showEditRegistersTourStep}
-          step={2}
-          totalSteps={7}
+          step={3}
+          totalSteps={8}
           align="end"
           title="Edit Register Values"
-          description="Use this to switch into register editing mode and customize the starting register state before running the program."
+          description="Edit the starting register values before you run the program."
           onBack={onBackEditRegistersTourStep}
           onNext={onNextEditRegistersTourStep}
           onSkip={onDismissTour}

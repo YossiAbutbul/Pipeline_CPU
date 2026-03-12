@@ -409,12 +409,12 @@ export default function MemoryEditor({
       <div className="memoryTableToolbar">
         <GuidedTourTooltip
           open={showAddRulesTourStep}
-          step={3}
-          totalSteps={7}
+          step={4}
+          totalSteps={8}
           align="start"
           fullWidth
           title="Add Memory Rules"
-          description="Rules prefill memory before execution starts. Use them to define the values that should appear in runtime memory."
+          description="Use rules to prefill memory before execution starts."
           onBack={onBackAddRulesTourStep}
           onNext={onNextAddRulesTourStep}
           onSkip={onDismissTour}
@@ -594,12 +594,12 @@ export default function MemoryEditor({
       <div className="memoryRuntimeList" role="table" aria-label="Runtime memory words">
         <GuidedTourTooltip
           open={showRuntimeMemoryTourStep}
-          step={6}
-          totalSteps={7}
+          step={7}
+          totalSteps={8}
           align="start"
           className="memoryRuntimeTableTour"
           title="Inspect Runtime Memory"
-          description="After running and stepping, this area shows the live memory values that changed during execution."
+          description="This table shows the memory values that change during execution."
           onBack={onBackRuntimeMemoryTourStep}
           onNext={onNextRuntimeMemoryTourStep}
           onSkip={onDismissTour}

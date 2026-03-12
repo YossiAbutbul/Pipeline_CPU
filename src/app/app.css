@@ -1,12 +1,18 @@
 .appShell {
+  position: relative;
   display: grid;
-  grid-template-columns:
-    var(--app-shell-pane-width) 1fr var(--app-shell-pane-width);
+  grid-template-columns: var(--app-shell-pane-width) 1fr var(
+      --app-shell-pane-width
+    );
   gap: var(--app-shell-gap);
   height: 100%;
   padding: var(--app-shell-padding);
   background:
-    radial-gradient(circle at top left, color-mix(in oklab, var(--accent) 10%, transparent), transparent 34%),
+    radial-gradient(
+      circle at top left,
+      color-mix(in oklab, var(--accent) 10%, transparent),
+      transparent 34%
+    ),
     linear-gradient(
       180deg,
       color-mix(in oklab, var(--bg) 92%, var(--surface-2)) 0%,
@@ -14,6 +20,25 @@
     );
   min-height: 0;
   overflow: hidden;
+}
+
+.centerPane .welcomeTourTooltip.tooltipWrap {
+  position: absolute;
+  top: 80px;
+  left: 20px;
+  z-index: 120;
+  width: auto;
+}
+
+.centerPane .welcomeTourTooltip .tooltipContent::before,
+.centerPane .welcomeTourTooltip .tooltipContent::after {
+  display: none;
+}
+
+.welcomeTourAnchor {
+  display: block;
+  width: 1px;
+  height: 1px;
 }
 
 .leftPane,
@@ -37,7 +62,8 @@
 .centerPane {
   background: var(--bg);
   border: 1px solid color-mix(in oklab, var(--border) 72%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--border) 18%, transparent);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in oklab, var(--border) 18%, transparent);
 }
 
 .rightPane {
