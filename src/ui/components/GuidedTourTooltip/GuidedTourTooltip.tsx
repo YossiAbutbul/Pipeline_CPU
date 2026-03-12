@@ -43,7 +43,7 @@ export function GuidedTourTooltip({
 }: Props) {
   return (
     <Tooltip
-      className={`guidedTourTooltip ${fullWidth ? "guidedTourTooltipFullWidth" : ""} ${className}`.trim()}
+      className={`guidedTourTooltip ${open ? "guidedTourTooltipActive" : ""} ${fullWidth ? "guidedTourTooltipFullWidth" : ""} ${className}`.trim()}
       align={align}
       ariaLabel={title}
       open={open}

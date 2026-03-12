@@ -6,6 +6,10 @@
   min-width: 0;
 }
 
+.guidedTourTooltip.guidedTourTooltipActive > :not(.tooltipContent) {
+  pointer-events: none;
+}
+
 .guidedTourTooltipFullWidth.tooltipWrap {
   display: flex;
   flex: 1 1 0;
