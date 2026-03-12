@@ -5,8 +5,8 @@
   z-index: 900;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  width: min(320px, calc(100vw - 28px));
+  gap: var(--space-2);
+  width: min(var(--toast-width), calc(100vw - 28px));
   pointer-events: none;
 }
 
@@ -20,9 +20,9 @@
   --notification-progress-bg: color-mix(in oklab, var(--accent) 84%, var(--tab-active));
   position: relative;
   overflow: hidden;
-  padding: 10px 12px 12px;
+  padding: var(--space-2);
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: var(--notification-bg);
   color: var(--notification-title);
   box-shadow:
@@ -47,15 +47,15 @@
 .notificationToastMain {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 .notificationToastIcon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
   border-radius: 999px;
   background: var(--notification-icon-bg);
   color: var(--notification-icon-fg);
@@ -65,7 +65,7 @@
 
 .notificationToastGlyph {
   display: block;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   font-weight: 700;
   line-height: 1;
   transform: translateY(-0.5px);
@@ -83,7 +83,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 .notificationToastHeader {
@@ -92,7 +92,7 @@
 
 .notificationToastTitle {
   display: block;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   line-height: 1.2;
   margin-bottom: 2px;
@@ -126,7 +126,7 @@
 .notificationToastBody {
   display: block;
   color: var(--notification-body);
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   line-height: var(--line-height-ui);
   white-space: nowrap;
   overflow: hidden;
@@ -137,8 +137,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
   padding: 0;
   border: none;
   background: transparent;

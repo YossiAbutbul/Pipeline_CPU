@@ -1,18 +1,18 @@
 .programPanel .panelHeader {
-  padding: 24px 24px 14px;
+  padding: 30px 30px 18px;
   align-items: center;
-  gap: 12px;
+  gap: 15px;
 }
 
 .programPanel .panelTitle {
   padding: 0;
-  font-size: 18px;
+  font-size: var(--font-size-xl);
   line-height: 1.2;
 }
 
 .programPanel .panelToolbar {
   margin-left: auto;
-  gap: 8px;
+  gap: 10px;
   position: relative;
 }
 
@@ -28,14 +28,14 @@
 }
 
 .programTopSection {
-  padding: 12px 24px 24px;
+  padding: 15px 30px 30px;
 }
 
 /* Editor container */
 .programEditorSection {
   flex: 1;
   min-height: 0;
-  margin: 0 14px 14px;
+  margin: 0 18px 18px;
   border: none;
   border-radius: var(--radius);
   background: var(--editor-surface);
@@ -52,9 +52,9 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 8px;
-  padding: 16px 24px;
-  margin-bottom: 24px;
+  gap: 10px;
+  padding: 20px 30px;
+  margin-bottom: 30px;
   border-top: var(--border-1) solid
     color-mix(in oklab, var(--border) 78%, transparent);
   border-bottom: var(--border-1) solid
@@ -65,16 +65,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 36px;
-  padding-inline: 12px;
+  gap: 10px;
+  min-height: var(--control-height);
+  padding-inline: var(--control-padding-x);
   white-space: nowrap;
 }
 
 .programToolbarIconButton {
-  width: 36px;
-  min-width: 36px;
-  min-height: 36px;
+  width: var(--icon-button-size);
+  min-width: var(--icon-button-size);
+  min-height: var(--icon-button-size);
   padding: 0;
   display: inline-flex;
   align-items: center;
@@ -89,15 +89,15 @@
 .programActions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 10px;
 }
 
 .programActionButton {
   min-width: 0;
-  min-height: 36px;
-  height: 36px;
-  padding: 0 12px;
-  border-radius: 8px;
+  min-height: var(--control-height);
+  height: var(--control-height);
+  padding: 0 var(--control-padding-x);
+  border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   display: inline-flex;
   align-items: center;
@@ -107,10 +107,10 @@
 
 .initialPcRow {
   display: grid;
-  grid-template-columns: auto minmax(0, 220px) auto;
+  grid-template-columns: auto minmax(0, 275px) auto;
   align-items: center;
-  gap: 12px;
-  width: min(100%, 360px);
+  gap: 15px;
+  width: min(100%, 450px);
   max-width: 100%;
   margin-left: auto;
 }
@@ -125,13 +125,13 @@
 .initialPcInput {
   width: 100%;
   max-width: 100%;
-  height: 36px;
+  height: var(--control-height);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--input-surface);
   color: var(--text);
   font-size: var(--font-size-sm);
-  padding: 0 12px;
+  padding: 0 var(--control-padding-x);
   transition: background-color var(--dur-1) ease;
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
@@ -154,13 +154,13 @@
 
 .initialPcHelp {
   position: relative;
-  top: 1px;
+  top: 2px;
   flex: 0 0 auto;
 }
 
 .initialPcHelp .tooltipTrigger {
-  width: 18px;
-  height: 18px;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -173,15 +173,17 @@
 .initialPcTooltip .tooltipContent {
   --tooltip-panel-bg: var(--register-tooltip-bg);
   --tooltip-panel-border: var(--register-tooltip-border);
-  --tooltip-arrow-offset: calc(100% - 26px - var(--tooltip-shift-x, 0px));
-  --tooltip-bias-x: 17px;
-  top: calc(100% + 12px);
+  --tooltip-arrow-offset: calc(
+    100% - var(--tooltip-arrow-edge-offset) - var(--tooltip-shift-x, 0px)
+  );
+  --tooltip-bias-x: var(--tooltip-bias);
+  top: calc(100% + var(--tooltip-gap));
   box-sizing: border-box;
-  width: 292px;
+  width: 365px;
   max-height: none;
-  padding: 16px;
+  padding: var(--tooltip-panel-padding);
   border: 1px solid var(--tooltip-panel-border);
-  border-radius: 8px;
+  border-radius: var(--tooltip-panel-radius);
   background: var(--tooltip-panel-bg);
   color: var(--register-tooltip-title);
   box-shadow: var(--shadow);
@@ -189,7 +191,7 @@
   transform: translateX(
       calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
   transform-origin: top center;
   transition:
     opacity 200ms ease-out,
@@ -206,15 +208,15 @@
 .initialPcTooltip .tooltipContent::before,
 .initialPcTooltip .tooltipContent::after {
   left: var(--tooltip-arrow-offset);
-  width: 16px;
-  height: 16px;
+  width: var(--tooltip-arrow-size);
+  height: var(--tooltip-arrow-size);
   border: none;
   border-radius: 2px 0 0 0;
   transform: translateX(-50%) rotate(45deg);
 }
 
 .initialPcTooltip .tooltipContent::before {
-  top: -8px;
+  top: calc(var(--tooltip-arrow-size) / -2);
   background: var(--register-tooltip-bg);
   border-top: 1px solid var(--register-tooltip-border);
   border-left: 1px solid var(--register-tooltip-border);
@@ -225,12 +227,12 @@
 }
 
 .initialPcTooltip .tooltipPlace-top {
-  bottom: calc(100% + 12px);
+  bottom: calc(100% + var(--tooltip-gap));
 }
 
 .initialPcTooltip .tooltipPlace-top::before {
   top: auto;
-  bottom: -8px;
+  bottom: calc(var(--tooltip-arrow-size) / -2);
   border-top: none;
   border-left: none;
   border-right: 1px solid var(--register-tooltip-border);
@@ -238,11 +240,13 @@
 }
 
 .initialPcTooltip .tooltipAlign-end {
-  --tooltip-arrow-offset: calc(100% - 26px - var(--tooltip-shift-x, 0px));
+  --tooltip-arrow-offset: calc(
+    100% - var(--tooltip-arrow-edge-offset) - var(--tooltip-shift-x, 0px)
+  );
   transform: translateX(
       calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .initialPcTooltip.tooltipVisible .tooltipContent,
@@ -269,14 +273,14 @@
   transform: translateX(
       calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .initialPcTooltip.tooltipClosing .tooltipAlign-end {
   transform: translateX(
       calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .initialPcTooltip.tooltipVisible .tooltipPlace-top,
@@ -309,24 +313,24 @@
 }
 
 .initialPcTooltipTitle {
-  margin-bottom: 12px;
+  margin-bottom: 15px;
   color: var(--register-tooltip-title);
-  font-size: 1rem;
+  font-size: var(--tooltip-title-size);
   font-weight: 600;
 }
 
 .initialPcTooltipList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 15px;
 }
 
 .initialPcTooltipCard {
-  padding: 12px;
-  border-radius: 6px;
+  padding: 15px;
+  border-radius: 8px;
   background: var(--register-tooltip-card-bg);
   opacity: 0;
-  transform: translateX(-10px);
+  transform: translateX(-12px);
 }
 
 .initialPcTooltip.tooltipVisible .initialPcTooltipCard,
@@ -355,24 +359,24 @@
 }
 
 .initialPcTooltipDescription {
-  margin-top: 4px;
+  margin-top: 5px;
   color: var(--register-tooltip-card-text);
-  font-size: 0.75rem;
+  font-size: var(--tooltip-body-size);
 }
 
 .initialPcTooltipFooter {
-  margin-top: 16px;
-  padding-top: 12px;
+  margin-top: 20px;
+  padding-top: 15px;
   border-top: 1px solid var(--register-tooltip-border);
   color: var(--register-tooltip-footer);
-  font-size: 0.6875rem;
+  font-size: var(--tooltip-footnote-size);
   line-height: 1.45;
 }
 
 @keyframes initialPcTooltipCardIn {
   from {
     opacity: 0;
-    transform: translateX(-10px);
+    transform: translateX(-12px);
   }
 
   to {
@@ -387,26 +391,26 @@
   justify-content: space-between;
   gap: var(--space-3);
   border-top: 1px solid var(--register-tooltip-border);
-  padding: 14px 0 2px;
+  padding: 18px 0 3px;
   opacity: 0;
-  transform: translateX(-10px);
+  transform: translateX(-12px);
   animation: settingsPanelItemIn 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
   animation-delay: 140ms;
 }
 
 .programSettingRow .switch {
-  width: 40px;
-  height: 22px;
+  width: 50px;
+  height: 28px;
 }
 
 .programSettingRow .switchThumb {
-  width: 16px;
-  height: 16px;
-  left: 3px;
+  width: 20px;
+  height: 20px;
+  left: 4px;
 }
 
 .programSettingRow .switchOn .switchThumb {
-  left: 19px;
+  left: 24px;
 }
 
 .programSettingInlineLabel {
@@ -417,14 +421,14 @@
 
 .programResetDbugButton {
   width: 100%;
-  min-height: 36px;
+  min-height: var(--control-height);
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 12px;
+  gap: 10px;
+  padding: 0 var(--control-padding-x);
   border: 1px solid
     color-mix(in oklab, var(--register-tooltip-border) 88%, transparent);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--register-tooltip-card-bg);
   color: var(--register-tooltip-title);
   font: inherit;
@@ -434,11 +438,11 @@
   box-shadow: inset 0 0 0 2px
     color-mix(in oklab, var(--register-tooltip-border) 18%, transparent);
   opacity: 0;
-  transform: translateX(-10px);
+  transform: translateX(-12px);
   animation: settingsPanelItemIn 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
   animation-delay: 90ms;
-  margin-top: 4px;
-  margin-bottom: 10px;
+  margin-top: 5px;
+  margin-bottom: 12px;
 }
 
 .programResetDbugButton:hover {
@@ -450,15 +454,15 @@
 }
 
 .clearProgramButton {
-  width: 36px;
-  min-width: 36px;
-  min-height: 36px;
-  height: 36px;
+  width: var(--icon-button-size);
+  min-width: var(--icon-button-size);
+  min-height: var(--icon-button-size);
+  height: var(--icon-button-size);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   flex: 0 0 auto;
   color: #e53935;
 }
@@ -473,8 +477,8 @@
 
 .clearProgramIcon {
   display: block;
-  width: 16px;
-  height: 16px;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
 }
 
 /* ========================= */
@@ -510,13 +514,13 @@
 
 /* ===== line-number padding a bit ===== */
 .programEditorSection .monaco-editor .margin .line-numbers {
-  padding-left: 6px !important;
-  padding-right: 6px !important;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
   opacity: 0.75;
 }
 
 /* Completion tab width */
 .monaco-editor .suggest-widget {
-  width: 200px !important;
-  font-size: 12px;
+  width: 250px !important;
+  font-size: 15px;
 }

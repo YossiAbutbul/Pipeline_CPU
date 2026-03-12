@@ -2,12 +2,12 @@
   --settings-panel-bg: var(--register-tooltip-bg);
   --settings-panel-border: var(--register-tooltip-border);
   position: absolute;
-  top: calc(100% + 12px);
+  top: calc(100% + var(--tooltip-gap));
   right: 0;
   z-index: 50;
-  width: min(100vw - 32px, 258px);
+  width: min(100vw - 32px, var(--settings-panel-width));
   border: 1px solid var(--settings-panel-border);
-  border-radius: 8px;
+  border-radius: var(--tooltip-panel-radius);
   background: var(--settings-panel-bg);
   color: var(--register-tooltip-title);
   box-shadow: var(--shadow);
@@ -20,10 +20,10 @@
 .settingsPanel::before {
   content: "";
   position: absolute;
-  top: -8px;
-  right: 18px;
-  width: 16px;
-  height: 16px;
+  top: calc(var(--tooltip-arrow-size) / -2);
+  right: var(--tooltip-arrow-edge-offset-sm);
+  width: var(--tooltip-arrow-size);
+  height: var(--tooltip-arrow-size);
   border-top: 1px solid var(--settings-panel-border);
   border-left: 1px solid var(--settings-panel-border);
   border-radius: 2px 0 0 0;
@@ -35,14 +35,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 16px 16px 8px;
+  gap: var(--space-2);
+  padding: var(--settings-panel-header-padding) var(--settings-panel-header-padding) var(--space-1);
 }
 
 .settingsPanelTitle {
   margin: 0;
   color: var(--register-tooltip-title);
-  font-size: 1rem;
+  font-size: var(--settings-title-size);
   font-weight: 600;
   opacity: 0;
   transform: translateX(-10px);
@@ -51,15 +51,15 @@
 }
 
 .settingsPanelCloseButton {
-  width: 22px;
-  min-width: 22px;
-  height: 22px;
+  width: var(--icon-size-close);
+  min-width: var(--icon-size-close);
+  height: var(--icon-size-close);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--register-tooltip-footer);
   cursor: var(--cursor-action);
@@ -87,7 +87,7 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding: 0 16px 14px;
+  padding: 0 var(--settings-panel-body-padding) var(--space-3);
 }
 
 @keyframes settingsPanelIn {

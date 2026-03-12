@@ -10,8 +10,8 @@
 }
 
 .tooltipTrigger {
-  width: 20px;
-  height: 20px;
+  width: var(--icon-size-close);
+  height: var(--icon-size-close);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -41,7 +41,7 @@
   --tooltip-bias-x: 0px;
   position: absolute;
   left: 50%;
-  top: calc(100% + 8px);
+  top: calc(100% + var(--space-1));
   transform: translateX(
       calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
@@ -54,7 +54,7 @@
   background: var(--tooltip-panel-bg);
   color: var(--tooltip-info-fg);
   padding: var(--space-2);
-  font-size: var(--font-size-xs);
+  font-size: var(--tooltip-font-size);
   line-height: var(--line-height-ui);
   box-shadow: var(--shadow);
   opacity: 0;
@@ -239,8 +239,8 @@
   position: absolute;
   top: 6px;
   right: 6px;
-  width: 16px;
-  height: 16px;
+  width: var(--icon-size-close);
+  height: var(--icon-size-close);
   display: inline-flex;
   align-items: center;
   justify-content: center;

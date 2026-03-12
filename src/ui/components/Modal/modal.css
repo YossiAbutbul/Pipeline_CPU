@@ -69,13 +69,13 @@
 .modalTitle {
   margin: 0;
   color: var(--text);
-  font-size: var(--font-size-md);
+  font-size: var(--modal-title-size);
 }
 
 .modalDescription {
   margin: var(--space-1) 0 0 0;
   color: var(--muted);
-  font-size: var(--font-size-sm);
+  font-size: var(--modal-description-size);
   line-height: var(--line-height-ui);
 }
 
@@ -95,15 +95,15 @@
 }
 
 .modalCloseBtn {
-  width: 36px;
-  min-width: 36px;
-  min-height: 36px;
-  height: 36px;
+  width: calc(var(--icon-button-size) + 2px);
+  min-width: calc(var(--icon-button-size) + 2px);
+  min-height: calc(var(--icon-button-size) + 2px);
+  height: calc(var(--icon-button-size) + 2px);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--surface-1);
   color: var(--muted);
   cursor: var(--cursor-action);
@@ -124,7 +124,7 @@
 
 .modalField {
   display: grid;
-  gap: 6px;
+  gap: var(--space-1);
   cursor: var(--cursor-default);
 }
 
@@ -137,13 +137,13 @@
 
 .modalInput {
   width: 100%;
-  min-height: 36px;
-  height: 36px;
+  min-height: var(--control-height);
+  height: var(--control-height);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background-color: var(--input-surface);
   color: var(--text);
-  padding: 0 12px;
+  padding: 0 var(--control-padding-x);
   font: inherit;
   font-size: var(--font-size-sm);
   transition: background-color var(--dur-1) ease;
@@ -177,8 +177,8 @@
 }
 
 .modalCheckbox {
-  width: 16px;
-  height: 16px;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
   accent-color: var(--accent);
 }
 
@@ -198,7 +198,7 @@
 .modalTextarea {
   min-height: 88px;
   height: auto;
-  padding: 10px 12px;
+  padding: var(--space-2) var(--control-padding-x);
   resize: vertical;
 }
 
