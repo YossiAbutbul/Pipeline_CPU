@@ -251,3 +251,8 @@
   cursor: var(--cursor-action);
   padding: 0;
 }
+
+.tooltipClose svg {
+  display: block;
+  transform: translateY(4px);
+}

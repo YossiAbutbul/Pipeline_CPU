@@ -33,6 +33,7 @@ export function Tooltip({
   dismissible = false,
   onDismiss,
   autoDismissMs,
+  manual = false,
 }: TooltipProps) {
   const wrapRef = useRef<HTMLSpanElement | null>(null);
   const contentRef = useRef<HTMLSpanElement | null>(null);
@@ -42,7 +43,7 @@ export function Tooltip({
   const [shiftY, setShiftY] = useState(0);
   const [placement, setPlacement] = useState<"top" | "bottom">("bottom");
   const [closing, setClosing] = useState(false);
-  const isVisible = (open || hovered || focused) && !closing;
+  const isVisible = (manual ? open : (open || hovered || focused)) && !closing;
   const hasCustomTrigger = children !== undefined && children !== null;
   const shouldCollapseWrapper = !showTrigger && !hasCustomTrigger;
 
@@ -114,7 +115,7 @@ export function Tooltip({
   }, [onDismiss]);
 
   useEffect(() => {
-    if (!open || !autoDismissMs || !onDismiss || hovered || focused || closing) {
+    if (!open || !autoDismissMs || !onDismiss || (!manual && (hovered || focused)) || closing) {
       return;
     }
     const timer = window.setTimeout(() => {

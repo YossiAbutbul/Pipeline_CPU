@@ -1,6 +1,6 @@
 ﻿import type { MemoryRuleConfig, WriteMode } from "@/app/store/appStore";
 import type { ModalField } from "@/ui/components";
-import { Button, Modal, Tooltip } from "@/ui/components";
+import { Button, GuidedTourTooltip, Modal, Tooltip } from "@/ui/components";
 import { ChevronDown, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { evaluateMemoryFormula, parseSignedOrUnsigned32, parseWordNumber, toHex32 } from "./memoryEditorModel";
@@ -13,6 +13,13 @@ type Props = {
   runtimeMemoryWords: Map<number, number>;
   runtimeChangedWords: number[];
   isRuntimeLocked: boolean;
+  showAddRulesTourStep: boolean;
+  onBackAddRulesTourStep: () => void;
+  onNextAddRulesTourStep: () => void;
+  showRuntimeMemoryTourStep: boolean;
+  onBackRuntimeMemoryTourStep: () => void;
+  onNextRuntimeMemoryTourStep: () => void;
+  onDismissTour: () => void;
 };
 
 const ADD_RULE_FIELDS: ModalField[] = [
@@ -90,6 +97,13 @@ export default function MemoryEditor({
   runtimeMemoryWords,
   runtimeChangedWords,
   isRuntimeLocked,
+  showAddRulesTourStep,
+  onBackAddRulesTourStep,
+  onNextAddRulesTourStep,
+  showRuntimeMemoryTourStep,
+  onBackRuntimeMemoryTourStep,
+  onNextRuntimeMemoryTourStep,
+  onDismissTour,
 }: Props) {
   const overlayInset = 12;
   const toHexCompact = (value: number) => `0x${(value >>> 0).toString(16).toUpperCase()}`;
@@ -393,15 +407,29 @@ export default function MemoryEditor({
   return (
     <div className="memoryEditor">
       <div className="memoryTableToolbar">
-        <Button
-          size="sm"
-          className="memoryActionBtn memoryAddBtn"
-          onClick={() => setIsAddModalOpen(true)}
-          disabled={isRuntimeLocked}
+        <GuidedTourTooltip
+          open={showAddRulesTourStep}
+          step={3}
+          totalSteps={7}
+          align="start"
+          fullWidth
+          title="Add Memory Rules"
+          description="Rules prefill memory before execution starts. Use them to define the values that should appear in runtime memory."
+          onBack={onBackAddRulesTourStep}
+          onNext={onNextAddRulesTourStep}
+          onSkip={onDismissTour}
+          onClose={onDismissTour}
         >
-          <Plus size={14} aria-hidden="true" />
-          Add Rule
-        </Button>
+          <Button
+            size="sm"
+            className="memoryActionBtn memoryAddBtn"
+            onClick={() => setIsAddModalOpen(true)}
+            disabled={isRuntimeLocked}
+          >
+            <Plus size={14} aria-hidden="true" />
+            Add Rule
+          </Button>
+        </GuidedTourTooltip>
         <Button
           size="sm"
           className="memoryActionBtn memoryClearBtn"
@@ -564,6 +592,21 @@ export default function MemoryEditor({
         />
       </div>
       <div className="memoryRuntimeList" role="table" aria-label="Runtime memory words">
+        <GuidedTourTooltip
+          open={showRuntimeMemoryTourStep}
+          step={6}
+          totalSteps={7}
+          align="start"
+          className="memoryRuntimeTableTour"
+          title="Inspect Runtime Memory"
+          description="After running and stepping, this area shows the live memory values that changed during execution."
+          onBack={onBackRuntimeMemoryTourStep}
+          onNext={onNextRuntimeMemoryTourStep}
+          onSkip={onDismissTour}
+          onClose={onDismissTour}
+        >
+          <span className="memoryRuntimeTableTourAnchor" aria-hidden="true" />
+        </GuidedTourTooltip>
         <div className="memoryRuntimeHeaderRow" role="row">
           <div className="memoryRuntimeHeaderCell" role="columnheader">
             Word

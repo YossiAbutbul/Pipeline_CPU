@@ -16,4 +16,5 @@ export type TooltipProps = {
   dismissible?: boolean;
   onDismiss?: () => void;
   autoDismissMs?: number;
+  manual?: boolean;
 };

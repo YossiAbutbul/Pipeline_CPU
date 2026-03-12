@@ -113,6 +113,10 @@
   margin-left: auto;
 }
 
+.initialPcTourAnchor {
+  width: auto;
+}
+
 .initialPcLabel {
   color: var(--text);
   font-size: var(--font-size-md);

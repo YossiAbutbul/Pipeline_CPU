@@ -1,4 +1,4 @@
-import { Button, Panel, Tooltip } from "@/ui/components";
+import { Button, GuidedTourTooltip, Panel, Tooltip } from "@/ui/components";
 import CpuDiagram from "@/assets/cpu/mips_cpu.svg?react";
 import { FastForward, Rewind, RotateCcw, SkipBack, ZoomIn, ZoomOut } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -30,6 +30,12 @@ type Props = {
   onStepBackward: () => void;
   canStepBackward: boolean;
   canStepForward: boolean;
+  showStepForwardTourStep: boolean;
+  onBackStepForwardTourStep: () => void;
+  onNextStepForwardTourStep: () => void;
+  showHoverDiagramTourStep: boolean;
+  onBackHoverDiagramTourStep: () => void;
+  onDismissTour: () => void;
 };
 
 const STAGE_ORDER: Array<keyof PipelineSlots> = ["IF", "ID", "EX", "MEM", "WB"];
@@ -47,6 +53,12 @@ export default function PipelineCanvas({
   onStepBackward,
   canStepBackward,
   canStepForward,
+  showStepForwardTourStep,
+  onBackStepForwardTourStep,
+  onNextStepForwardTourStep,
+  showHoverDiagramTourStep,
+  onBackHoverDiagramTourStep,
+  onDismissTour,
 }: Props) {
   const [zoom, setZoom] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
@@ -307,49 +319,80 @@ export default function PipelineCanvas({
             >
               <SkipBack size={20} aria-hidden="true" />
             </Button>
-            <Button
-              onClick={onStepForward}
-              disabled={!canStepForward}
-              className="btn-iconOnly"
-              aria-label="Step forward"
-              title="Step forward"
+            <GuidedTourTooltip
+              className="pipelineStepHintTooltip"
+              align="end"
+              open={showStepForwardTourStep}
+              step={5}
+              totalSteps={7}
+              title="Step Through Execution"
+              description="Use Step Forward to advance one clock cycle at a time and watch instructions move across the pipeline."
+              onBack={onBackStepForwardTourStep}
+              onNext={onNextStepForwardTourStep}
+              onSkip={onDismissTour}
+              onClose={onDismissTour}
             >
-              <FastForward size={20} aria-hidden="true" />
-            </Button>
+              <Button
+                onClick={onStepForward}
+                disabled={!canStepForward}
+                className="btn-iconOnly"
+                aria-label="Step forward"
+                title="Step forward"
+              >
+                <FastForward size={20} aria-hidden="true" />
+              </Button>
+            </GuidedTourTooltip>
           </div>
         </div>
 
-        <div
-          ref={viewportRef}
-          className={`diagramViewport ${canDrag ? "canDrag" : ""} ${isDragging ? "isDragging" : ""}`}
-          onMouseDown={handleDragStart}
-          onMouseUp={handleDragEnd}
+        <div className="pipelineDiagramViewportShell">
+          <GuidedTourTooltip
+            className="pipelineDiagramTourTooltip"
+            align="start"
+            open={showHoverDiagramTourStep}
+            step={7}
+            totalSteps={7}
+          title="Hover The Diagram"
+          description="Hover highlighted paths in the CPU diagram to inspect the current values traveling through each signal."
+          onBack={onBackHoverDiagramTourStep}
+          onNext={onDismissTour}
+          nextLabel="Finish"
+          onClose={onDismissTour}
         >
+            <span className="pipelineDiagramTourAnchor" aria-hidden="true" />
+          </GuidedTourTooltip>
           <div
-            ref={diagramRef}
-            className="diagramContent"
-            style={{ width: `${95 * zoom}%` }}
+            ref={viewportRef}
+            className={`diagramViewport ${canDrag ? "canDrag" : ""} ${isDragging ? "isDragging" : ""}`}
+            onMouseDown={handleDragStart}
+            onMouseUp={handleDragEnd}
           >
-            <CpuDiagram style={{ width: "100%", height: "auto" }} />
-            {hoverTooltip && (
-              <div
-                className="pipelineHoverTooltip"
-                style={{ left: `${hoverTooltip.left}px`, top: `${hoverTooltip.top}px` }}
-              >
-                <Tooltip
-                  showTrigger={false}
-                  open
-                  align="center"
-                  ariaLabel={`${hoverTooltip.label} value`}
-                  content={
-                    <div className="pipelineTooltipBody">
-                      <div className="pipelineTooltipLabel">{hoverTooltip.label}</div>
-                      <div className="pipelineTooltipValue">{hoverTooltip.value}</div>
-                    </div>
-                  }
-                />
-              </div>
-            )}
+            <div
+              ref={diagramRef}
+              className="diagramContent"
+              style={{ width: `${95 * zoom}%` }}
+            >
+              <CpuDiagram style={{ width: "100%", height: "auto" }} />
+              {hoverTooltip && (
+                <div
+                  className="pipelineHoverTooltip"
+                  style={{ left: `${hoverTooltip.left}px`, top: `${hoverTooltip.top}px` }}
+                >
+                  <Tooltip
+                    showTrigger={false}
+                    open
+                    align="center"
+                    ariaLabel={`${hoverTooltip.label} value`}
+                    content={
+                      <div className="pipelineTooltipBody">
+                        <div className="pipelineTooltipLabel">{hoverTooltip.label}</div>
+                        <div className="pipelineTooltipValue">{hoverTooltip.value}</div>
+                      </div>
+                    }
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

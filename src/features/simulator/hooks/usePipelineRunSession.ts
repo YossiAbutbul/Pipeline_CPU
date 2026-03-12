@@ -146,13 +146,20 @@ export function usePipelineRunSession({
     const initialMemoryWords = createMemoryFromRules(memoryRules);
     initialRegisterValuesRef.current = { ...registerValues };
     initialMemoryWordsRef.current = new Map(initialMemoryWords);
+    const firstInstruction = instructions[0] ?? null;
 
-    setPipeline(EMPTY_PIPELINE);
-    setPipelineInstructionIndices(EMPTY_PIPELINE_INDICES);
+    setPipeline({
+      ...EMPTY_PIPELINE,
+      IF: firstInstruction?.source ?? null,
+    });
+    setPipelineInstructionIndices({
+      ...EMPTY_PIPELINE_INDICES,
+      IF: firstInstruction ? 0 : null,
+    });
     setPipelineEffects(EMPTY_PIPELINE_EFFECTS);
     setMemoryWords(initialMemoryWords);
     setChangedMemoryWords([]);
-    setNextInstructionIndex(0);
+    setNextInstructionIndex(firstInstruction ? 1 : 0);
     setHistory([]);
     setRunSessionActive(true);
     setRegisterHighlightCycle(0);

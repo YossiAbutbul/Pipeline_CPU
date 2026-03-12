@@ -20,6 +20,16 @@ type Props = {
   runtimeMemoryWords: Map<number, number>;
   runtimeChangedWords: number[];
   isRuntimeLocked: boolean;
+  showEditRegistersTourStep: boolean;
+  onBackEditRegistersTourStep: () => void;
+  onNextEditRegistersTourStep: () => void;
+  showAddRulesTourStep: boolean;
+  onBackAddRulesTourStep: () => void;
+  onNextAddRulesTourStep: () => void;
+  showRuntimeMemoryTourStep: boolean;
+  onBackRuntimeMemoryTourStep: () => void;
+  onNextRuntimeMemoryTourStep: () => void;
+  onDismissTour: () => void;
 };
 
 export default function StatePanel({
@@ -39,6 +49,16 @@ export default function StatePanel({
   runtimeMemoryWords,
   runtimeChangedWords,
   isRuntimeLocked,
+  showEditRegistersTourStep,
+  onBackEditRegistersTourStep,
+  onNextEditRegistersTourStep,
+  showAddRulesTourStep,
+  onBackAddRulesTourStep,
+  onNextAddRulesTourStep,
+  showRuntimeMemoryTourStep,
+  onBackRuntimeMemoryTourStep,
+  onNextRuntimeMemoryTourStep,
+  onDismissTour,
 }: Props) {
   return (
     <Panel
@@ -68,6 +88,10 @@ export default function StatePanel({
           onNotifyError={onNotifyError}
           highlightCycle={registerHighlightCycle}
           isRuntimeLocked={isRuntimeLocked}
+          showEditRegistersTourStep={showEditRegistersTourStep}
+          onBackEditRegistersTourStep={onBackEditRegistersTourStep}
+          onNextEditRegistersTourStep={onNextEditRegistersTourStep}
+          onDismissTour={onDismissTour}
         />
       )}
       {tab === "memory" && (
@@ -78,6 +102,13 @@ export default function StatePanel({
           runtimeMemoryWords={runtimeMemoryWords}
           runtimeChangedWords={runtimeChangedWords}
           isRuntimeLocked={isRuntimeLocked}
+          showAddRulesTourStep={showAddRulesTourStep}
+          onBackAddRulesTourStep={onBackAddRulesTourStep}
+          onNextAddRulesTourStep={onNextAddRulesTourStep}
+          showRuntimeMemoryTourStep={showRuntimeMemoryTourStep}
+          onBackRuntimeMemoryTourStep={onBackRuntimeMemoryTourStep}
+          onNextRuntimeMemoryTourStep={onNextRuntimeMemoryTourStep}
+          onDismissTour={onDismissTour}
         />
       )}
     </Panel>

@@ -107,6 +107,31 @@
   margin: 0 var(--space-1);
 }
 
+.pipelineDiagramViewportShell {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.pipelineDiagramTourTooltip.tooltipWrap {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  z-index: 12;
+  width: auto;
+}
+
+.pipelineDiagramTourTooltip .tooltipContent::before,
+.pipelineDiagramTourTooltip .tooltipContent::after {
+  display: none;
+}
+
+.pipelineDiagramTourAnchor {
+  display: block;
+  width: 1px;
+  height: 1px;
+}
+
 .diagramViewport {
   flex: 1;
   min-height: 0;
@@ -207,6 +232,37 @@
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New",
     monospace;
   font-size: var(--tooltip-body-size);
+}
+
+.pipelineStepHintTooltip .tooltipContent {
+  --tooltip-panel-bg: var(--register-tooltip-bg);
+  --tooltip-panel-border: var(--register-tooltip-border);
+  min-width: 320px;
+  max-width: min(360px, calc(100vw - 24px));
+  padding: var(--tooltip-panel-padding);
+  border: 1px solid var(--tooltip-panel-border);
+  border-radius: var(--tooltip-panel-radius);
+  background: var(--tooltip-panel-bg);
+  color: var(--register-tooltip-title);
+  box-shadow: var(--shadow);
+}
+
+.pipelineStepHintPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pipelineStepHintTitle {
+  color: var(--register-tooltip-title);
+  font-size: var(--tooltip-title-size);
+  font-weight: 600;
+}
+
+.pipelineStepHintText {
+  color: var(--register-tooltip-card-text);
+  font-size: var(--tooltip-body-size);
+  line-height: 1.45;
 }
 
 @media (max-width: 980px) {

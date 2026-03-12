@@ -1,0 +1,70 @@
+.guidedTourTooltip.tooltipWrap {
+  position: relative;
+  display: block;
+  width: auto;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.guidedTourTooltipFullWidth.tooltipWrap {
+  display: flex;
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+}
+
+.guidedTourTooltipFullWidth.tooltipWrap > .btn {
+  flex: 1 1 0;
+  width: 100%;
+}
+
+.guidedTourTooltip .tooltipContent {
+  --tooltip-panel-bg: var(--register-tooltip-bg);
+  --tooltip-panel-border: var(--register-tooltip-border);
+  min-width: 320px;
+  max-width: min(380px, calc(100vw - 24px));
+  padding: var(--tooltip-panel-padding);
+  border: 1px solid var(--tooltip-panel-border);
+  border-radius: var(--tooltip-panel-radius);
+  background: var(--tooltip-panel-bg);
+  color: var(--register-tooltip-title);
+  box-shadow: var(--shadow);
+}
+
+.guidedTourTooltipPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.guidedTourTooltipStep {
+  color: var(--register-tooltip-footer);
+  font-size: var(--tooltip-footnote-size);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.guidedTourTooltipTitle {
+  color: var(--register-tooltip-title);
+  font-size: var(--tooltip-title-size);
+  font-weight: 600;
+}
+
+.guidedTourTooltipText {
+  color: var(--register-tooltip-card-text);
+  font-size: var(--tooltip-body-size);
+  line-height: 1.45;
+}
+
+.guidedTourTooltipActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.guidedTourTooltipNav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

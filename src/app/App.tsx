@@ -3,15 +3,27 @@ import ProgramEditor from "@/features/program/ProgramEditor";
 import { usePipelineRunSession } from "@/features/simulator/hooks/usePipelineRunSession";
 import StatePanel from "@/features/statePanels/StatePanel";
 import { NotificationToast } from "@/ui/components";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { clearPersistedAppState, createDefaultAppState, usePersistedAppState } from "./store/appStore";
 import "./app.css";
+
+const GUIDED_TOUR_STORAGE_KEY = "pipeline-cpu.guided-tour-completed";
+const GUIDED_TOUR_TOTAL_STEPS = 7;
+
+function loadInitialGuidedTourStep() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return window.localStorage.getItem(GUIDED_TOUR_STORAGE_KEY) === "true" ? null : 0;
+}
 
 export default function App() {
   const [appState, setAppState] = usePersistedAppState();
   const [notifications, setNotifications] = useState<
     Array<{ id: number; title: string; message: string; tone: "success" | "error" }>
   >([]);
+  const [guidedTourStep, setGuidedTourStep] = useState<number | null>(() => loadInitialGuidedTourStep());
   const { program, initialPc, statePanelTab, registers, memory } = appState;
 
   const pushSuccessNotification = (message: string) => {
@@ -28,6 +40,32 @@ export default function App() {
 
   const dismissNotification = useCallback((id: number) => {
     setNotifications((prev) => prev.filter((notification) => notification.id !== id));
+  }, []);
+
+  const completeGuidedTour = useCallback(() => {
+    setGuidedTourStep(null);
+    setAppState((prev) => ({ ...prev, statePanelTab: "registers" }));
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(GUIDED_TOUR_STORAGE_KEY, "true");
+    }
+  }, [setAppState]);
+
+  const goToNextTourStep = useCallback(() => {
+    setGuidedTourStep((current) => {
+      if (current === null) {
+        return current;
+      }
+      return current >= GUIDED_TOUR_TOTAL_STEPS - 1 ? current : current + 1;
+    });
+  }, []);
+
+  const goToPreviousTourStep = useCallback(() => {
+    setGuidedTourStep((current) => {
+      if (current === null) {
+        return current;
+      }
+      return current <= 0 ? current : current - 1;
+    });
   }, []);
 
   const setRegisterValues = (values: Record<string, string>) => {
@@ -56,6 +94,16 @@ export default function App() {
     onRegisterValuesChange: setRegisterValues,
   });
 
+  useEffect(() => {
+    if (guidedTourStep === 1 && statePanelTab !== "registers") {
+      setAppState((prev) => ({ ...prev, statePanelTab: "registers" }));
+    }
+
+    if ((guidedTourStep === 2 || guidedTourStep === 5) && statePanelTab !== "memory") {
+      setAppState((prev) => ({ ...prev, statePanelTab: "memory" }));
+    }
+  }, [guidedTourStep, setAppState, statePanelTab]);
+
   const handleProgramChange = (nextProgram: string) => {
     setAppState((prev) => ({ ...prev, program: nextProgram }));
     resetPipeline();
@@ -68,8 +116,44 @@ export default function App() {
 
   const handleResetPersistedData = () => {
     clearPersistedAppState();
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(GUIDED_TOUR_STORAGE_KEY);
+    }
     setAppState(createDefaultAppState());
     resetPipeline();
+    setGuidedTourStep(0);
+  };
+
+  const handleRun = () => {
+    run();
+    setGuidedTourStep((currentStep) => (currentStep === 3 ? 4 : currentStep));
+  };
+
+  const handleStop = () => {
+    resetPipeline();
+    setGuidedTourStep((currentStep) => {
+      if (currentStep === null) {
+        return currentStep;
+      }
+      return currentStep >= 4 ? 3 : currentStep;
+    });
+  };
+
+  const handleResetTracking = () => {
+    resetPipeline();
+    setGuidedTourStep((currentStep) => {
+      if (currentStep === null) {
+        return currentStep;
+      }
+      return currentStep >= 4 ? 3 : currentStep;
+    });
+  };
+
+  const handleStepForward = () => {
+    if (guidedTourStep === 4) {
+      setGuidedTourStep(5);
+    }
+    stepForward();
   };
 
   return (
@@ -78,13 +162,19 @@ export default function App() {
         <ProgramEditor
           program={program}
           onProgramChange={handleProgramChange}
-          onReset={resetPipeline}
-          onRun={run}
-          onStop={resetPipeline}
+          onReset={handleResetTracking}
+          onRun={handleRun}
+          onStop={handleStop}
           isRunActive={runSessionActive}
           initialPc={initialPc}
           onInitialPcChange={handleInitialPcChange}
           onResetPersistedData={handleResetPersistedData}
+          showInitialPcTourStep={guidedTourStep === 0}
+          onNextInitialPcTourStep={goToNextTourStep}
+          showRunTourStep={guidedTourStep === 3}
+          onBackRunTourStep={goToPreviousTourStep}
+          onNextRunTourStep={goToNextTourStep}
+          onDismissRunTour={completeGuidedTour}
         />
       </aside>
 
@@ -94,11 +184,17 @@ export default function App() {
           hoveredSignalValues={hoveredSignalValues}
           clockCycle={clockCycle}
           showClockCycle={runSessionActive}
-          onResetTracking={resetPipeline}
-          onStepForward={stepForward}
+          onResetTracking={handleResetTracking}
+          onStepForward={handleStepForward}
           onStepBackward={stepBackward}
           canStepBackward={canStepBackward}
           canStepForward={canStepForward}
+          showStepForwardTourStep={guidedTourStep === 4}
+          onBackStepForwardTourStep={goToPreviousTourStep}
+          onNextStepForwardTourStep={goToNextTourStep}
+          showHoverDiagramTourStep={guidedTourStep === 6}
+          onBackHoverDiagramTourStep={goToPreviousTourStep}
+          onDismissTour={completeGuidedTour}
         />
       </main>
 
@@ -126,6 +222,16 @@ export default function App() {
           runtimeMemoryWords={memoryWords}
           runtimeChangedWords={changedMemoryWords}
           isRuntimeLocked={runSessionActive}
+          showEditRegistersTourStep={guidedTourStep === 1}
+          onBackEditRegistersTourStep={goToPreviousTourStep}
+          onNextEditRegistersTourStep={goToNextTourStep}
+          showAddRulesTourStep={guidedTourStep === 2}
+          onBackAddRulesTourStep={goToPreviousTourStep}
+          onNextAddRulesTourStep={goToNextTourStep}
+          showRuntimeMemoryTourStep={guidedTourStep === 5}
+          onBackRuntimeMemoryTourStep={goToPreviousTourStep}
+          onNextRuntimeMemoryTourStep={goToNextTourStep}
+          onDismissTour={completeGuidedTour}
         />
       </aside>
       <NotificationToast notifications={notifications} onDismiss={dismissNotification} />
