@@ -177,7 +177,7 @@
   --tooltip-bias-x: var(--tooltip-bias);
   top: calc(100% + var(--tooltip-gap));
   box-sizing: border-box;
-  width: 365px;
+  width: 405px;
   max-height: none;
   padding: var(--tooltip-panel-padding);
   border: 1px solid var(--tooltip-panel-border);
@@ -353,7 +353,7 @@
 
 .initialPcTooltipCard code {
   color: var(--register-tooltip-card-code);
-  font-size: 0.875rem;
+  font-size: var(--tooltip-code-size);
   font-weight: 600;
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",

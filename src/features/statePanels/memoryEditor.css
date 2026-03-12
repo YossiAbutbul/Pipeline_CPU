@@ -128,7 +128,7 @@
   --tooltip-bias-x: var(--tooltip-bias-sm);
   top: calc(100% + var(--tooltip-gap));
   box-sizing: border-box;
-  width: 350px;
+  width: 390px;
   max-height: none;
   padding: var(--tooltip-panel-padding);
   border: 1px solid var(--tooltip-panel-border);
@@ -140,7 +140,8 @@
   transform: translateX(
       calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
   transform-origin: top center;
   transition:
     opacity 200ms ease-out,
@@ -195,7 +196,8 @@
   transform: translateX(
       calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
 }
 
 .memoryRulesInfoTooltip.tooltipVisible .tooltipContent,
@@ -222,14 +224,16 @@
   transform: translateX(
       calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
 }
 
 .memoryRulesInfoTooltip.tooltipClosing .tooltipAlign-end {
   transform: translateX(
       calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
 }
 
 .memoryRulesInfoTooltip.tooltipVisible .tooltipPlace-top,
@@ -346,7 +350,8 @@
   --tooltip-bias-x: var(--tooltip-bias-sm);
   top: calc(100% + var(--tooltip-gap));
   box-sizing: border-box;
-  width: 375px;
+  width: 340px;
+  min-width: 340px;
   max-height: none;
   padding: var(--tooltip-panel-padding);
   border: 1px solid var(--tooltip-panel-border);
@@ -358,7 +363,8 @@
   transform: translateX(
       calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
   transform-origin: top center;
   transition:
     opacity 200ms ease-out,
@@ -413,7 +419,8 @@
   transform: translateX(
       calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
 }
 
 .memoryRuntimeInfoTooltip.tooltipVisible .tooltipContent,
@@ -440,14 +447,16 @@
   transform: translateX(
       calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
 }
 
 .memoryRuntimeInfoTooltip.tooltipClosing .tooltipAlign-end {
   transform: translateX(
       calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
-    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px))) scale(0.9);
+    translateY(calc(var(--tooltip-shift) + var(--tooltip-shift-y, 0px)))
+    scale(0.9);
 }
 
 .memoryRuntimeInfoTooltip.tooltipVisible .tooltipPlace-top,
@@ -513,7 +522,7 @@
 
 .memoryRuntimeTooltipCard code {
   color: var(--register-tooltip-card-code);
-  font-size: var(--tooltip-body-size);
+  font-size: var(--tooltip-code-size);
   font-weight: 600;
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",

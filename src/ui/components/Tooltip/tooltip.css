@@ -46,8 +46,8 @@
       calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
     )
     translateY(calc(-4px + var(--tooltip-shift-y, 0px)));
-  min-width: 200px;
-  max-width: min(280px, calc(100vw - 24px));
+  min-width: 240px;
+  max-width: min(320px, calc(100vw - 24px));
   max-height: min(260px, calc(100vh - 24px));
   border: var(--border-2) solid var(--tooltip-panel-border);
   border-radius: var(--radius);

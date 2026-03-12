@@ -145,7 +145,8 @@
   --toast-width: 360px;
   --tooltip-font-size: var(--font-size-md);
   --tooltip-title-size: var(--font-size-md);
-  --tooltip-body-size: var(--font-size-md);
+  --tooltip-body-size: var(--font-size-sm);
+  --tooltip-code-size: var(--font-size-md);
   --tooltip-caption-size: var(--font-size-sm);
   --tooltip-footnote-size: var(--font-size-xs);
   --settings-title-size: var(--font-size-lg);

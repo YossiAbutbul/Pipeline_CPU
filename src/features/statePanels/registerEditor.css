@@ -81,7 +81,7 @@
   --tooltip-bias-x: var(--tooltip-bias);
   top: calc(100% + var(--tooltip-gap));
   box-sizing: border-box;
-  width: 390px;
+  width: 430px;
   max-height: none;
   padding: var(--tooltip-panel-padding);
   border: 1px solid var(--tooltip-panel-border);
@@ -274,7 +274,7 @@
 
 .registerFormulaTooltipCard code {
   color: var(--register-tooltip-card-code);
-  font-size: var(--tooltip-body-size);
+  font-size: var(--tooltip-code-size);
   font-weight: 600;
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
