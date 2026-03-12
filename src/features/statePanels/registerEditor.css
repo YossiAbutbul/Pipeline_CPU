@@ -564,7 +564,7 @@
 .registerOverlayScrollbar {
   position: absolute;
   top: 2px;
-  right: 2px;
+  right: 1px;
   bottom: 0;
   width: var(--scrollbar-size);
   pointer-events: none;
@@ -590,12 +590,14 @@
 
 .registerOverlayScrollbar::before {
   top: 2px;
-  border-bottom: calc(var(--scrollbar-arrow-size) - 2px) solid var(--scrollbar-arrow);
+  border-bottom: calc(var(--scrollbar-arrow-size) - 2px) solid
+    var(--scrollbar-arrow);
 }
 
 .registerOverlayScrollbar::after {
   bottom: 2px;
-  border-top: calc(var(--scrollbar-arrow-size) - 2px) solid var(--scrollbar-arrow);
+  border-top: calc(var(--scrollbar-arrow-size) - 2px) solid
+    var(--scrollbar-arrow);
 }
 
 .registerOverlayScrollbar.isVisible {
@@ -610,8 +612,11 @@
   background-color: var(--scrollbar-thumb);
   border-radius: 999px;
   width: calc(var(--scrollbar-size) - 2px);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--scrollbar-thumb-hover) 44%, transparent);
-  transition: background-color 160ms ease, box-shadow 160ms ease;
+  box-shadow: inset 0 0 0 1px
+    color-mix(in oklab, var(--scrollbar-thumb-hover) 44%, transparent);
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .registerTableBodyWrap:hover .registerOverlayThumb {
