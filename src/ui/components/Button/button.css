@@ -1,27 +1,28 @@
 .btn {
   min-height: 36px;
   padding: 0 12px;
-  border: 1px solid var(--button-border);
+  border: 1px solid var(--button-border-subtle);
   border-radius: 8px;
   font: inherit;
   font-weight: 600;
   font-size: var(--font-size-sm);
   color: var(--text);
-  background: var(--surface-1);
+  background: var(--button-surface);
   cursor: var(--cursor-action);
   transition:
     background var(--dur-1),
     border-color var(--dur-1),
+    box-shadow var(--dur-1),
     color var(--dur-1);
 }
 
 .btn:hover {
-  background: color-mix(in oklab, var(--surface-1) 72%, var(--control-hover));
-  border-color: color-mix(in oklab, var(--button-border) 76%, var(--muted));
+  background: var(--button-surface-hover);
+  border-color: color-mix(in oklab, var(--button-border-subtle) 88%, var(--muted));
 }
 
 .btn:active {
-  background: color-mix(in oklab, var(--surface-1) 55%, var(--control-hover));
+  background: var(--button-surface-active);
 }
 
 .btn:focus-visible {
@@ -42,24 +43,32 @@
 
 .btn-primary {
   background: var(--accent);
-  border-color: var(--accent);
+  border-color: color-mix(in oklab, var(--accent) 72%, transparent);
   color: #fff;
 }
 
 .btn-primary:hover {
-  background: color-mix(in oklab, var(--accent) 88%, white);
+  background: var(--button-primary-hover);
   border-color: color-mix(in oklab, var(--accent) 88%, white);
 }
 
 .btn-primary:active {
-  background: color-mix(in oklab, var(--accent) 78%, black);
+  background: var(--button-primary-active);
 }
 
 .btn-secondary {
-  background: var(--surface-1);
+  background: var(--button-surface);
 }
 
 .btn-ghost {
   background: transparent;
   border-color: transparent;
+}
+
+.btn-ghost:hover {
+  background: var(--button-ghost-hover);
+}
+
+.btn-ghost:active {
+  background: var(--button-ghost-active);
 }
