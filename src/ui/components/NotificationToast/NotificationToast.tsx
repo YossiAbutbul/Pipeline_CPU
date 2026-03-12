@@ -21,14 +21,14 @@ type Props = {
 function getNotificationIcon(tone: NotificationTone) {
   switch (tone) {
     case "success":
-      return <Check size={14} aria-hidden="true" />;
+      return <Check size={20} aria-hidden="true" />;
     case "warning":
-      return <TriangleAlert size={14} aria-hidden="true" />;
+      return <TriangleAlert size={20} aria-hidden="true" />;
     case "error":
       return <span className="notificationToastGlyph" aria-hidden="true">!</span>;
     case "info":
     default:
-      return <Info size={14} aria-hidden="true" />;
+      return <Info size={20} aria-hidden="true" />;
   }
 }
 
@@ -60,7 +60,7 @@ function NotificationToastItem({
               aria-label="Dismiss notification"
               onClick={() => onDismiss(id)}
             >
-              <X size={12} aria-hidden="true" />
+              <X size={18} aria-hidden="true" />
             </button>
           </div>
           <span className="notificationToastBody">{message}</span>

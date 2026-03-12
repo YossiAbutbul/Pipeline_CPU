@@ -20,7 +20,7 @@
   --notification-progress-bg: color-mix(in oklab, var(--accent) 84%, var(--tab-active));
   position: relative;
   overflow: hidden;
-  padding: var(--space-2);
+  padding: var(--toast-padding);
   border: none;
   border-radius: var(--radius-md);
   background: var(--notification-bg);
@@ -47,25 +47,25 @@
 .notificationToastMain {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-2);
+  gap: 14px;
 }
 
 .notificationToastIcon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--icon-size-lg);
-  height: var(--icon-size-lg);
+  width: var(--toast-icon-size);
+  height: var(--toast-icon-size);
   border-radius: 999px;
   background: var(--notification-icon-bg);
   color: var(--notification-icon-fg);
   flex: 0 0 auto;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .notificationToastGlyph {
   display: block;
-  font-size: var(--font-size-sm);
+  font-size: var(--toast-title-size);
   font-weight: 700;
   line-height: 1;
   transform: translateY(-0.5px);
@@ -92,10 +92,10 @@
 
 .notificationToastTitle {
   display: block;
-  font-size: var(--font-size-sm);
+  font-size: var(--toast-title-size);
   font-weight: var(--font-weight-medium);
   line-height: 1.2;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   color: var(--notification-title);
 }
 
@@ -126,7 +126,7 @@
 .notificationToastBody {
   display: block;
   color: var(--notification-body);
-  font-size: var(--font-size-xs);
+  font-size: var(--toast-body-size);
   line-height: var(--line-height-ui);
   white-space: nowrap;
   overflow: hidden;
@@ -137,8 +137,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--icon-size-md);
-  height: var(--icon-size-md);
+  width: var(--toast-close-size);
+  height: var(--toast-close-size);
   padding: 0;
   border: none;
   background: transparent;
@@ -157,7 +157,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  height: 3px;
+  height: var(--toast-progress-height);
   background: var(--notification-progress-bg);
   transform-origin: left center;
   animation: notificationToastProgressShrink var(--notification-duration) linear forwards;

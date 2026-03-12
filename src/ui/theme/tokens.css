@@ -143,7 +143,14 @@
   --settings-panel-width: 320px;
   --settings-panel-header-padding: 20px;
   --settings-panel-body-padding: 16px;
-  --toast-width: 360px;
+  --toast-width: 460px;
+  --toast-padding: 18px;
+  --toast-icon-size: 38px;
+  --toast-title-size: var(--font-size-md);
+  --toast-body-size: var(--font-size-sm);
+  --toast-close-size: 32px;
+  --toast-close-icon-size: 18px;
+  --toast-progress-height: 5px;
   --tooltip-font-size: var(--font-size-md);
   --tooltip-title-size: var(--font-size-md);
   --tooltip-body-size: var(--font-size-sm);
