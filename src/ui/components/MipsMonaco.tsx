@@ -95,15 +95,19 @@ export function MipsMonaco({ value, onChange, themeMode, height = "100%" }: Prop
 
         scrollbar: {
           vertical: "auto",
-          horizontal: "auto",
-          verticalScrollbarSize: 4,
-          horizontalScrollbarSize: 4,
+          horizontal: "hidden",
+          verticalHasArrows: false,
+          verticalScrollbarSize: 0,
+          horizontalScrollbarSize: 0,
           useShadows: false,
           alwaysConsumeMouseWheel: false,
         },
 
         renderLineHighlight: "all",
         renderLineHighlightOnlyWhenFocus: false,
+        padding: {
+          top: 10,
+        },
 
         cursorBlinking: "smooth",
         cursorSmoothCaretAnimation: "on",
@@ -114,6 +118,8 @@ export function MipsMonaco({ value, onChange, themeMode, height = "100%" }: Prop
         fontFamily:
           'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace',
 
+        wordWrap: "on",
+        wordWrapColumn: 120,
         tabSize: 2,
         insertSpaces: true,
       }}

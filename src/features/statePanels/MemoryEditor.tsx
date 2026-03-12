@@ -1,7 +1,7 @@
 ﻿import type { MemoryRuleConfig, WriteMode } from "@/app/store/appStore";
 import type { ModalField } from "@/ui/components";
 import { Button, Modal, Tooltip } from "@/ui/components";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { evaluateMemoryFormula, parseSignedOrUnsigned32, parseWordNumber, toHex32 } from "./memoryEditorModel";
 import "./memoryEditor.css";
@@ -91,16 +91,23 @@ export default function MemoryEditor({
   runtimeChangedWords,
   isRuntimeLocked,
 }: Props) {
+  const overlayInset = 12;
   const toHexCompact = (value: number) => `0x${(value >>> 0).toString(16).toUpperCase()}`;
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
+  const [isRulesExpanded, setIsRulesExpanded] = useState(true);
+  const [isRulesScrollbarVisible, setIsRulesScrollbarVisible] = useState(false);
+  const [rulesScrollbarThumbTop, setRulesScrollbarThumbTop] = useState(0);
+  const [rulesScrollbarThumbHeight, setRulesScrollbarThumbHeight] = useState(0);
+  const [hasRulesOverflow, setHasRulesOverflow] = useState(false);
   const [recentlyChangedWords, setRecentlyChangedWords] = useState<Record<number, true>>({});
   const [watchedWords, setWatchedWords] = useState<number[]>([]);
   const [isRuntimeScrollbarVisible, setIsRuntimeScrollbarVisible] = useState(false);
   const [runtimeScrollbarThumbTop, setRuntimeScrollbarThumbTop] = useState(0);
   const [runtimeScrollbarThumbHeight, setRuntimeScrollbarThumbHeight] = useState(0);
   const [hasRuntimeOverflow, setHasRuntimeOverflow] = useState(false);
+  const rulesListRef = useRef<HTMLDivElement | null>(null);
   const runtimeListRef = useRef<HTMLDivElement | null>(null);
   const highlightTimeoutsRef = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
 
@@ -120,14 +127,44 @@ export default function MemoryEditor({
       return;
     }
 
+    const trackHeight = Math.max(0, clientHeight - (overlayInset * 2));
     const minThumbHeight = 24;
-    const thumbHeight = Math.max(minThumbHeight, (clientHeight / scrollHeight) * clientHeight);
-    const maxThumbTop = clientHeight - thumbHeight;
+    const thumbHeight = Math.max(minThumbHeight, (clientHeight / scrollHeight) * trackHeight);
+    const maxThumbOffset = Math.max(0, trackHeight - thumbHeight);
     const maxScrollTop = scrollHeight - clientHeight;
-    const thumbTop = maxScrollTop > 0 ? (scrollTop / maxScrollTop) * maxThumbTop : 0;
+    const thumbTop = maxScrollTop > 0
+      ? overlayInset + ((scrollTop / maxScrollTop) * maxThumbOffset)
+      : overlayInset;
 
     setRuntimeScrollbarThumbHeight(thumbHeight);
     setRuntimeScrollbarThumbTop(thumbTop);
+  };
+
+  const updateRulesOverlayScrollbar = () => {
+    const listEl = rulesListRef.current;
+    if (!listEl) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = listEl;
+    const hasOverflow = scrollHeight > clientHeight + 1;
+    setHasRulesOverflow(hasOverflow);
+
+    if (!hasOverflow) {
+      setRulesScrollbarThumbTop(0);
+      setRulesScrollbarThumbHeight(0);
+      return;
+    }
+
+    const trackHeight = Math.max(0, clientHeight - (overlayInset * 2));
+    const minThumbHeight = 24;
+    const thumbHeight = Math.max(minThumbHeight, (clientHeight / scrollHeight) * trackHeight);
+    const maxThumbOffset = Math.max(0, trackHeight - thumbHeight);
+    const maxScrollTop = scrollHeight - clientHeight;
+    const thumbTop = maxScrollTop > 0
+      ? overlayInset + ((scrollTop / maxScrollTop) * maxThumbOffset)
+      : overlayInset;
+
+    setRulesScrollbarThumbHeight(thumbHeight);
+    setRulesScrollbarThumbTop(thumbTop);
   };
 
   useEffect(() => {
@@ -183,6 +220,20 @@ export default function MemoryEditor({
   }, [runtimeMemoryWords, watchedWords.length]);
 
   useEffect(() => {
+    updateRulesOverlayScrollbar();
+
+    const listEl = rulesListRef.current;
+    if (!listEl) return;
+
+    const resizeObserver = new ResizeObserver(() => updateRulesOverlayScrollbar());
+    resizeObserver.observe(listEl);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [isRulesExpanded, rules]);
+
+  useEffect(() => {
     updateRuntimeOverlayScrollbar();
 
     const listEl = runtimeListRef.current;
@@ -226,12 +277,33 @@ export default function MemoryEditor({
     });
   }, [recentlyChangedWords, runtimeMemoryWords, watchedWords]);
 
-  const formatAddressViews = (rule: MemoryRuleConfig) => {
+  const renderAddressViews = (rule: MemoryRuleConfig) => {
     if (rule.fullRange) {
-      return "Address Full range";
+      return (
+        <>
+          <strong>Address:</strong> Full range
+        </>
+      );
     }
-    return `Address ${rule.start} - ${rule.end} | ${toHexCompact(rule.start)} - ${toHexCompact(rule.end)}`;
+    return (
+      <>
+        <strong>Address: </strong> {rule.start} - {rule.end} | {toHexCompact(rule.start)} - {toHexCompact(rule.end)}
+      </>
+    );
   };
+
+  const formatRuleSummary = (rule: MemoryRuleConfig) => {
+    const rangeLabel = rule.fullRange
+      ? "Full range"
+      : `${toHexCompact(rule.start)} - ${toHexCompact(rule.end)}`;
+    const valueLabel = rule.useFormula
+      ? `Formula: ${rule.formulaText}`
+      : `Value: ${toHexCompact(parseSignedOrUnsigned32(rule.valueText, "Value"))}`;
+    return `${rangeLabel} | ${valueLabel}`;
+  };
+
+  const formatWriteModeLabel = (rule: MemoryRuleConfig) =>
+    rule.writeMode === "byte" ? "Byte Write" : "Word Write";
 
   const buildRuleFromModal = (rawValues: Record<string, string>, existingId?: string): MemoryRuleConfig => {
     const fullRange = (rawValues.fullRange ?? "false") === "true";
@@ -342,68 +414,106 @@ export default function MemoryEditor({
       </div>
 
       <div className="memoryRulesHeaderRow">
-        <div className="memoryRulesHeader">Rules ({rules.length})</div>
-        <Tooltip
-          className="memoryRulesInfoTooltip"
-          ariaLabel="About memory rules"
-          align="end"
-          content={
-            <div className="memoryRulesTooltipPanel">
-              <div className="memoryRulesTooltipTitle">About Rules</div>
-              <div className="memoryRulesTooltipText">
-                Rules initialize runtime memory when you press Run.
+        <button
+          type="button"
+          className="memoryRulesToggle"
+          aria-expanded={isRulesExpanded}
+          aria-controls="memory-rules-list"
+          onClick={() => setIsRulesExpanded((prev) => !prev)}
+        >
+          <span className="memoryRulesHeader">Rules ({rules.length})</span>
+          <Tooltip
+            className="memoryRulesInfoTooltip"
+            ariaLabel="About memory rules"
+            align="end"
+            content={
+              <div className="memoryRulesTooltipPanel">
+                <div className="memoryRulesTooltipTitle">About Rules</div>
+                <div className="memoryRulesTooltipText">
+                  Rules initialize runtime memory when you press Run.
+                </div>
+                <div className="memoryRulesTooltipFooter">
+                  Click <code>Add Rule</code> to create your first rule.
+                </div>
               </div>
-              <div className="memoryRulesTooltipFooter">
-                Click <code>Add Rule</code> to create your first rule.
-              </div>
-            </div>
-          }
-        />
+            }
+          />
+          <span className="memoryRulesChevron" aria-hidden="true">
+            <ChevronDown size={14} />
+          </span>
+        </button>
       </div>
-      <div className="memoryRulesList">
-        {rules.length === 0 && <div className="memoryRulesEmpty">No rules yet. Click Add Rule.</div>}
-        {rules.map((rule, idx) => (
-          <div className="memoryRuleItem" key={rule.id}>
-            <div className="memoryRuleHead">
-              <div className="memoryRuleTitle">
-                {rule.writeMode === "word" ? "Word Write" : "Byte Write"}
-                {rule.useFormula ? " Formula" : ""}
+      {isRulesExpanded && (
+        <div
+          className="memoryRulesListWrap"
+          onMouseEnter={() => setIsRulesScrollbarVisible(true)}
+          onMouseLeave={() => setIsRulesScrollbarVisible(false)}
+        >
+          <div
+            ref={rulesListRef}
+            className="memoryRulesList"
+            id="memory-rules-list"
+            onScroll={updateRulesOverlayScrollbar}
+          >
+            {rules.length === 0 && <div className="memoryRulesEmpty">No rules yet. Click Add Rule.</div>}
+            {rules.map((rule, idx) => (
+              <div className="memoryRuleItem" key={rule.id}>
+                <div className="memoryRuleHead">
+                  <div className="memoryRuleMain">
+                    <div className="memoryRuleTitle">{formatWriteModeLabel(rule)}</div>
+                    <div className="memoryRuleSummary">{formatRuleSummary(rule)}</div>
+                  </div>
+                  <div className="memoryRuleActions">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="memoryRuleEdit"
+                      disabled={isRuntimeLocked}
+                      onClick={() => {
+                        setEditingRuleId(rule.id);
+                        setIsAddModalOpen(true);
+                      }}
+                      aria-label={`Edit rule ${idx + 1}`}
+                    >
+                      <Pencil size={12} aria-hidden="true" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="memoryRuleDelete"
+                      disabled={isRuntimeLocked}
+                      onClick={() => removeRule(rule.id)}
+                      aria-label={`Remove rule ${idx + 1}`}
+                    >
+                      <Trash2 size={12} aria-hidden="true" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="memoryRuleDetails">
+                  <div className="memoryRuleMeta">{renderAddressViews(rule)}</div>
+                  <div className="memoryRuleValueLine">
+                    {rule.useFormula
+                      ? `Value ${rule.wordHex}`
+                      : `Value ${toHexCompact(parseSignedOrUnsigned32(rule.valueText, "Value"))}`}
+                  </div>
+                </div>
               </div>
-              <div className="memoryRuleActions">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="memoryRuleEdit"
-                  disabled={isRuntimeLocked}
-                  onClick={() => {
-                    setEditingRuleId(rule.id);
-                    setIsAddModalOpen(true);
-                  }}
-                  aria-label={`Edit rule ${idx + 1}`}
-                >
-                  <Pencil size={12} aria-hidden="true" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="memoryRuleDelete"
-                  disabled={isRuntimeLocked}
-                  onClick={() => removeRule(rule.id)}
-                  aria-label={`Remove rule ${idx + 1}`}
-                >
-                  <Trash2 size={12} aria-hidden="true" />
-                </Button>
-              </div>
-            </div>
-            <div className="memoryRuleMeta">{formatAddressViews(rule)}</div>
-            <div className="memoryRuleValueLine">
-              {rule.useFormula
-                ? `Value formula ${rule.formulaText}`
-                : `Value ${toHexCompact(parseSignedOrUnsigned32(rule.valueText, "Value"))}`}
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
+          <div
+            className={`memoryRulesOverlayScrollbar${isRulesScrollbarVisible && hasRulesOverflow ? " isVisible" : ""}`}
+            aria-hidden="true"
+          >
+            <div
+              className="memoryRulesOverlayThumb"
+              style={{
+                height: `${rulesScrollbarThumbHeight}px`,
+                transform: `translateY(${rulesScrollbarThumbTop}px)`,
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="memorySectionDivider" aria-hidden="true" />
 

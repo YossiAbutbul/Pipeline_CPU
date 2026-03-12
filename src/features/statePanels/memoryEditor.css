@@ -41,18 +41,36 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   margin-bottom: 0;
+  line-height: 20px;
 }
 
 .memoryRulesHeaderRow {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 6px;
   line-height: 1;
+  padding: 0 4px;
+}
+
+.memoryRulesToggle {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  text-align: left;
+  cursor: var(--cursor-action);
 }
 
 .memoryRulesInfoTooltip {
-  position: relative;
-  top: 2px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .memoryRuntimeHeader {
@@ -62,11 +80,29 @@
   margin-bottom: 0;
 }
 
+.memoryRulesChevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  margin-left: auto;
+  transition: transform 160ms ease;
+}
+
+.memoryRulesChevron svg {
+  transform: translateY(1px);
+}
+
+.memoryRulesToggle[aria-expanded="true"] .memoryRulesChevron {
+  transform: rotate(180deg);
+}
+
 .memoryRuntimeHeaderRowWrap {
   display: flex;
   align-items: baseline;
   gap: 6px;
   line-height: 1;
+  padding: 0 4px;
 }
 
 .memoryRulesInfoTooltip .tooltipTrigger {
@@ -80,6 +116,7 @@
   box-shadow: none;
   color: var(--muted);
   vertical-align: middle;
+  transform: translateY(1px);
 }
 
 .memoryRulesInfoTooltip .tooltipContent {
@@ -98,10 +135,10 @@
   color: var(--register-tooltip-title);
   box-shadow: var(--shadow);
   overflow: visible;
-  transform:
-    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
-    scale(0.9);
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
   transform-origin: top center;
   transition:
     opacity 200ms ease-out,
@@ -151,18 +188,18 @@
 
 .memoryRulesInfoTooltip .tooltipAlign-end {
   --tooltip-arrow-offset: calc(100% - 22px - var(--tooltip-shift-x, 0px));
-  transform:
-    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
-    scale(0.9);
+  transform: translateX(
+      calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .memoryRulesInfoTooltip.tooltipVisible .tooltipContent,
 .memoryRulesInfoTooltip .tooltipOpen {
-  transform:
-    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(var(--tooltip-shift-y, 0px))
-    scale(1);
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(var(--tooltip-shift-y, 0px)) scale(1);
   transition:
     opacity 200ms ease-out,
     transform 200ms ease-out,
@@ -171,48 +208,48 @@
 
 .memoryRulesInfoTooltip.tooltipVisible .tooltipAlign-end,
 .memoryRulesInfoTooltip .tooltipOpen.tooltipAlign-end {
-  transform:
-    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(var(--tooltip-shift-y, 0px))
-    scale(1);
+  transform: translateX(
+      calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(var(--tooltip-shift-y, 0px)) scale(1);
 }
 
 .memoryRulesInfoTooltip.tooltipClosing .tooltipContent {
-  transform:
-    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
-    scale(0.9);
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .memoryRulesInfoTooltip.tooltipClosing .tooltipAlign-end {
-  transform:
-    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
-    scale(0.9);
+  transform: translateX(
+      calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .memoryRulesInfoTooltip.tooltipVisible .tooltipPlace-top,
 .memoryRulesInfoTooltip .tooltipOpen.tooltipPlace-top {
-  transform:
-    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(var(--tooltip-shift-y, 0px))
-    scale(1);
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(var(--tooltip-shift-y, 0px)) scale(1);
 }
 
 .memoryRulesInfoTooltip.tooltipVisible .tooltipPlace-top.tooltipAlign-end,
 .memoryRulesInfoTooltip .tooltipOpen.tooltipPlace-top.tooltipAlign-end {
-  transform:
-    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(var(--tooltip-shift-y, 0px))
-    scale(1);
+  transform: translateX(
+      calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(var(--tooltip-shift-y, 0px)) scale(1);
 }
 
 .memoryRulesInfoTooltip.tooltipClosing .tooltipPlace-top,
 .memoryRulesInfoTooltip.tooltipClosing .tooltipPlace-top.tooltipAlign-end {
-  transform:
-    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
-    scale(0.9);
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .memoryRulesTooltipPanel {
@@ -312,10 +349,10 @@
   color: var(--register-tooltip-title);
   box-shadow: var(--shadow);
   overflow: visible;
-  transform:
-    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
-    scale(0.9);
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
   transform-origin: top center;
   transition:
     opacity 200ms ease-out,
@@ -365,18 +402,18 @@
 
 .memoryRuntimeInfoTooltip .tooltipAlign-end {
   --tooltip-arrow-offset: calc(100% - 22px - var(--tooltip-shift-x, 0px));
-  transform:
-    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
-    scale(0.9);
+  transform: translateX(
+      calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .memoryRuntimeInfoTooltip.tooltipVisible .tooltipContent,
 .memoryRuntimeInfoTooltip .tooltipOpen {
-  transform:
-    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(var(--tooltip-shift-y, 0px))
-    scale(1);
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(var(--tooltip-shift-y, 0px)) scale(1);
   transition:
     opacity 200ms ease-out,
     transform 200ms ease-out,
@@ -385,48 +422,48 @@
 
 .memoryRuntimeInfoTooltip.tooltipVisible .tooltipAlign-end,
 .memoryRuntimeInfoTooltip .tooltipOpen.tooltipAlign-end {
-  transform:
-    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(var(--tooltip-shift-y, 0px))
-    scale(1);
+  transform: translateX(
+      calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(var(--tooltip-shift-y, 0px)) scale(1);
 }
 
 .memoryRuntimeInfoTooltip.tooltipClosing .tooltipContent {
-  transform:
-    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
-    scale(0.9);
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .memoryRuntimeInfoTooltip.tooltipClosing .tooltipAlign-end {
-  transform:
-    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
-    scale(0.9);
+  transform: translateX(
+      calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .memoryRuntimeInfoTooltip.tooltipVisible .tooltipPlace-top,
 .memoryRuntimeInfoTooltip .tooltipOpen.tooltipPlace-top {
-  transform:
-    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(var(--tooltip-shift-y, 0px))
-    scale(1);
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(var(--tooltip-shift-y, 0px)) scale(1);
 }
 
 .memoryRuntimeInfoTooltip.tooltipVisible .tooltipPlace-top.tooltipAlign-end,
 .memoryRuntimeInfoTooltip .tooltipOpen.tooltipPlace-top.tooltipAlign-end {
-  transform:
-    translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(var(--tooltip-shift-y, 0px))
-    scale(1);
+  transform: translateX(
+      calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(var(--tooltip-shift-y, 0px)) scale(1);
 }
 
 .memoryRuntimeInfoTooltip.tooltipClosing .tooltipPlace-top,
 .memoryRuntimeInfoTooltip.tooltipClosing .tooltipPlace-top.tooltipAlign-end {
-  transform:
-    translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
-    translateY(calc(10px + var(--tooltip-shift-y, 0px)))
-    scale(0.9);
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
+    translateY(calc(10px + var(--tooltip-shift-y, 0px))) scale(0.9);
 }
 
 .memoryRuntimeTooltipPanel {
@@ -567,10 +604,12 @@
   gap: 0;
   min-height: 0;
   overflow: hidden;
-  border: var(--border-1) solid color-mix(in oklab, var(--border) 82%, transparent);
+  border: var(--border-1) solid
+    color-mix(in oklab, var(--border) 82%, transparent);
   border-radius: calc(var(--radius) - 2px);
   background: color-mix(in oklab, var(--surface-1) 96%, var(--surface-2));
-  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--surface-1) 72%, transparent);
+  box-shadow: inset 0 1px 0
+    color-mix(in oklab, var(--surface-1) 72%, transparent);
 }
 
 .memoryRuntimeBodyWrap {
@@ -601,7 +640,8 @@
   align-items: center;
   min-height: 40px;
   background: color-mix(in oklab, var(--surface-2) 84%, var(--surface-1));
-  border-bottom: var(--border-1) solid color-mix(in oklab, var(--border) 76%, transparent);
+  border-bottom: var(--border-1) solid
+    color-mix(in oklab, var(--border) 76%, transparent);
   padding: 0 12px;
 }
 
@@ -619,7 +659,8 @@
   align-items: center;
   min-height: 46px;
   background: color-mix(in oklab, var(--surface-1) 97%, var(--surface-2));
-  border-bottom: var(--border-1) solid color-mix(in oklab, var(--border) 58%, transparent);
+  border-bottom: var(--border-1) solid
+    color-mix(in oklab, var(--border) 58%, transparent);
   padding: 0 12px;
   transition:
     background-color 160ms ease,
@@ -656,13 +697,28 @@
   color: var(--muted);
 }
 
+.memoryRulesListWrap {
+  position: relative;
+  min-height: 0;
+  padding: 0 4px;
+}
+
 .memoryRulesList {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
   min-height: 0;
-  max-height: 240px;
+  max-height: 195px;
   overflow: auto;
+  overflow-x: hidden;
+  padding-right: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.memoryRulesList::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .memoryRulesEmpty {
@@ -674,29 +730,125 @@
   padding: 12px;
 }
 
-.memoryOverlayScrollbar {
+.memoryRulesOverlayScrollbar {
   position: absolute;
-  top: 1px;
-  right: 0;
+  top: 2px;
+  right: 1px;
   bottom: 0;
-  width: 5px;
+  width: var(--scrollbar-size);
   pointer-events: none;
   opacity: 0;
-  transition: opacity 700ms ease;
+  border-radius: 999px;
+  background: var(--scrollbar-track);
+  transition: opacity var(--scrollbar-fade-duration) ease;
   z-index: 4;
+}
+
+.memoryRulesOverlayScrollbar::before,
+.memoryRulesOverlayScrollbar::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: calc(var(--scrollbar-arrow-size) / 2) solid transparent;
+  border-right: calc(var(--scrollbar-arrow-size) / 2) solid transparent;
+  opacity: 0.78;
+}
+
+.memoryRulesOverlayScrollbar::before {
+  top: 2px;
+  border-bottom: calc(var(--scrollbar-arrow-size) - 2px) solid
+    var(--scrollbar-arrow);
+}
+
+.memoryRulesOverlayScrollbar::after {
+  bottom: 2px;
+  border-top: calc(var(--scrollbar-arrow-size) - 2px) solid
+    var(--scrollbar-arrow);
+}
+
+.memoryRulesOverlayScrollbar.isVisible {
+  opacity: 1;
+  transition: opacity 160ms ease;
+}
+
+.memoryRulesOverlayThumb {
+  position: absolute;
+  inset-inline-start: 1px;
+  inline-size: 100%;
+  background-color: var(--scrollbar-thumb);
+  border-radius: 999px;
+  width: calc(var(--scrollbar-size) - 2px);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in oklab, var(--scrollbar-thumb-hover) 44%, transparent);
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.memoryRulesListWrap:hover .memoryRulesOverlayThumb {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+.memoryOverlayScrollbar {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  bottom: 0;
+  width: var(--scrollbar-size);
+  pointer-events: none;
+  opacity: 0;
+  border-radius: 999px;
+  background: var(--scrollbar-track);
+  box-shadow: inset 0 0 0 1px var(--scrollbar-track-border);
+  transition: opacity var(--scrollbar-fade-duration) ease;
+  z-index: 4;
+}
+
+.memoryOverlayScrollbar::before,
+.memoryOverlayScrollbar::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: calc(var(--scrollbar-arrow-size) / 2) solid transparent;
+  border-right: calc(var(--scrollbar-arrow-size) / 2) solid transparent;
+  opacity: 0.78;
+}
+
+.memoryOverlayScrollbar::before {
+  top: 2px;
+  border-bottom: calc(var(--scrollbar-arrow-size) - 2px) solid
+    var(--scrollbar-arrow);
+}
+
+.memoryOverlayScrollbar::after {
+  bottom: 2px;
+  border-top: calc(var(--scrollbar-arrow-size) - 2px) solid
+    var(--scrollbar-arrow);
 }
 
 .memoryOverlayScrollbar.isVisible {
   opacity: 1;
-  transition: opacity 180ms ease;
+  transition: opacity 160ms ease;
 }
 
 .memoryOverlayThumb {
   position: absolute;
-  inset-inline-start: 0;
+  inset-inline-start: 1px;
   inline-size: 100%;
   background-color: var(--scrollbar-thumb);
   border-radius: 999px;
+  width: calc(var(--scrollbar-size) - 2px);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in oklab, var(--scrollbar-thumb-hover) 44%, transparent);
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .memoryRuntimeBodyWrap:hover .memoryOverlayThumb {
@@ -706,11 +858,11 @@
 .memoryRuleItem {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 8px;
   border: var(--border-1) solid var(--border);
   border-radius: var(--radius);
   background: color-mix(in oklab, var(--surface-1) 90%, var(--surface-2));
-  padding: var(--space-2);
+  padding: 8px 10px;
   box-shadow: 0 1px 0 color-mix(in oklab, var(--border) 50%, transparent);
 }
 
@@ -718,49 +870,69 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-2);
+  gap: 8px;
+}
+
+.memoryRuleMain {
+  flex: 1;
+  min-width: 0;
 }
 
 .memoryRuleTitle {
   color: var(--text);
-  font-size: calc(var(--font-size-md) + 3px);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-ui);
+}
+
+.memoryRuleSummary {
+  display: none;
 }
 
 .memoryRuleActions {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+.memoryRuleDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .memoryRuleMeta {
-  color: var(--muted);
+  color: var(--text);
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
   line-height: var(--line-height-ui);
 }
 
 .memoryRuleValueLine {
-  color: var(--text);
+  color: var(--muted);
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
   line-height: var(--line-height-ui);
 }
 
 .memoryRuleDelete {
-  min-width: 36px;
-  width: 36px;
-  min-height: 36px;
-  height: 36px;
+  min-width: 30px;
+  width: 30px;
+  min-height: 30px;
+  height: 30px;
   padding: 0;
-  border-radius: 8px;
+  border-radius: 7px;
+  color: #ff3b30;
 }
 
 .memoryRuleEdit {
-  min-width: 36px;
-  width: 36px;
-  min-height: 36px;
-  height: 36px;
+  min-width: 30px;
+  width: 30px;
+  min-height: 30px;
+  height: 30px;
   padding: 0;
-  border-radius: 8px;
+  border-radius: 7px;
 }
 
 .memoryRuleModal .modalHeader {

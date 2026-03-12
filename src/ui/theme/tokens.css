@@ -82,6 +82,19 @@
   /* Controls */
   --control-bg: #1a1d24;
   --control-hover: #242936;
+  --editor-surface: #171b21;
+  --editor-surface-border: #2a303b;
+  --input-surface: #1b1f26;
+  --input-surface-hover: #21252d;
+  --input-focus-ring: var(--border);
+  --button-border-subtle: color-mix(in oklab, var(--border) 42%, transparent);
+  --button-surface: var(--surface-1);
+  --button-surface-hover: #181c23;
+  --button-surface-active: #1e232b;
+  --button-ghost-hover: color-mix(in oklab, var(--surface-2) 82%, transparent);
+  --button-ghost-active: color-mix(in oklab, var(--surface-3) 78%, transparent);
+  --button-primary-hover: color-mix(in oklab, var(--accent) 88%, white);
+  --button-primary-active: color-mix(in oklab, var(--accent) 78%, black);
 
   /* Radius / motion */
   --radius: 12px;
@@ -100,9 +113,14 @@
   --switch-thumb-active: var(--accent);
 
   /* Scroll Bar */
-  --scrollbar-track: transparent;
-  --scrollbar-thumb: #2f3440;
-  --scrollbar-thumb-hover: #3a404d;
+  --scrollbar-size: 8px;
+  --scrollbar-arrow-size: 9px;
+  --scrollbar-fade-duration: 220ms;
+  --scrollbar-track: color-mix(in oklab, var(--surface-2) 78%, transparent);
+  --scrollbar-track-border: color-mix(in oklab, var(--border) 68%, transparent);
+  --scrollbar-thumb: #3a404d;
+  --scrollbar-thumb-hover: #4a5260;
+  --scrollbar-arrow: color-mix(in oklab, var(--muted) 78%, var(--text));
 
   /* CPU Diagram */
   --dp: #b3b3b3; /* data paths border and text color */
@@ -136,10 +154,22 @@
     color-mix(in oklab, #a78bfa 16%, var(--surface-1)) 100%
   );
   --register-tooltip-card-code: color-mix(in oklab, #60a5fa 78%, var(--text));
-  --register-tooltip-card-text: color-mix(in oklab, var(--text) 72%, var(--muted));
+  --register-tooltip-card-text: color-mix(
+    in oklab,
+    var(--text) 72%,
+    var(--muted)
+  );
   --register-tooltip-footer: var(--muted);
-  --register-tooltip-chip-bg: color-mix(in oklab, var(--surface-3) 78%, var(--surface-2));
-  --register-tooltip-chip-fg: color-mix(in oklab, var(--text) 86%, var(--muted));
+  --register-tooltip-chip-bg: color-mix(
+    in oklab,
+    var(--surface-3) 78%,
+    var(--surface-2)
+  );
+  --register-tooltip-chip-fg: color-mix(
+    in oklab,
+    var(--text) 86%,
+    var(--muted)
+  );
 }
 
 /* -----------------------------
@@ -170,6 +200,19 @@
   /* Controls */
   --control-bg: var(--surface-2);
   --control-hover: #e6e2d8;
+  --editor-surface: #f3f3f3;
+  --editor-surface-border: #d9d5ca;
+  --input-surface: #f3f3f3;
+  --input-surface-hover: #ececec;
+  --input-focus-ring: var(--border);
+  --button-border-subtle: color-mix(in oklab, var(--border) 44%, transparent);
+  --button-surface: var(--surface-1);
+  --button-surface-hover: #f5f6f8;
+  --button-surface-active: #eceff3;
+  --button-ghost-hover: color-mix(in oklab, var(--surface-2) 88%, transparent);
+  --button-ghost-active: color-mix(in oklab, var(--border) 18%, var(--surface-2));
+  --button-primary-hover: color-mix(in oklab, var(--accent) 88%, white);
+  --button-primary-active: color-mix(in oklab, var(--accent) 78%, black);
 
   /* Toggle Switch */
   --switch-track: var(--surface-3);
@@ -177,9 +220,14 @@
   --switch-thumb-active: var(--accent);
 
   /* Scroll Bar */
-  --scrollbar-track: transparent;
-  --scrollbar-thumb: #c7c3b9;
-  --scrollbar-thumb-hover: #b6b2a8;
+  --scrollbar-size: 8px;
+  --scrollbar-arrow-size: 9px;
+  --scrollbar-fade-duration: 220ms;
+  --scrollbar-track: color-mix(in oklab, var(--surface-2) 82%, transparent);
+  --scrollbar-track-border: color-mix(in oklab, var(--border) 72%, transparent);
+  --scrollbar-thumb: #c5cbd6;
+  --scrollbar-thumb-hover: #b0b8c5;
+  --scrollbar-arrow: color-mix(in oklab, var(--muted) 72%, var(--text));
 
   /* CPU Diagram */
   --dp: #16181d; /* data paths border and text color */
