@@ -419,7 +419,7 @@
 
 .programSettingInlineLabel {
   color: var(--register-tooltip-title);
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   line-height: 1.2;
 }

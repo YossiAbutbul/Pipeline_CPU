@@ -10,6 +10,7 @@
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;
+  --font-weight-large: 600;
 
   --line-height-ui: 1.35;
 
@@ -198,6 +199,10 @@
 
   --trash-icon-color: #dc2626;
   --trash-icon-color-hover: #b91c1c;
+  --memory-rule-edit-icon: color-mix(in oklab, var(--accent) 78%, var(--text));
+  --memory-rule-edit-hover-bg: color-mix(in oklab, var(--accent) 16%, transparent);
+  --memory-rule-delete-icon: #ff3b30;
+  --memory-rule-delete-hover-bg: color-mix(in oklab, #ff3b30 16%, transparent);
 
   /* Register formula tooltip */
   --register-tooltip-bg: var(--surface-1);
