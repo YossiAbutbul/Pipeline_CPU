@@ -210,28 +210,58 @@
 }
 
 .pipelineHoverTooltip .tooltipContent {
-  min-width: 165px;
+  --tooltip-panel-bg: var(--register-tooltip-bg);
+  --tooltip-panel-border: var(--register-tooltip-border);
+  --tooltip-arrow-offset: 50%;
+  min-width: 0;
+  width: max-content;
+  max-width: min(240px, calc(100vw - 24px));
+  top: auto;
+  bottom: calc(100% + 8px);
+  padding: 9px 11px;
+  border: 1px solid var(--tooltip-panel-border);
+  border-radius: var(--tooltip-panel-radius);
+  background: var(--tooltip-panel-bg);
+  color: var(--register-tooltip-title);
+  box-shadow: var(--shadow);
   pointer-events: none;
+  overflow: visible;
+  transform-origin: bottom center;
+}
+
+.pipelineHoverTooltip .tooltipBody {
+  overflow: visible;
+  max-height: none;
+  padding-right: 0;
+}
+
+.pipelineHoverTooltip .tooltipContent::before,
+.pipelineHoverTooltip .tooltipContent::after {
+  display: none;
 }
 
 .pipelineTooltipBody {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
-.pipelineTooltipLabel {
-  color: var(--muted);
+.pipelineTooltipHeader {
+  color: var(--register-tooltip-title);
   font-size: var(--tooltip-caption-size);
-  letter-spacing: 0.02em;
+  font-weight: 600;
+  line-height: 1.2;
 }
 
-.pipelineTooltipValue {
-  color: var(--text);
+.pipelineTooltipContent {
+  color: var(--muted);
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New",
     monospace;
   font-size: var(--tooltip-body-size);
+  line-height: 1.3;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .pipelineStepHintTooltip .tooltipContent {

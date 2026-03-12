@@ -385,8 +385,8 @@ export default function PipelineCanvas({
                     ariaLabel={`${hoverTooltip.label} value`}
                     content={
                       <div className="pipelineTooltipBody">
-                        <div className="pipelineTooltipLabel">{hoverTooltip.label}</div>
-                        <div className="pipelineTooltipValue">{hoverTooltip.value}</div>
+                        <div className="pipelineTooltipHeader">{hoverTooltip.label}</div>
+                        <div className="pipelineTooltipContent">{hoverTooltip.value}</div>
                       </div>
                     }
                   />
