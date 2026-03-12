@@ -42,14 +42,12 @@
   width: 100%;
   max-width: 180px;
   min-width: 0;
-  padding-right: 38px;
   border: var(--border-1) solid
     color-mix(in oklab, var(--border) 88%, transparent);
   background: color-mix(in oklab, var(--surface-1) 72%, var(--surface-2));
 }
 
 .registerFormulaInputWrap {
-  position: relative;
   width: 100%;
   max-width: 180px;
   min-width: 0;
@@ -57,15 +55,17 @@
 }
 
 .registerFormulaHelp {
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
+  position: relative;
+  top: 1px;
+  flex: 0 0 auto;
 }
 
 .registerFormulaHelp .tooltipTrigger {
   width: 18px;
   height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: transparent;
   border: none;
   box-shadow: none;
@@ -334,6 +334,8 @@
   box-shadow: none;
 }
 
+.registerFormulaInput:focus,
+.registerFormulaInput:focus-visible,
 .registerValueInput:focus,
 .registerValueInput:focus-visible {
   outline: none;
@@ -489,6 +491,7 @@
 .registerHeaderRow .registerHeaderCell:nth-child(3) {
   justify-self: start;
   text-align: left;
+  margin-left: 8px;
 }
 
 .registerRow {
@@ -590,7 +593,8 @@
     width: 100%;
   }
 
-  .registerFormulaInput {
-    flex: 1 1 140px;
+  .registerFormulaHelp {
+    top: 0;
+    align-self: center;
   }
 }

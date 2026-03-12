@@ -203,45 +203,45 @@ export default function RegisterEditor({
                 placeholder="num * 0x200"
                 spellCheck={false}
               />
-              <Tooltip
-                className="registerFormulaHelp registerFormulaTooltip"
-                ariaLabel="Formula format help"
-                align="end"
-                content={
-                  <div className="registerFormulaTooltipPanel">
-                    <div className="registerFormulaTooltipTitle">Available Formulas</div>
-                    <div className="registerFormulaTooltipList">
-                      <div className="registerFormulaTooltipCard">
-                        <code>num * 0x200</code>
-                        <div className="registerFormulaTooltipDescription">Multiply by hex value</div>
-                      </div>
-                      <div className="registerFormulaTooltipCard">
-                        <code>number + 100</code>
-                        <div className="registerFormulaTooltipDescription">Add constant</div>
-                      </div>
-                      <div className="registerFormulaTooltipCard">
-                        <code>index * 2</code>
-                        <div className="registerFormulaTooltipDescription">Double the index</div>
-                      </div>
-                      <div className="registerFormulaTooltipCard">
-                        <code>i % 10</code>
-                        <div className="registerFormulaTooltipDescription">Modulo operation</div>
-                      </div>
-                      <div className="registerFormulaTooltipCard">
-                        <code>num ** 2</code>
-                        <div className="registerFormulaTooltipDescription">Power operation</div>
-                      </div>
+            </div>
+            <Tooltip
+              className="registerFormulaHelp registerFormulaTooltip"
+              ariaLabel="Formula format help"
+              align="end"
+              content={
+                <div className="registerFormulaTooltipPanel">
+                  <div className="registerFormulaTooltipTitle">Available Formulas</div>
+                  <div className="registerFormulaTooltipList">
+                    <div className="registerFormulaTooltipCard">
+                      <code>num * 0x200</code>
+                      <div className="registerFormulaTooltipDescription">Multiply by hex value</div>
                     </div>
-                    <div className="registerFormulaTooltipFooter">
-                      Use variables:{" "}
-                      <span className="registerFormulaTooltipFooterItems">
-                        <code>num</code>, <code>number</code>, <code>index</code>, or <code>i</code>
-                      </span>
+                    <div className="registerFormulaTooltipCard">
+                      <code>number + 100</code>
+                      <div className="registerFormulaTooltipDescription">Add constant</div>
+                    </div>
+                    <div className="registerFormulaTooltipCard">
+                      <code>index * 2</code>
+                      <div className="registerFormulaTooltipDescription">Double the index</div>
+                    </div>
+                    <div className="registerFormulaTooltipCard">
+                      <code>i % 10</code>
+                      <div className="registerFormulaTooltipDescription">Modulo operation</div>
+                    </div>
+                    <div className="registerFormulaTooltipCard">
+                      <code>num ** 2</code>
+                      <div className="registerFormulaTooltipDescription">Power operation</div>
                     </div>
                   </div>
-                }
-              />
-            </div>
+                  <div className="registerFormulaTooltipFooter">
+                    Use variables:{" "}
+                    <span className="registerFormulaTooltipFooterItems">
+                      <code>num</code>, <code>number</code>, <code>index</code>, or <code>i</code>
+                    </span>
+                  </div>
+                </div>
+              }
+            />
             <div className="registerFormulaActions">
               <Button size="sm" className="registerActionBtn" onClick={applyFormula}>
                 Apply

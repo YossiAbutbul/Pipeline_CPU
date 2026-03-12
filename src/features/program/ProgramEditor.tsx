@@ -1,4 +1,4 @@
-import { Button, Panel, SettingsPanel } from "@/ui/components";
+import { Button, Panel, SettingsPanel, Tooltip } from "@/ui/components";
 import { MipsMonaco } from "@/ui/components/MipsMonaco";
 import "@/ui/components/ThemeToggle/themeToggle.css";
 import { useTheme } from "@/ui/theme/ThemeProvider";
@@ -116,6 +116,29 @@ export default function ProgramEditor({
               spellCheck={false}
               autoComplete="off"
               aria-label="Initial PC"
+            />
+            <Tooltip
+              className="initialPcHelp initialPcTooltip"
+              ariaLabel="Initial PC format help"
+              align="end"
+              content={
+                <div className="initialPcTooltipPanel">
+                  <div className="initialPcTooltipTitle">Initial PC</div>
+                  <div className="initialPcTooltipList">
+                    <div className="initialPcTooltipCard">
+                      <code>0x00400000</code>
+                      <div className="initialPcTooltipDescription">Start execution from a hex address</div>
+                    </div>
+                    <div className="initialPcTooltipCard">
+                      <code>4194304</code>
+                      <div className="initialPcTooltipDescription">Decimal values work too</div>
+                    </div>
+                  </div>
+                  <div className="initialPcTooltipFooter">
+                    Use the address of the first instruction you want the simulator to fetch.
+                  </div>
+                </div>
+              }
             />
           </div>
         </div>
