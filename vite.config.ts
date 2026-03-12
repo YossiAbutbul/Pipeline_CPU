@@ -4,6 +4,7 @@ import path from "node:path";
 import svgr from "vite-plugin-svgr";
 
 export default defineConfig({
+  base: "/Pipeline_CPU/",
   plugins: [
     react(),
     svgr(),
