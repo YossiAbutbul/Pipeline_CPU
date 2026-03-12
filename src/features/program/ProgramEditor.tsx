@@ -141,8 +141,8 @@ export default function ProgramEditor({
             variant="secondary"
             className="clearProgramButton"
             onClick={handleClearProgram}
-            aria-label="Reset editor text"
-            title="Reset editor text"
+            aria-label="Delete editor text"
+            title="Delete editor text"
           >
             <Trash2 size={16} aria-hidden="true" className="clearProgramIcon" />
           </Button>
