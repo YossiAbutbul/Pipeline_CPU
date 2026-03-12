@@ -1,0 +1,115 @@
+.settingsPanel {
+  --settings-panel-bg: var(--register-tooltip-bg);
+  --settings-panel-border: var(--register-tooltip-border);
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 50;
+  width: min(100vw - 32px, 258px);
+  border: 1px solid var(--settings-panel-border);
+  border-radius: 8px;
+  background: var(--settings-panel-bg);
+  color: var(--register-tooltip-title);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transform: translateY(0) scale(1);
+  transform-origin: top right;
+  animation: settingsPanelIn 200ms ease-out;
+}
+
+.settingsPanel::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  right: 18px;
+  width: 16px;
+  height: 16px;
+  border-top: 1px solid var(--settings-panel-border);
+  border-left: 1px solid var(--settings-panel-border);
+  border-radius: 2px 0 0 0;
+  background: var(--settings-panel-bg);
+  transform: rotate(45deg);
+}
+
+.settingsPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 16px 8px;
+}
+
+.settingsPanelTitle {
+  margin: 0;
+  color: var(--register-tooltip-title);
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateX(-10px);
+  animation: settingsPanelItemIn 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 40ms;
+}
+
+.settingsPanelCloseButton {
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--register-tooltip-footer);
+  cursor: var(--cursor-action);
+  opacity: 0;
+  transform: translateX(-10px);
+  animation: settingsPanelItemIn 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 60ms;
+}
+
+.settingsPanelCloseButton:hover {
+  border-color: color-mix(
+    in oklab,
+    var(--settings-panel-border) 54%,
+    transparent
+  );
+  background: color-mix(
+    in oklab,
+    var(--register-tooltip-card-bg) 52%,
+    transparent
+  );
+  color: var(--register-tooltip-title);
+}
+
+.settingsPanelBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0 16px 14px;
+}
+
+@keyframes settingsPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes settingsPanelItemIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

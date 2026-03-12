@@ -1,42 +1,95 @@
+.programPanel .panelHeader {
+  padding: 24px 24px 14px;
+  align-items: center;
+  gap: 12px;
+}
+
+.programPanel .panelTitle {
+  padding: 0;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.programPanel .panelToolbar {
+  margin-left: auto;
+  gap: 8px;
+  position: relative;
+}
+
+.programPanel .panelBody {
+  padding: 0;
+}
+
 .programLayout {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
   height: 100%;
   min-height: 0;
 }
 
-/* Editor container */
-.programEditorBox {
-  height: var(--program-editor-height);
-  min-height: var(--program-editor-min-height);
-  max-height: var(--program-editor-max-height);
+.programTopSection {
+  padding: 12px 24px 24px;
+}
 
+/* Editor container */
+.programEditorSection {
+  flex: 1;
+  min-height: 0;
+  margin: 0 20px 20px;
   border: var(--border-1) solid var(--border);
   border-radius: var(--radius);
-
   background: var(--surface-1);
-
   overflow: hidden; /* keeps Monaco inside rounded border */
 }
 
 /* Monaco fills container */
-.programEditorBox > div {
+.programEditorSection > div {
   height: 100%;
 }
 
 /* Controls */
-.programControls {
+.programControlsSection {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--space-2);
+  gap: 8px;
+  padding: 16px 24px;
+  margin-bottom: 24px;
+  border-top: var(--border-1) solid
+    color-mix(in oklab, var(--border) 78%, transparent);
+  border-bottom: var(--border-1) solid
+    color-mix(in oklab, var(--border) 78%, transparent);
+}
+
+.programToolbarButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  padding-inline: 12px;
+  white-space: nowrap;
+}
+
+.programToolbarIconButton {
+  width: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.programSettingsAnchor {
+  position: relative;
+  display: inline-flex;
 }
 
 .programActions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-2);
+  gap: 8px;
 }
 
 .programActionButton {
@@ -55,18 +108,19 @@
 .initialPcRow {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: var(--space-1) 0;
+  gap: 12px;
 }
 
 .initialPcLabel {
   color: var(--text);
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-medium);
+  flex: 0 0 auto;
 }
 
 .initialPcInput {
   flex: 1 1 auto;
+  max-width: none;
   height: 36px;
   border: var(--border-1) solid
     color-mix(in oklab, var(--border) 88%, transparent);
@@ -89,14 +143,72 @@
   box-shadow: none;
 }
 
-.programFooter {
-  margin-top: auto;
-  padding-top: var(--space-2);
-  border-top: var(--border-1) solid var(--border);
+.programSettingRow {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: var(--space-2);
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-top: 1px solid var(--register-tooltip-border);
+  padding: 14px 0 2px;
+  opacity: 0;
+  transform: translateX(-10px);
+  animation: settingsPanelItemIn 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 140ms;
+}
+
+.programSettingRow .switch {
+  width: 40px;
+  height: 22px;
+}
+
+.programSettingRow .switchThumb {
+  width: 16px;
+  height: 16px;
+  left: 3px;
+}
+
+.programSettingRow .switchOn .switchThumb {
+  left: 19px;
+}
+
+.programSettingInlineLabel {
+  color: var(--register-tooltip-title);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+}
+
+.programResetDbugButton {
+  width: 100%;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid
+    color-mix(in oklab, var(--register-tooltip-border) 88%, transparent);
+  border-radius: 10px;
+  background: var(--register-tooltip-card-bg);
+  color: var(--register-tooltip-title);
+  font: inherit;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  cursor: var(--cursor-action);
+  box-shadow: inset 0 0 0 2px
+    color-mix(in oklab, var(--register-tooltip-border) 18%, transparent);
+  opacity: 0;
+  transform: translateX(-10px);
+  animation: settingsPanelItemIn 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 90ms;
+  margin-top: 4px;
+  margin-bottom: 10px;
+}
+
+.programResetDbugButton:hover {
+  background: color-mix(
+    in oklab,
+    var(--register-tooltip-card-bg) 78%,
+    var(--surface-1)
+  );
 }
 
 .clearProgramButton {
@@ -131,70 +243,70 @@
 /* Thin themed scrollbar     */
 /* ========================= */
 
-.programEditorBox * {
+.programEditorSection * {
   scrollbar-width: thin; /* Firefox */
   scrollbar-color: var(--border) transparent;
 }
 
 /* Chrome / Edge / Safari */
-.programEditorBox *::-webkit-scrollbar {
+.programEditorSection *::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
-.programEditorBox *::-webkit-scrollbar-track {
+.programEditorSection *::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.programEditorBox *::-webkit-scrollbar-thumb {
+.programEditorSection *::-webkit-scrollbar-thumb {
   background-color: var(--border);
   border-radius: 20px;
   background-clip: padding-box;
 }
 
-.programEditorBox *::-webkit-scrollbar-thumb:hover {
+.programEditorSection *::-webkit-scrollbar-thumb:hover {
   background-color: var(--text-muted);
 }
 
-.programEditorBox .monaco-editor .scrollbar .slider:hover {
+.programEditorSection .monaco-editor .scrollbar .slider:hover {
   background: var(--text-muted);
 }
 
-.programEditorBox .monaco-editor .scrollbar.vertical {
+.programEditorSection .monaco-editor .scrollbar.vertical {
   width: 6px !important;
 }
 
-.programEditorBox .monaco-editor .current-line {
+.programEditorSection .monaco-editor .current-line {
   background: color-mix(in oklab, var(--surface-2) 80%, transparent);
   border: none !important;
 }
 
-.programEditorBox .monaco-editor .margin .current-line {
+.programEditorSection .monaco-editor .margin .current-line {
   background: color-mix(in oklab, var(--surface-2) 80%, transparent);
 }
 
 /* ===== Code Editor Style ===== */
-.programEditorBox .monaco-editor .view-overlays .current-line {
+.programEditorSection .monaco-editor .view-overlays .current-line {
   background: color-mix(in oklab, var(--surface-2) 65%, transparent) !important;
   border: none !important;
 }
-.programEditorBox .monaco-editor .margin .current-line {
+.programEditorSection .monaco-editor .margin .current-line {
   background: color-mix(in oklab, var(--surface-2) 65%, transparent) !important;
   border: none !important;
 }
 
 /* ===== Rounded  Monaco scrollbar slider ===== */
-.programEditorBox .monaco-editor .scrollbar .slider {
+.programEditorSection .monaco-editor .scrollbar .slider {
   border-radius: 999px !important;
 }
 
 /* On Hover effect */
-.programEditorBox .monaco-editor .scrollbar .slider:hover {
+.programEditorSection .monaco-editor .scrollbar .slider:hover {
   background: color-mix(in oklab, var(--text) 22%, transparent) !important;
 }
 
 /* ===== line-number padding a bit ===== */
-.programEditorBox .monaco-editor .margin .line-numbers {
+.programEditorSection .monaco-editor .margin .line-numbers {
   padding-left: 6px !important;
   padding-right: 6px !important;
   opacity: 0.75;
