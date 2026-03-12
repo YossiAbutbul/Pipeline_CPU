@@ -1,6 +1,7 @@
 export { Button } from "./Button/Button";
 export { NotificationToast } from "./NotificationToast/NotificationToast";
 export { Panel } from "./Panel/Panel";
+export { SettingsPanel } from "./SettingsPanel/SettingsPanel";
 export { Tabs } from "./Tabs/Tabs";
 export { ThemeToggle } from "./ThemeToggle/ThemeToggle";
 export { Tooltip } from "./Tooltip/Tooltip";

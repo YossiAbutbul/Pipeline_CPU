@@ -1,7 +1,9 @@
-import { Button, Panel, ThemeToggle } from "@/ui/components";
+import { Button, Panel, SettingsPanel } from "@/ui/components";
 import { MipsMonaco } from "@/ui/components/MipsMonaco";
+import "@/ui/components/ThemeToggle/themeToggle.css";
 import { useTheme } from "@/ui/theme/ThemeProvider";
-import { Play, RotateCcw, Square, Trash2 } from "lucide-react";
+import { Play, Plus, RotateCcw, Settings, Square, Trash2 } from "lucide-react";
+import { useState } from "react";
 import "./programEditor.css";
 
 const DEFAULT_PROGRAM = "# Write MIPS here...\n";
@@ -29,7 +31,8 @@ export default function ProgramEditor({
   onInitialPcChange,
   onResetPersistedData,
 }: Props) {
-  const { themeMode } = useTheme();
+  const { theme, themeMode, toggleTheme } = useTheme();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleClearProgram = () => {
     onProgramChange(DEFAULT_PROGRAM);
@@ -39,35 +42,85 @@ export default function ProgramEditor({
   return (
     <Panel
       title="Program"
+      className="programPanel"
       headerSize="lg"
       toolbar={
         <>
-          <Button size="sm">Load</Button>
-          {import.meta.env.DEV && (
-            <Button size="sm" variant="secondary" onClick={onResetPersistedData}>
-              Reset Dbug
+          <Button size="sm" className="programToolbarButton">
+            <Plus size={14} aria-hidden="true" />
+            Add Component
+          </Button>
+          <div
+            className="programSettingsAnchor"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              className="programToolbarIconButton"
+              onClick={() => setIsSettingsOpen((prev) => !prev)}
+              aria-label="Open settings"
+              title="Settings"
+              aria-expanded={isSettingsOpen}
+            >
+              <Settings size={14} aria-hidden="true" />
             </Button>
-          )}
+            <SettingsPanel
+              open={isSettingsOpen}
+              title="Settings"
+              onClose={() => setIsSettingsOpen(false)}
+            >
+              <button
+                type="button"
+                className="programResetDbugButton"
+                onClick={() => {
+                  onResetPersistedData();
+                  setIsSettingsOpen(false);
+                }}
+              >
+                <RotateCcw size={14} aria-hidden="true" />
+                Reset Dbug
+              </button>
+
+              <div className="programSettingRow">
+                <span className="programSettingInlineLabel">Light Mode</span>
+                <button
+                  type="button"
+                  className={`switch ${theme === "dark" ? "switchOn" : "switchOff"}`}
+                  role="switch"
+                  aria-checked={theme === "dark"}
+                  aria-label="Toggle color mode"
+                  onClick={toggleTheme}
+                >
+                  <span className="switchThumb" />
+                </button>
+              </div>
+            </SettingsPanel>
+          </div>
         </>
       }
     >
       <div className="programLayout">
-        <div className="initialPcRow">
-          <label htmlFor="initialPc" className="initialPcLabel">
-            Initial PC:
-          </label>
-          <input
-            id="initialPc"
-            type="text"
-            className="initialPcInput"
-            value={initialPc}
-            onChange={(event) => onInitialPcChange(event.target.value)}
-            spellCheck={false}
-            autoComplete="off"
-            aria-label="Initial PC"
-          />
+        <div className="programTopSection">
+          <div className="initialPcRow">
+            <label htmlFor="initialPc" className="initialPcLabel">
+              Initial PC:
+            </label>
+            <input
+              id="initialPc"
+              type="text"
+              className="initialPcInput"
+              value={initialPc}
+              onChange={(event) => onInitialPcChange(event.target.value)}
+              spellCheck={false}
+              autoComplete="off"
+              aria-label="Initial PC"
+            />
+          </div>
         </div>
-        <div className="programControls">
+
+        <div className="programControlsSection">
           <div className="programActions">
             <Button
               onClick={isRunActive ? onStop : onRun}
@@ -95,12 +148,8 @@ export default function ProgramEditor({
           </Button>
         </div>
 
-        <div className="programEditorBox">
+        <div className="programEditorSection">
           <MipsMonaco value={program} onChange={onProgramChange} themeMode={themeMode} height="100%" />
-        </div>
-
-        <div className="programFooter">
-          <ThemeToggle label={themeMode === "dark" ? "Dark Mode" : "Light Mode"} />
         </div>
       </div>
     </Panel>
