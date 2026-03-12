@@ -2,6 +2,7 @@ import { Button, GuidedTourTooltip, Panel, SettingsPanel, Tooltip } from "@/ui/c
 import { MipsMonaco } from "@/ui/components/MipsMonaco";
 import "@/ui/components/ThemeToggle/themeToggle.css";
 import { useTheme } from "@/ui/theme/ThemeProvider";
+import { AddComponentPanel } from "@/features/components/AddComponentPanel";
 import { Play, Plus, RotateCcw, Settings, Square, Trash2 } from "lucide-react";
 import { useState } from "react";
 import "./programEditor.css";
@@ -46,6 +47,7 @@ export default function ProgramEditor({
   onDismissRunTour,
 }: Props) {
   const { theme, themeMode, toggleTheme } = useTheme();
+  const [isAddComponentOpen, setIsAddComponentOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleClearProgram = () => {
@@ -56,14 +58,32 @@ export default function ProgramEditor({
   return (
     <Panel
       title="Program"
-      className="programPanel"
+      className="programPanel panelOverflowVisible"
+      bodyClassName="panelBodyVisible"
       headerSize="lg"
       toolbar={
         <>
-          <Button size="sm" className="programToolbarButton">
-            <Plus size={14} aria-hidden="true" />
-            Add Component
-          </Button>
+          <div
+            className="programAddComponentAnchor"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <Button
+              type="button"
+              size="sm"
+              className="programToolbarButton"
+              onClick={() => {
+                setIsAddComponentOpen((prev) => !prev);
+                setIsSettingsOpen(false);
+              }}
+              aria-expanded={isAddComponentOpen}
+            >
+              <Plus size={14} aria-hidden="true" />
+              Add Component
+            </Button>
+            {isAddComponentOpen ? (
+              <AddComponentPanel onClose={() => setIsAddComponentOpen(false)} />
+            ) : null}
+          </div>
           <div
             className="programSettingsAnchor"
             onMouseDown={(event) => event.stopPropagation()}
@@ -73,7 +93,10 @@ export default function ProgramEditor({
               size="sm"
               variant="secondary"
               className="programToolbarIconButton"
-              onClick={() => setIsSettingsOpen((prev) => !prev)}
+              onClick={() => {
+                setIsSettingsOpen((prev) => !prev);
+                setIsAddComponentOpen(false);
+              }}
               aria-label="Open settings"
               title="Settings"
               aria-expanded={isSettingsOpen}

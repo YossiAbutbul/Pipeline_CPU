@@ -70,3 +70,8 @@
   overflow: visible;
   z-index: 20;
 }
+
+.leftPane {
+  overflow: visible;
+  z-index: 20;
+}

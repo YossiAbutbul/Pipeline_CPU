@@ -6,6 +6,7 @@ type Props = {
   open: boolean;
   title: string;
   className?: string;
+  closeLabel?: string;
   children: React.ReactNode;
   onClose: () => void;
 };
@@ -14,6 +15,7 @@ export function SettingsPanel({
   open,
   title,
   className = "",
+  closeLabel,
   children,
   onClose,
 }: Props) {
@@ -69,7 +71,7 @@ export function SettingsPanel({
         <button
           type="button"
           className="settingsPanelCloseButton"
-          aria-label="Close settings"
+          aria-label={closeLabel ?? `Close ${title.toLowerCase()}`}
           onClick={onClose}
         >
           <X size={18} aria-hidden="true" />
