@@ -1,5 +1,5 @@
 import type * as Monaco from "monaco-editor";
-import { INSTRUCTION_DOCS, REG_INFO } from "./mipsData";
+import { getRegisterInfo, INSTRUCTION_DOCS } from "./mipsData";
 
 export function registerMipsHover(monaco: typeof Monaco): Monaco.IDisposable {
   return monaco.languages.registerHoverProvider("mips", {
@@ -14,8 +14,12 @@ export function registerMipsHover(monaco: typeof Monaco): Monaco.IDisposable {
       const wordStartIdx = word.startColumn - 1; // 0-based
       const hasDollar = wordStartIdx > 0 && line[wordStartIdx - 1] === "$";
 
-      if (hasDollar && REG_INFO[text]) {
-        const info = REG_INFO[text];
+      if (hasDollar) {
+        const info = getRegisterInfo(text);
+        if (!info) {
+          return null;
+        }
+
         return {
           range: new monaco.Range(
             position.lineNumber,
@@ -24,7 +28,7 @@ export function registerMipsHover(monaco: typeof Monaco): Monaco.IDisposable {
             word.endColumn
           ),
           contents: [
-            { value: `### \`${"$" + text}\`  \`(r${info.num})\`` },
+            { value: `### \`${"$" + text}\`  \`(r${info.num} / $${info.alias})\`` },
             { value: `${info.desc}` },
             { value: `---\n**Type:** Register` },
             ],
