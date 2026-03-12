@@ -35,7 +35,7 @@
 .programEditorSection {
   flex: 1;
   min-height: 0;
-  margin: 0 20px 20px;
+  margin: 0 14px 14px;
   border: none;
   border-radius: var(--radius);
   background: var(--editor-surface);
@@ -331,7 +331,8 @@
 
 .initialPcTooltip.tooltipVisible .initialPcTooltipCard,
 .initialPcTooltip .tooltipOpen .initialPcTooltipCard {
-  animation: initialPcTooltipCardIn 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: initialPcTooltipCardIn 260ms cubic-bezier(0.22, 1, 0.36, 1)
+    forwards;
 }
 
 .initialPcTooltip.tooltipVisible .initialPcTooltipCard:nth-child(1),
