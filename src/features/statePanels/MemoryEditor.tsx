@@ -1,6 +1,6 @@
 ﻿import type { MemoryRuleConfig, WriteMode } from "@/app/store/appStore";
 import type { ModalField } from "@/ui/components";
-import { Button, Modal } from "@/ui/components";
+import { Button, Modal, Tooltip } from "@/ui/components";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { evaluateMemoryFormula, parseSignedOrUnsigned32, parseWordNumber, toHex32 } from "./memoryEditorModel";
@@ -298,8 +298,25 @@ export default function MemoryEditor({
         </Button>
       </div>
 
-      <div className="memoryRulesHeader">Rules ({rules.length})</div>
-      <div className="memoryRulesHelp">Rules initialize runtime memory when you press Run.</div>
+      <div className="memoryRulesHeaderRow">
+        <div className="memoryRulesHeader">Rules ({rules.length})</div>
+        <Tooltip
+          className="memoryRulesInfoTooltip"
+          ariaLabel="About memory rules"
+          align="end"
+          content={
+            <div className="memoryRulesTooltipPanel">
+              <div className="memoryRulesTooltipTitle">About Rules</div>
+              <div className="memoryRulesTooltipText">
+                Rules initialize runtime memory when you press Run.
+              </div>
+              <div className="memoryRulesTooltipFooter">
+                Click <code>Add Rule</code> to create your first rule.
+              </div>
+            </div>
+          }
+        />
+      </div>
       <div className="memoryRulesList">
         {rules.length === 0 && <div className="memoryRulesEmpty">No rules yet. Click Add Rule.</div>}
         {rules.map((rule, idx) => (
@@ -347,7 +364,41 @@ export default function MemoryEditor({
 
       <div className="memorySectionDivider" aria-hidden="true" />
 
-      <div className="memoryRuntimeHeader">Runtime Memory</div>
+      <div className="memoryRuntimeHeaderRowWrap">
+        <div className="memoryRuntimeHeader">Runtime Memory</div>
+        <Tooltip
+          className="memoryRuntimeInfoTooltip"
+          ariaLabel="About runtime memory"
+          align="end"
+          content={
+            <div className="memoryRuntimeTooltipPanel">
+              <div className="memoryRuntimeTooltipTitle">Runtime Memory</div>
+              <div className="memoryRuntimeTooltipText">
+                Shows live memory values during program execution.
+              </div>
+              <div className="memoryRuntimeTooltipList">
+                <div className="memoryRuntimeTooltipCard">
+                  <code>Word</code>
+                  <div className="memoryRuntimeTooltipDescription">
+                    Memory index or identifier
+                  </div>
+                </div>
+                <div className="memoryRuntimeTooltipCard">
+                  <code>Address</code>
+                  <div className="memoryRuntimeTooltipDescription">Memory location (hex)</div>
+                </div>
+                <div className="memoryRuntimeTooltipCard">
+                  <code>Value</code>
+                  <div className="memoryRuntimeTooltipDescription">Current data stored</div>
+                </div>
+              </div>
+              <div className="memoryRuntimeTooltipFooter">
+                Press <code>Run</code> and <code>Step</code> to populate values.
+              </div>
+            </div>
+          }
+        />
+      </div>
       <div className="memoryRuntimeList" role="table" aria-label="Runtime memory words">
         <div className="memoryRuntimeHeaderRow" role="row">
           <div className="memoryRuntimeHeaderCell" role="columnheader">

@@ -5,6 +5,11 @@
   height: 100%;
   background: var(--surface-1);
   overflow: hidden; /* header stays fixed, body handles overflow */
+  border-radius: var(--radius);
+}
+
+.panelOverflowVisible {
+  overflow: visible;
 }
 
 .panelHeader {
@@ -44,6 +49,10 @@
   min-height: 0;
   padding: var(--space-3);
   overflow: hidden;
+}
+
+.panelBodyVisible {
+  overflow: visible;
 }
 
 /* Header size variants */

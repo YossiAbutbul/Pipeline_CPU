@@ -42,7 +42,9 @@
   position: absolute;
   left: 50%;
   top: calc(100% + 8px);
-  transform: translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
     translateY(calc(-4px + var(--tooltip-shift-y, 0px)));
   min-width: 200px;
   max-width: min(280px, calc(100vw - 24px));
@@ -73,7 +75,7 @@
   content: "";
   position: absolute;
   left: var(--tooltip-arrow-offset);
-  transform: translateX(-50%);
+  transform: translateX(-35%);
   width: 0;
   height: 0;
   border-left: 8px solid transparent;
@@ -117,7 +119,11 @@
 }
 
 .tooltipContent-error {
-  --tooltip-panel-bg: color-mix(in oklab, var(--tooltip-error-bg) 28%, var(--surface-1));
+  --tooltip-panel-bg: color-mix(
+    in oklab,
+    var(--tooltip-error-bg) 28%,
+    var(--surface-1)
+  );
   --tooltip-panel-border: var(--tooltip-error-border);
   color: var(--text);
 }
@@ -145,7 +151,9 @@
 .tooltipAlign-start {
   left: 0;
   --tooltip-arrow-offset: 18px;
-  transform: translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+  transform: translateX(
+      calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
     translateY(calc(-4px + var(--tooltip-shift-y, 0px)));
 }
 
@@ -153,7 +161,9 @@
   left: auto;
   right: 0;
   --tooltip-arrow-offset: calc(100% - 18px);
-  transform: translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+  transform: translateX(
+      calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
     translateY(calc(-4px + var(--tooltip-shift-y, 0px)));
 }
 
@@ -161,7 +171,9 @@
   opacity: 1;
   pointer-events: auto;
   visibility: visible;
-  transform: translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
     translateY(var(--tooltip-shift-y, 0px));
   transition:
     opacity var(--dur-1),
@@ -171,7 +183,9 @@
 
 .tooltipVisible .tooltipAlign-start,
 .tooltipVisible .tooltipAlign-end {
-  transform: translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+  transform: translateX(
+      calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
     translateY(var(--tooltip-shift-y, 0px));
 }
 
@@ -179,7 +193,9 @@
   opacity: 1;
   pointer-events: auto;
   visibility: visible;
-  transform: translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
     translateY(var(--tooltip-shift-y, 0px));
   transition:
     opacity var(--dur-1),
@@ -189,20 +205,26 @@
 
 .tooltipOpen.tooltipAlign-start,
 .tooltipOpen.tooltipAlign-end {
-  transform: translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+  transform: translateX(
+      calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
     translateY(var(--tooltip-shift-y, 0px));
 }
 
 .tooltipClosing .tooltipContent {
   opacity: 0;
   pointer-events: none;
-  transform: translateX(calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+  transform: translateX(
+      calc(-50% + var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
     translateY(calc(-4px + var(--tooltip-shift-y, 0px)));
 }
 
 .tooltipClosing .tooltipAlign-start,
 .tooltipClosing .tooltipAlign-end {
-  transform: translateX(calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px)))
+  transform: translateX(
+      calc(var(--tooltip-bias-x) + var(--tooltip-shift-x, 0px))
+    )
     translateY(calc(-4px + var(--tooltip-shift-y, 0px)));
 }
 

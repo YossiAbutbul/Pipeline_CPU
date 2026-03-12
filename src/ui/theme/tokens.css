@@ -125,6 +125,21 @@
   --tooltip-success-bg: color-mix(in oklab, var(--ctrl) 90%, transparent);
   --tooltip-success-border: color-mix(in oklab, var(--ctrl) 72%, var(--border));
   /* --tooltip-success-fg: var(--text); */
+
+  /* Register formula tooltip */
+  --register-tooltip-bg: var(--surface-1);
+  --register-tooltip-border: color-mix(in oklab, var(--border) 88%, white 12%);
+  --register-tooltip-title: var(--text);
+  --register-tooltip-card-bg: linear-gradient(
+    90deg,
+    color-mix(in oklab, #60a5fa 14%, var(--surface-1)) 0%,
+    color-mix(in oklab, #a78bfa 16%, var(--surface-1)) 100%
+  );
+  --register-tooltip-card-code: color-mix(in oklab, #60a5fa 78%, var(--text));
+  --register-tooltip-card-text: color-mix(in oklab, var(--text) 72%, var(--muted));
+  --register-tooltip-footer: var(--muted);
+  --register-tooltip-chip-bg: color-mix(in oklab, var(--surface-3) 78%, var(--surface-2));
+  --register-tooltip-chip-fg: color-mix(in oklab, var(--text) 86%, var(--muted));
 }
 
 /* -----------------------------
@@ -187,4 +202,15 @@
   --tooltip-success-bg: color-mix(in oklab, var(--ctrl) 90%, transparent);
   --tooltip-success-border: color-mix(in oklab, var(--ctrl) 44%, var(--border));
   /* --tooltip-success-fg: color-mix(in oklab, var(--ctrl) 72%, var(--text)); */
+
+  /* Register formula tooltip */
+  --register-tooltip-bg: #ffffff;
+  --register-tooltip-border: #e5e7eb;
+  --register-tooltip-title: #111827;
+  --register-tooltip-card-bg: linear-gradient(90deg, #eff6ff 0%, #f5f3ff 100%);
+  --register-tooltip-card-code: #1d4ed8;
+  --register-tooltip-card-text: #4b5563;
+  --register-tooltip-footer: #6b7280;
+  --register-tooltip-chip-bg: #f3f4f6;
+  --register-tooltip-chip-fg: #374151;
 }

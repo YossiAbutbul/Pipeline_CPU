@@ -10,6 +10,20 @@
   --cursor-disabled: not-allowed;
 }
 
+:root[data-theme="light"] {
+  --cursor-default: url("/src/ui/cursors/light/default-light.svg") 13 10, default;
+  --cursor-action: url("/src/ui/cursors/light/pointer-light.svg") 18 9, pointer;
+  --cursor-text: url("/src/ui/cursors/light/text-light.svg") 20 20, text;
+  --cursor-help: url("/src/ui/cursors/light/default-light.svg") 13 10, help;
+  --cursor-drag: url("/src/ui/cursors/light/grab-light.svg") 19 10, grab;
+  --cursor-dragging:
+    url("/src/ui/cursors/light/grabbing-light.svg") 20 10,
+    grabbing;
+  --cursor-disabled:
+    url("/src/ui/cursors/light/not-allowed-light.svg") 13 10,
+    not-allowed;
+}
+
 *,
 *::before,
 *::after {
