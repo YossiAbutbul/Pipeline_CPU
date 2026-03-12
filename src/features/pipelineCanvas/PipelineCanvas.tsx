@@ -323,10 +323,10 @@ export default function PipelineCanvas({
               className="pipelineStepHintTooltip"
               align="end"
               open={showStepForwardTourStep}
-              step={5}
-              totalSteps={7}
+              step={6}
+              totalSteps={8}
               title="Step Through Execution"
-              description="Use Step Forward to advance one clock cycle at a time and watch instructions move across the pipeline."
+              description="Step one clock cycle at a time and watch the pipeline update."
               onBack={onBackStepForwardTourStep}
               onNext={onNextStepForwardTourStep}
               onSkip={onDismissTour}
@@ -350,15 +350,15 @@ export default function PipelineCanvas({
             className="pipelineDiagramTourTooltip"
             align="start"
             open={showHoverDiagramTourStep}
-            step={7}
-            totalSteps={7}
-          title="Hover The Diagram"
-          description="Hover highlighted paths in the CPU diagram to inspect the current values traveling through each signal."
-          onBack={onBackHoverDiagramTourStep}
-          onNext={onDismissTour}
-          nextLabel="Finish"
-          onClose={onDismissTour}
-        >
+            step={8}
+            totalSteps={8}
+            title="Hover The Diagram"
+            description="Hover highlighted paths to inspect the current signal values."
+            onBack={onBackHoverDiagramTourStep}
+            onNext={onDismissTour}
+            nextLabel="Finish"
+            onClose={onDismissTour}
+          >
             <span className="pipelineDiagramTourAnchor" aria-hidden="true" />
           </GuidedTourTooltip>
           <div

@@ -115,8 +115,8 @@
 
 .pipelineDiagramTourTooltip.tooltipWrap {
   position: absolute;
-  top: 40px;
-  left: 40px;
+  top: 20px;
+  left: 5px;
   z-index: 12;
   width: auto;
 }
