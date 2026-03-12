@@ -92,6 +92,7 @@ export default function App() {
     memoryRules: memory.rules,
     registerValues: registers.values,
     onRegisterValuesChange: setRegisterValues,
+    onRunError: pushErrorNotification,
   });
 
   useEffect(() => {

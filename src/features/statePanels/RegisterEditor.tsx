@@ -1,4 +1,5 @@
 import { Button, GuidedTourTooltip, Tooltip } from "@/ui/components";
+import { notifyAppError } from "@/app/errors/appError";
 import { Check, Edit, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -72,7 +73,7 @@ export default function RegisterEditor({
       onValuesChange(next);
       onNotifySuccess("Register formula applied");
     } catch (err) {
-      onNotifyError(err instanceof Error ? err.message : String(err));
+      notifyAppError(onNotifyError, err, "registers", "Failed to apply register formula");
     }
   };
 
@@ -96,7 +97,7 @@ export default function RegisterEditor({
       const parsed = parseRegisterValue(current);
       onValuesChange({ ...values, [alias]: toHex32(parsed) });
     } catch (err) {
-      onNotifyError(err instanceof Error ? err.message : String(err));
+      notifyAppError(onNotifyError, err, "registers", "Register value is invalid");
     }
   };
 
@@ -124,7 +125,7 @@ export default function RegisterEditor({
       onNotifySuccess("Registers updated successfully");
       onIsEditingChange(false);
     } catch (err) {
-      onNotifyError(err instanceof Error ? err.message : String(err));
+      notifyAppError(onNotifyError, err, "registers", "Failed to update registers");
     }
   };
 
