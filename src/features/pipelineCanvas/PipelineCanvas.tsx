@@ -1,5 +1,6 @@
 import { Button, GuidedTourTooltip, Panel, Tooltip } from "@/ui/components";
 import CpuDiagram from "@/assets/cpu/mips_cpu.svg?react";
+import type { PlacedComponent } from "@/features/components/placement/usePendingComponentPlacement";
 import { FastForward, Rewind, RotateCcw, SkipBack, ZoomIn, ZoomOut } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { PATH_SIGNAL_MAP, type HoveredSignalValues } from "./pipelineHoverMap";
@@ -40,6 +41,7 @@ type Props = {
   hoveredSignalValues: HoveredSignalValues;
   clockCycle: number;
   showClockCycle: boolean;
+  enableSignalHover: boolean;
   onResetTracking: () => void;
   onStepForward: () => void;
   onStepBackward: () => void;
@@ -51,8 +53,10 @@ type Props = {
   showHoverDiagramTourStep: boolean;
   onBackHoverDiagramTourStep: () => void;
   onDismissTour: () => void;
+  placedComponents?: PlacedComponent[];
   pendingComponentLabel?: string | null;
-  onPlacePendingComponent?: () => void;
+  onPlacePendingComponent?: (placement: { pathId: string; x: number; y: number }) => void;
+  onDeletePlacedComponent?: (componentId: number) => void;
 };
 
 const STAGE_ORDER: Array<keyof PipelineSlots> = ["IF", "ID", "EX", "MEM", "WB"];
@@ -65,6 +69,7 @@ export default function PipelineCanvas({
   hoveredSignalValues,
   clockCycle,
   showClockCycle,
+  enableSignalHover,
   onResetTracking,
   onStepForward,
   onStepBackward,
@@ -76,8 +81,10 @@ export default function PipelineCanvas({
   showHoverDiagramTourStep,
   onBackHoverDiagramTourStep,
   onDismissTour,
+  placedComponents = [],
   pendingComponentLabel = null,
   onPlacePendingComponent,
+  onDeletePlacedComponent,
 }: Props) {
   const [zoom, setZoom] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
@@ -130,6 +137,17 @@ export default function PipelineCanvas({
       return;
     }
     setIsDragging(false);
+  };
+
+  const getSvgPlacementPoint = (svg: SVGSVGElement, clientX: number, clientY: number) => {
+    const point = new DOMPoint(clientX, clientY);
+    const matrix = svg.getScreenCTM();
+    if (!matrix) {
+      return null;
+    }
+
+    const svgPoint = point.matrixTransform(matrix.inverse());
+    return { x: svgPoint.x, y: svgPoint.y };
   };
 
   useEffect(() => {
@@ -211,12 +229,21 @@ export default function PipelineCanvas({
       }
 
       const handleEnter = () => {
-        path.classList.add("isHovered");
+        if (enableSignalHover) {
+          path.classList.add("isHovered");
+        }
+        if (pendingComponentLabel && !isControl) {
+          path.classList.add("isPlacementCandidate");
+        }
       };
 
       const handleMove = (event: PointerEvent) => {
         const signal = PATH_SIGNAL_MAP[pathId];
         const diagramBounds = diagramElement.getBoundingClientRect();
+        if (!enableSignalHover) {
+          setHoverTooltip(null);
+          return;
+        }
         if (!signal) {
           setHoverTooltip(null);
           return;
@@ -232,6 +259,7 @@ export default function PipelineCanvas({
 
       const handleLeave = () => {
         path.classList.remove("isHovered");
+        path.classList.remove("isPlacementCandidate");
         setHoverTooltip((current) => {
           if (!current) {
             return current;
@@ -240,13 +268,31 @@ export default function PipelineCanvas({
         });
       };
 
+      const handlePlace = (event: PointerEvent) => {
+        if (!pendingComponentLabel || !onPlacePendingComponent || isControl) {
+          return;
+        }
+        event.preventDefault();
+        const placementPoint = getSvgPlacementPoint(svg, event.clientX, event.clientY);
+        if (!placementPoint) {
+          return;
+        }
+        onPlacePendingComponent({
+          pathId,
+          x: placementPoint.x,
+          y: placementPoint.y,
+        });
+      };
+
       hitPath.addEventListener("pointerenter", handleEnter);
       hitPath.addEventListener("pointermove", handleMove);
       hitPath.addEventListener("pointerleave", handleLeave);
+      hitPath.addEventListener("pointerdown", handlePlace);
       cleanupFns.push(() => {
         hitPath.removeEventListener("pointerenter", handleEnter);
         hitPath.removeEventListener("pointermove", handleMove);
         hitPath.removeEventListener("pointerleave", handleLeave);
+        hitPath.removeEventListener("pointerdown", handlePlace);
       });
     });
 
@@ -260,11 +306,23 @@ export default function PipelineCanvas({
       cleanupFns.forEach((cleanup) => cleanup());
       hitGroup.remove();
       targetById.forEach((path) => {
-        path.classList.remove("cpuPath", "cpuPathControl", "cpuPathData", "isHovered");
+        path.classList.remove(
+          "cpuPath",
+          "cpuPathControl",
+          "cpuPathData",
+          "isHovered",
+          "isPlacementCandidate",
+        );
       });
       setHoverTooltip(null);
     };
-  }, [hoveredSignalValues]);
+  }, [
+    enableSignalHover,
+    hoveredSignalValues,
+    onPlacePendingComponent,
+    pendingComponentLabel,
+    placedComponents,
+  ]);
 
   useEffect(() => {
     if (!import.meta.env.DEV) {
@@ -410,12 +468,6 @@ export default function PipelineCanvas({
             }`}
             onMouseDown={handleDragStart}
             onMouseUp={handleDragEnd}
-            onClick={() => {
-              if (!pendingComponentLabel || !onPlacePendingComponent) {
-                return;
-              }
-              onPlacePendingComponent();
-            }}
           >
             <div
               ref={diagramRef}
@@ -423,6 +475,43 @@ export default function PipelineCanvas({
               style={{ width: `${95 * zoom}%` }}
             >
               <CpuDiagram style={{ width: "100%", height: "auto" }} />
+              <svg
+                className={`placedComponentOverlay ${
+                  !pendingComponentLabel && !enableSignalHover ? "isInteractive" : ""
+                }`}
+                viewBox="0 0 1848 1075"
+                aria-hidden="true"
+              >
+                {placedComponents.map((component) => {
+                  return (
+                    <g
+                      key={component.id}
+                      className="placedComponentToken"
+                      transform={`translate(${component.x} ${component.y})`}
+                    >
+                      <circle r="24" />
+                      <text textAnchor="middle" dominantBaseline="central">
+                        {component.label}
+                      </text>
+                      {!enableSignalHover ? (
+                        <g
+                          className="placedComponentDelete"
+                          onPointerDown={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            onDeletePlacedComponent?.(component.id);
+                          }}
+                        >
+                          <circle cx="15" cy="-15" r="9" />
+                          <text x="15" y="-15" textAnchor="middle" dominantBaseline="central">
+                            x
+                          </text>
+                        </g>
+                      ) : null}
+                    </g>
+                  );
+                })}
+              </svg>
               {hoverTooltip && (
                 <div
                   className="pipelineHoverTooltip"

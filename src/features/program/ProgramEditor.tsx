@@ -168,6 +168,7 @@ export default function ProgramEditor({
                 className="initialPcInput"
                 value={initialPc}
                 onChange={(event) => onInitialPcChange(event.target.value)}
+                disabled={isRunActive}
                 spellCheck={false}
                 autoComplete="off"
                 aria-label="Initial PC"
