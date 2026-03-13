@@ -423,8 +423,8 @@ export default function PipelineCanvas({
               className="pipelineStepHintTooltip"
               align="end"
               open={showStepForwardTourStep}
-              step={6}
-              totalSteps={8}
+              step={7}
+              totalSteps={9}
               title="Step Through Execution"
               description="Step one clock cycle at a time and watch the pipeline update."
               onBack={onBackStepForwardTourStep}
@@ -450,8 +450,8 @@ export default function PipelineCanvas({
             className="pipelineDiagramTourTooltip"
             align="start"
             open={showHoverDiagramTourStep}
-            step={8}
-            totalSteps={8}
+            step={9}
+            totalSteps={9}
             title="Hover The Diagram"
             description="Hover highlighted paths to inspect the current signal values."
             onBack={onBackHoverDiagramTourStep}

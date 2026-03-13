@@ -20,7 +20,10 @@ type Props = {
   onInitialPcChange: (value: string) => void;
   onResetPersistedData: () => void;
   showInitialPcTourStep: boolean;
+  showAddComponentTourStep: boolean;
   onBackInitialPcTourStep?: () => void;
+  onBackAddComponentTourStep: () => void;
+  onNextAddComponentTourStep: () => void;
   onNextInitialPcTourStep: () => void;
   showRunTourStep: boolean;
   onBackRunTourStep: () => void;
@@ -40,7 +43,10 @@ export default function ProgramEditor({
   onInitialPcChange,
   onResetPersistedData,
   showInitialPcTourStep,
+  showAddComponentTourStep,
   onBackInitialPcTourStep,
+  onBackAddComponentTourStep,
+  onNextAddComponentTourStep,
   onNextInitialPcTourStep,
   showRunTourStep,
   onBackRunTourStep,
@@ -69,19 +75,32 @@ export default function ProgramEditor({
             className="programAddComponentAnchor"
             onMouseDown={(event) => event.stopPropagation()}
           >
-            <Button
-              type="button"
-              size="sm"
-              className="programToolbarButton"
-              onClick={() => {
-                setIsAddComponentOpen((prev) => !prev);
-                setIsSettingsOpen(false);
-              }}
-              aria-expanded={isAddComponentOpen}
+            <GuidedTourTooltip
+              open={showAddComponentTourStep}
+              step={5}
+              totalSteps={9}
+              align="start"
+              title="Add A Component"
+              description="Open the panel to choose a component and place it on the diagram."
+              onBack={onBackAddComponentTourStep}
+              onNext={onNextAddComponentTourStep}
+              onSkip={onDismissRunTour}
+              onClose={onDismissRunTour}
             >
-              <Plus size={14} aria-hidden="true" />
-              Add Component
-            </Button>
+              <Button
+                type="button"
+                size="sm"
+                className="programToolbarButton"
+                onClick={() => {
+                  setIsAddComponentOpen((prev) => !prev);
+                  setIsSettingsOpen(false);
+                }}
+                aria-expanded={isAddComponentOpen}
+              >
+                <Plus size={14} aria-hidden="true" />
+                Add Component
+              </Button>
+            </GuidedTourTooltip>
             {isAddComponentOpen ? (
               <AddComponentPanel
                 onClose={() => setIsAddComponentOpen(false)}
@@ -152,7 +171,7 @@ export default function ProgramEditor({
             <GuidedTourTooltip
               open={showInitialPcTourStep}
               step={2}
-              totalSteps={8}
+              totalSteps={9}
               align="end"
               className="initialPcTourAnchor"
               title="Set The Initial PC"
@@ -204,8 +223,8 @@ export default function ProgramEditor({
           <div className="programActions">
             <GuidedTourTooltip
               open={showRunTourStep}
-              step={5}
-              totalSteps={8}
+              step={6}
+              totalSteps={9}
               align="start"
               fullWidth
               title="Run The Program"

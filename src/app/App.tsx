@@ -11,7 +11,7 @@ import { useNotificationQueue } from "./hooks/useNotificationQueue";
 import { clearPersistedAppState, createDefaultAppState, usePersistedAppState } from "./store/appStore";
 import "./app.css";
 
-const GUIDED_TOUR_TOTAL_STEPS = 8;
+const GUIDED_TOUR_TOTAL_STEPS = 9;
 
 export default function App() {
   const [appState, setAppState] = usePersistedAppState();
@@ -89,7 +89,7 @@ export default function App() {
       setAppState((prev) => ({ ...prev, statePanelTab: "registers" }));
     }
 
-    if ((guidedTourStep === 3 || guidedTourStep === 6) && statePanelTab !== "memory") {
+    if ((guidedTourStep === 3 || guidedTourStep === 7) && statePanelTab !== "memory") {
       setAppState((prev) => ({ ...prev, statePanelTab: "memory" }));
     }
   }, [guidedTourStep, setAppState, statePanelTab]);
@@ -114,7 +114,7 @@ export default function App() {
 
   const handleRun = () => {
     run();
-    setGuidedTourStep((currentStep) => (currentStep === 4 ? 5 : currentStep));
+    setGuidedTourStep((currentStep) => (currentStep === 5 ? 6 : currentStep));
   };
 
   const handleStop = () => {
@@ -123,7 +123,7 @@ export default function App() {
       if (currentStep === null) {
         return currentStep;
       }
-      return currentStep >= 5 ? 4 : currentStep;
+      return currentStep >= 6 ? 5 : currentStep;
     });
   };
 
@@ -133,7 +133,7 @@ export default function App() {
       if (currentStep === null) {
         return currentStep;
       }
-      return currentStep >= 5 ? 4 : currentStep;
+      return currentStep >= 6 ? 5 : currentStep;
     });
   };
 
@@ -158,8 +158,11 @@ export default function App() {
           onInitialPcChange={handleInitialPcChange}
           onResetPersistedData={handleResetPersistedData}
           showInitialPcTourStep={guidedTourStep === 1}
+          showAddComponentTourStep={guidedTourStep === 4}
+          onBackAddComponentTourStep={goToPreviousTourStep}
+          onNextAddComponentTourStep={goToNextTourStep}
           onNextInitialPcTourStep={goToNextTourStep}
-          showRunTourStep={guidedTourStep === 4}
+          showRunTourStep={guidedTourStep === 5}
           onBackRunTourStep={goToPreviousTourStep}
           onNextRunTourStep={goToNextTourStep}
           onDismissRunTour={handleCompleteGuidedTour}
@@ -194,10 +197,10 @@ export default function App() {
           onStepBackward={stepBackward}
           canStepBackward={canStepBackward}
           canStepForward={canStepForward}
-          showStepForwardTourStep={guidedTourStep === 5}
+          showStepForwardTourStep={guidedTourStep === 6}
           onBackStepForwardTourStep={goToPreviousTourStep}
           onNextStepForwardTourStep={goToNextTourStep}
-          showHoverDiagramTourStep={guidedTourStep === 7}
+          showHoverDiagramTourStep={guidedTourStep === 8}
           onBackHoverDiagramTourStep={goToPreviousTourStep}
           onDismissTour={handleCompleteGuidedTour}
           placedComponents={placedComponents}
@@ -238,7 +241,7 @@ export default function App() {
           showAddRulesTourStep={guidedTourStep === 3}
           onBackAddRulesTourStep={goToPreviousTourStep}
           onNextAddRulesTourStep={goToNextTourStep}
-          showRuntimeMemoryTourStep={guidedTourStep === 6}
+          showRuntimeMemoryTourStep={guidedTourStep === 7}
           onBackRuntimeMemoryTourStep={goToPreviousTourStep}
           onNextRuntimeMemoryTourStep={goToNextTourStep}
           onDismissTour={handleCompleteGuidedTour}
