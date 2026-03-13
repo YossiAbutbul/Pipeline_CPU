@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Binary, MoveHorizontal, Split } from "lucide-react";
-import { SettingsPanel } from "@/ui/components";
+import { Binary, Minus, MoveHorizontal } from "lucide-react";
+import { Button, SettingsPanel } from "@/ui/components";
 import "./addComponentPanel.css";
 
 export type AddableComponentType = "neg" | "not" | "shift";
@@ -51,28 +51,40 @@ export function AddComponentPanel({ onClose, onAddComponent }: Props) {
           <div className="addComponentOptionList" aria-label="Component type">
             <div className="addComponentOptionRow" style={{ animationDelay: "90ms" }}>
               <span className="addComponentOptionIcon" aria-hidden="true">
-                <Binary size={18} />
+                <Minus size={18} />
               </span>
               <span className="addComponentOptionText">
                 <span className="addComponentOptionTitle">NEG</span>
                 <span className="addComponentOptionDescription">Negate the value before it continues.</span>
               </span>
-              <button type="button" className="addComponentActionButton" onClick={() => handleAdd("NEG")}>
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                className="addComponentActionButton"
+                onClick={() => handleAdd("NEG")}
+              >
                 Add
-              </button>
+              </Button>
             </div>
 
             <div className="addComponentOptionRow" style={{ animationDelay: "135ms" }}>
               <span className="addComponentOptionIcon" aria-hidden="true">
-                <Split size={18} />
+                <Binary size={18} />
               </span>
               <span className="addComponentOptionText">
                 <span className="addComponentOptionTitle">NOT</span>
                 <span className="addComponentOptionDescription">Invert all bits of the value.</span>
               </span>
-              <button type="button" className="addComponentActionButton" onClick={() => handleAdd("NOT")}>
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                className="addComponentActionButton"
+                onClick={() => handleAdd("NOT")}
+              >
                 Add
-              </button>
+              </Button>
             </div>
 
             <div className="addComponentOptionRow" style={{ animationDelay: "180ms" }}>
@@ -83,9 +95,15 @@ export function AddComponentPanel({ onClose, onAddComponent }: Props) {
                 <span className="addComponentOptionTitle">SHIFT</span>
                 <span className="addComponentOptionDescription">Configure direction, mode, and amount first.</span>
               </span>
-              <button type="button" className="addComponentActionButton" onClick={() => setView("shift")}>
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                className="addComponentActionButton"
+                onClick={() => setView("shift")}
+              >
                 Setup
-              </button>
+              </Button>
             </div>
           </div>
         </>
@@ -143,20 +161,24 @@ export function AddComponentPanel({ onClose, onAddComponent }: Props) {
           </div>
 
           <div className="addComponentShiftFooter">
-            <button
+            <Button
               type="button"
+              size="sm"
+              variant="secondary"
               className="addComponentBackButton"
               onClick={() => setView("main")}
             >
               Back
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              size="sm"
+              variant="secondary"
               className="addComponentActionButton"
               onClick={() => handleAdd(shiftLabel)}
             >
               Add
-            </button>
+            </Button>
           </div>
         </section>
       )}
