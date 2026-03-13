@@ -201,6 +201,10 @@
   user-select: none;
 }
 
+.diagramViewport.isPlacingComponent {
+  cursor: copy;
+}
+
 .pipelineHoverTooltip {
   position: absolute;
   left: 0;

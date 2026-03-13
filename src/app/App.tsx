@@ -23,6 +23,12 @@ export default function App() {
   const [appState, setAppState] = usePersistedAppState();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [guidedTourStep, setGuidedTourStep] = useState<number | null>(() => loadInitialGuidedTourStep());
+  const [pendingComponent, setPendingComponent] = useState<{
+    label: string;
+    x: number;
+    y: number;
+  } | null>(null);
+  const isPlacingComponent = pendingComponent !== null;
   const { program, initialPc, statePanelTab, registers, memory } = appState;
 
   const pushNotification = useCallback((notification: Omit<NotificationItem, "id">) => {
@@ -63,6 +69,27 @@ export default function App() {
   const dismissNotification = useCallback((id: number) => {
     setNotifications((prev) => prev.filter((notification) => notification.id !== id));
   }, []);
+
+  useEffect(() => {
+    if (!isPlacingComponent) {
+      return;
+    }
+
+    const handleWindowMouseMove = (event: MouseEvent) => {
+      setPendingComponent((current) =>
+        current
+          ? {
+              ...current,
+              x: event.clientX,
+              y: event.clientY,
+            }
+          : current,
+      );
+    };
+
+    window.addEventListener("mousemove", handleWindowMouseMove);
+    return () => window.removeEventListener("mousemove", handleWindowMouseMove);
+  }, [isPlacingComponent]);
 
   const completeGuidedTour = useCallback(() => {
     setGuidedTourStep(null);
@@ -180,6 +207,12 @@ export default function App() {
     stepForward();
   };
 
+  const handleAddComponent = (label: string) => {
+    const startX = typeof window === "undefined" ? 0 : Math.round(window.innerWidth * 0.5);
+    const startY = typeof window === "undefined" ? 0 : Math.round(window.innerHeight * 0.5);
+    setPendingComponent({ label, x: startX, y: startY });
+  };
+
   return (
     <div className="appShell">
       <aside className="leftPane">
@@ -199,6 +232,7 @@ export default function App() {
           onBackRunTourStep={goToPreviousTourStep}
           onNextRunTourStep={goToNextTourStep}
           onDismissRunTour={completeGuidedTour}
+          onAddComponent={handleAddComponent}
         />
       </aside>
 
@@ -234,6 +268,8 @@ export default function App() {
           showHoverDiagramTourStep={guidedTourStep === 7}
           onBackHoverDiagramTourStep={goToPreviousTourStep}
           onDismissTour={completeGuidedTour}
+          pendingComponentLabel={pendingComponent?.label ?? null}
+          onPlacePendingComponent={() => setPendingComponent(null)}
         />
       </main>
 
@@ -274,6 +310,27 @@ export default function App() {
           onDismissTour={completeGuidedTour}
         />
       </aside>
+      {pendingComponent ? (
+        <div
+          className="dragCancelZone"
+          onClick={() => setPendingComponent(null)}
+          aria-label="Cancel pending component placement"
+        >
+          <span className="dragCancelIcon" aria-hidden="true">
+            x
+          </span>
+          <span className="dragCancelText">Cancel Placement</span>
+        </div>
+      ) : null}
+      {pendingComponent ? (
+        <div
+          className="componentAttachLayer"
+          style={{ left: `${pendingComponent.x}px`, top: `${pendingComponent.y}px` }}
+          aria-hidden="true"
+        >
+          <div className="componentAttachToken">{pendingComponent.label}</div>
+        </div>
+      ) : null}
       <NotificationToast notifications={notifications} onDismiss={dismissNotification} />
     </div>
   );

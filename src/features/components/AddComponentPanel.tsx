@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Binary, MoveHorizontal, Split } from "lucide-react";
+import { Binary, MoveHorizontal, Split } from "lucide-react";
 import { SettingsPanel } from "@/ui/components";
 import "./addComponentPanel.css";
 
@@ -9,42 +9,30 @@ type ShiftDirection = "left" | "right";
 type ShiftMode = "logical" | "arithmetic";
 type PanelView = "main" | "shift";
 
-const COMPONENT_OPTIONS: Array<{
-  id: AddableComponentType;
-  title: string;
-  description: string;
-  icon: typeof Binary;
-}> = [
-  {
-    id: "neg",
-    title: "NEG",
-    description: "Negate the input value before it continues through the path.",
-    icon: Binary,
-  },
-  {
-    id: "not",
-    title: "NOT",
-    description: "Flip all bits of the input value with a bitwise NOT operation.",
-    icon: Split,
-  },
-  {
-    id: "shift",
-    title: "SHIFT",
-    description: "Shift left or right by a chosen amount with logical or arithmetic behavior.",
-    icon: MoveHorizontal,
-  },
-];
-
 type Props = {
   onClose: () => void;
+  onAddComponent: (label: string) => void;
 };
 
-export function AddComponentPanel({ onClose }: Props) {
-  const [selectedType, setSelectedType] = useState<AddableComponentType>("neg");
+function getShiftShortLabel(direction: ShiftDirection, mode: ShiftMode, amount: string) {
+  const normalizedAmount = amount.trim() || "0";
+  if (direction === "left") {
+    return `SLL ${normalizedAmount}`;
+  }
+  return mode === "logical" ? `SLR ${normalizedAmount}` : `SAR ${normalizedAmount}`;
+}
+
+export function AddComponentPanel({ onClose, onAddComponent }: Props) {
   const [shiftDirection, setShiftDirection] = useState<ShiftDirection>("left");
   const [shiftMode, setShiftMode] = useState<ShiftMode>("logical");
   const [shiftAmount, setShiftAmount] = useState("1");
   const [view, setView] = useState<PanelView>("main");
+  const shiftLabel = getShiftShortLabel(shiftDirection, shiftMode, shiftAmount);
+
+  const handleAdd = (label: string) => {
+    onAddComponent(label);
+    onClose();
+  };
 
   return (
     <SettingsPanel
@@ -57,49 +45,55 @@ export function AddComponentPanel({ onClose }: Props) {
       {view === "main" ? (
         <>
           <div className="addComponentPanelIntro">
-            Drag a component into the diagram to place it in the pipeline path.
+            Add a component, then place it on the diagram or cancel it from the top area.
           </div>
 
-          <div className="addComponentOptionList" role="radiogroup" aria-label="Component type">
-            {COMPONENT_OPTIONS.map((option, index) => {
-              const Icon = option.icon;
-              const isSelected = selectedType === option.id;
+          <div className="addComponentOptionList" aria-label="Component type">
+            <div className="addComponentOptionRow" style={{ animationDelay: "90ms" }}>
+              <span className="addComponentOptionIcon" aria-hidden="true">
+                <Binary size={18} />
+              </span>
+              <span className="addComponentOptionText">
+                <span className="addComponentOptionTitle">NEG</span>
+                <span className="addComponentOptionDescription">Negate the value before it continues.</span>
+              </span>
+              <button type="button" className="addComponentActionButton" onClick={() => handleAdd("NEG")}>
+                Add
+              </button>
+            </div>
 
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  role="radio"
-                  aria-checked={isSelected}
-                  className={`addComponentOption ${isSelected ? "addComponentOptionSelected" : ""}`.trim()}
-                  style={{ animationDelay: `${90 + index * 45}ms` }}
-                  onClick={() => {
-                    if (option.id === "shift") {
-                      setSelectedType("shift");
-                      setView("shift");
-                      return;
-                    }
+            <div className="addComponentOptionRow" style={{ animationDelay: "135ms" }}>
+              <span className="addComponentOptionIcon" aria-hidden="true">
+                <Split size={18} />
+              </span>
+              <span className="addComponentOptionText">
+                <span className="addComponentOptionTitle">NOT</span>
+                <span className="addComponentOptionDescription">Invert all bits of the value.</span>
+              </span>
+              <button type="button" className="addComponentActionButton" onClick={() => handleAdd("NOT")}>
+                Add
+              </button>
+            </div>
 
-                    setSelectedType(option.id);
-                  }}
-                >
-                  <span className="addComponentOptionIcon" aria-hidden="true">
-                    <Icon size={18} />
-                  </span>
-                  <span className="addComponentOptionText">
-                    <span className="addComponentOptionTitle">{option.title}</span>
-                    <span className="addComponentOptionDescription">{option.description}</span>
-                  </span>
-                </button>
-              );
-            })}
+            <div className="addComponentOptionRow" style={{ animationDelay: "180ms" }}>
+              <span className="addComponentOptionIcon" aria-hidden="true">
+                <MoveHorizontal size={18} />
+              </span>
+              <span className="addComponentOptionText">
+                <span className="addComponentOptionTitle">SHIFT</span>
+                <span className="addComponentOptionDescription">Configure direction, mode, and amount first.</span>
+              </span>
+              <button type="button" className="addComponentActionButton" onClick={() => setView("shift")}>
+                Setup
+              </button>
+            </div>
           </div>
         </>
       ) : (
         <section className="addComponentShiftConfig" aria-label="Shift configuration">
           <div className="addComponentSectionTitle">Shift Setup</div>
           <div className="addComponentPanelIntro addComponentShiftIntro">
-            Set the shift behavior, then drag it into the diagram.
+            Add the configured shift, then place it on the diagram or cancel it from the top area.
           </div>
 
           <div className="addComponentField">
@@ -154,8 +148,14 @@ export function AddComponentPanel({ onClose }: Props) {
               className="addComponentBackButton"
               onClick={() => setView("main")}
             >
-              <ArrowLeft size={16} aria-hidden="true" />
               Back
+            </button>
+            <button
+              type="button"
+              className="addComponentActionButton"
+              onClick={() => handleAdd(shiftLabel)}
+            >
+              Add
             </button>
           </div>
         </section>

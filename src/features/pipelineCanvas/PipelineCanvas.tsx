@@ -51,6 +51,8 @@ type Props = {
   showHoverDiagramTourStep: boolean;
   onBackHoverDiagramTourStep: () => void;
   onDismissTour: () => void;
+  pendingComponentLabel?: string | null;
+  onPlacePendingComponent?: () => void;
 };
 
 const STAGE_ORDER: Array<keyof PipelineSlots> = ["IF", "ID", "EX", "MEM", "WB"];
@@ -74,6 +76,8 @@ export default function PipelineCanvas({
   showHoverDiagramTourStep,
   onBackHoverDiagramTourStep,
   onDismissTour,
+  pendingComponentLabel = null,
+  onPlacePendingComponent,
 }: Props) {
   const [zoom, setZoom] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
@@ -107,7 +111,7 @@ export default function PipelineCanvas({
   };
 
   const handleDragStart = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!canDrag || !viewportRef.current) {
+    if (pendingComponentLabel || !canDrag || !viewportRef.current) {
       return;
     }
 
@@ -401,9 +405,17 @@ export default function PipelineCanvas({
           </GuidedTourTooltip>
           <div
             ref={viewportRef}
-            className={`diagramViewport ${canDrag ? "canDrag" : ""} ${isDragging ? "isDragging" : ""}`}
+            className={`diagramViewport ${canDrag ? "canDrag" : ""} ${isDragging ? "isDragging" : ""} ${
+              pendingComponentLabel ? "isPlacingComponent" : ""
+            }`}
             onMouseDown={handleDragStart}
             onMouseUp={handleDragEnd}
+            onClick={() => {
+              if (!pendingComponentLabel || !onPlacePendingComponent) {
+                return;
+              }
+              onPlacePendingComponent();
+            }}
           >
             <div
               ref={diagramRef}

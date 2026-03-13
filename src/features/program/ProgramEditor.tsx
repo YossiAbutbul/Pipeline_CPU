@@ -26,6 +26,7 @@ type Props = {
   onBackRunTourStep: () => void;
   onNextRunTourStep: () => void;
   onDismissRunTour: () => void;
+  onAddComponent: (label: string) => void;
 };
 
 export default function ProgramEditor({
@@ -45,6 +46,7 @@ export default function ProgramEditor({
   onBackRunTourStep,
   onNextRunTourStep,
   onDismissRunTour,
+  onAddComponent,
 }: Props) {
   const { theme, themeMode, toggleTheme } = useTheme();
   const [isAddComponentOpen, setIsAddComponentOpen] = useState(false);
@@ -81,7 +83,10 @@ export default function ProgramEditor({
               Add Component
             </Button>
             {isAddComponentOpen ? (
-              <AddComponentPanel onClose={() => setIsAddComponentOpen(false)} />
+              <AddComponentPanel
+                onClose={() => setIsAddComponentOpen(false)}
+                onAddComponent={onAddComponent}
+              />
             ) : null}
           </div>
           <div
