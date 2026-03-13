@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Binary, MoveHorizontal, Split } from "lucide-react";
+import { ArrowLeft, Binary, MoveHorizontal, Split } from "lucide-react";
 import { SettingsPanel } from "@/ui/components";
 import "./addComponentPanel.css";
 
@@ -7,6 +7,7 @@ export type AddableComponentType = "neg" | "not" | "shift";
 
 type ShiftDirection = "left" | "right";
 type ShiftMode = "logical" | "arithmetic";
+type PanelView = "main" | "shift";
 
 const COMPONENT_OPTIONS: Array<{
   id: AddableComponentType;
@@ -43,6 +44,7 @@ export function AddComponentPanel({ onClose }: Props) {
   const [shiftDirection, setShiftDirection] = useState<ShiftDirection>("left");
   const [shiftMode, setShiftMode] = useState<ShiftMode>("logical");
   const [shiftAmount, setShiftAmount] = useState("1");
+  const [view, setView] = useState<PanelView>("main");
 
   return (
     <SettingsPanel
@@ -52,40 +54,53 @@ export function AddComponentPanel({ onClose }: Props) {
       className="addComponentPanelShell"
       onClose={onClose}
     >
-      <div className="addComponentPanelIntro">
-        Choose a component type. Drag-and-drop wiring comes next, but the panel is ready for the full flow.
-      </div>
+      {view === "main" ? (
+        <>
+          <div className="addComponentPanelIntro">
+            Drag a component into the diagram to place it in the pipeline path.
+          </div>
 
-      <div className="addComponentOptionList" role="radiogroup" aria-label="Component type">
-        {COMPONENT_OPTIONS.map((option, index) => {
-          const Icon = option.icon;
-          const isSelected = selectedType === option.id;
+          <div className="addComponentOptionList" role="radiogroup" aria-label="Component type">
+            {COMPONENT_OPTIONS.map((option, index) => {
+              const Icon = option.icon;
+              const isSelected = selectedType === option.id;
 
-          return (
-            <button
-              key={option.id}
-              type="button"
-              role="radio"
-              aria-checked={isSelected}
-              className={`addComponentOption ${isSelected ? "addComponentOptionSelected" : ""}`.trim()}
-              style={{ animationDelay: `${90 + index * 45}ms` }}
-              onClick={() => setSelectedType(option.id)}
-            >
-              <span className="addComponentOptionIcon" aria-hidden="true">
-                <Icon size={18} />
-              </span>
-              <span className="addComponentOptionText">
-                <span className="addComponentOptionTitle">{option.title}</span>
-                <span className="addComponentOptionDescription">{option.description}</span>
-              </span>
-            </button>
-          );
-        })}
-      </div>
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  className={`addComponentOption ${isSelected ? "addComponentOptionSelected" : ""}`.trim()}
+                  style={{ animationDelay: `${90 + index * 45}ms` }}
+                  onClick={() => {
+                    if (option.id === "shift") {
+                      setSelectedType("shift");
+                      setView("shift");
+                      return;
+                    }
 
-      {selectedType === "shift" ? (
+                    setSelectedType(option.id);
+                  }}
+                >
+                  <span className="addComponentOptionIcon" aria-hidden="true">
+                    <Icon size={18} />
+                  </span>
+                  <span className="addComponentOptionText">
+                    <span className="addComponentOptionTitle">{option.title}</span>
+                    <span className="addComponentOptionDescription">{option.description}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      ) : (
         <section className="addComponentShiftConfig" aria-label="Shift configuration">
           <div className="addComponentSectionTitle">Shift Setup</div>
+          <div className="addComponentPanelIntro addComponentShiftIntro">
+            Set the shift behavior, then drag it into the diagram.
+          </div>
 
           <div className="addComponentField">
             <label className="addComponentFieldLabel" htmlFor="shift-direction">
@@ -132,17 +147,19 @@ export function AddComponentPanel({ onClose }: Props) {
               onChange={(event) => setShiftAmount(event.target.value)}
             />
           </div>
-        </section>
-      ) : null}
 
-      <div className="addComponentPreview">
-        <div className="addComponentSectionTitle">Selection</div>
-        <div className="addComponentPreviewText">
-          {selectedType === "shift"
-            ? `${shiftMode} shift ${shiftDirection} by ${shiftAmount || "0"}`
-            : selectedType.toUpperCase()}
-        </div>
-      </div>
+          <div className="addComponentShiftFooter">
+            <button
+              type="button"
+              className="addComponentBackButton"
+              onClick={() => setView("main")}
+            >
+              <ArrowLeft size={16} aria-hidden="true" />
+              Back
+            </button>
+          </div>
+        </section>
+      )}
     </SettingsPanel>
   );
 }
