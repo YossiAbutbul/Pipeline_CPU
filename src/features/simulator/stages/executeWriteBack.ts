@@ -1,6 +1,10 @@
 import { parseRegister } from "@/features/compiler/registers";
 import type { ParsedInstruction } from "@/features/compiler/types";
-import { applySignalComponentToNumber, type ActiveSignalComponent } from "@/features/components/placement/componentSignalRuntime";
+import {
+  applySignalComponentToNumber,
+  applySignalComponentToPathNumber,
+  type ActiveSignalComponent,
+} from "@/features/components/placement/componentSignalRuntime";
 import { REGISTERS, parseRegisterValue, toHex32 } from "@/features/statePanels/registerEditorModel";
 import { parseImmediate } from "../core/parse";
 import type { StageEffect } from "../core/types";
@@ -61,8 +65,22 @@ export function applyWriteBack(
     if (["add", "addu", "sub", "subu", "and", "or", "xor", "nor", "slt", "sltu"].includes(mnemonic)) {
       if (operands.length !== 3) return values;
       const rd = parseRegister(operands[0]);
-      const rs = getRegisterValue(values, parseRegister(operands[1]));
-      const rt = getRegisterValue(values, parseRegister(operands[2]));
+      const rs =
+        applySignalComponentToPathNumber(
+          activeSignalComponent,
+          "exA",
+          getRegisterValue(values, parseRegister(operands[1])),
+        ) ?? 0;
+      const rt =
+        applySignalComponentToPathNumber(
+          activeSignalComponent,
+          "aluB",
+          applySignalComponentToPathNumber(
+            activeSignalComponent,
+            "exB",
+            getRegisterValue(values, parseRegister(operands[2])),
+          ),
+        ) ?? 0;
 
       const result =
         mnemonic === "add" || mnemonic === "addu"
@@ -99,7 +117,16 @@ export function applyWriteBack(
     if (["sll", "srl", "sra"].includes(mnemonic)) {
       if (operands.length !== 3) return values;
       const rd = parseRegister(operands[0]);
-      const rt = getRegisterValue(values, parseRegister(operands[1]));
+      const rt =
+        applySignalComponentToPathNumber(
+          activeSignalComponent,
+          "aluB",
+          applySignalComponentToPathNumber(
+            activeSignalComponent,
+            "exB",
+            getRegisterValue(values, parseRegister(operands[1])),
+          ),
+        ) ?? 0;
       const shamt = parseImmediate(operands[2]) & 0x1f;
       const result = mnemonic === "sll" ? (rt << shamt) >>> 0 : mnemonic === "srl" ? rt >>> shamt : (rt >> shamt) >>> 0;
       return writeRegisterValue(
@@ -116,8 +143,22 @@ export function applyWriteBack(
     if (["sllv", "srlv", "srav"].includes(mnemonic)) {
       if (operands.length !== 3) return values;
       const rd = parseRegister(operands[0]);
-      const rt = getRegisterValue(values, parseRegister(operands[1]));
-      const rs = getRegisterValue(values, parseRegister(operands[2])) & 0x1f;
+      const rt =
+        applySignalComponentToPathNumber(
+          activeSignalComponent,
+          "aluB",
+          applySignalComponentToPathNumber(
+            activeSignalComponent,
+            "exB",
+            getRegisterValue(values, parseRegister(operands[1])),
+          ),
+        ) ?? 0;
+      const rs =
+        (applySignalComponentToPathNumber(
+          activeSignalComponent,
+          "exA",
+          getRegisterValue(values, parseRegister(operands[2])),
+        ) ?? 0) & 0x1f;
       const result = mnemonic === "sllv" ? (rt << rs) >>> 0 : mnemonic === "srlv" ? rt >>> rs : (rt >> rs) >>> 0;
       return writeRegisterValue(
         values,
@@ -133,8 +174,14 @@ export function applyWriteBack(
     if (["addi", "addiu", "andi", "ori", "xori", "slti", "sltiu"].includes(mnemonic)) {
       if (operands.length !== 3) return values;
       const rt = parseRegister(operands[0]);
-      const rs = getRegisterValue(values, parseRegister(operands[1]));
-      const imm = parseImmediate(operands[2]);
+      const rs =
+        applySignalComponentToPathNumber(
+          activeSignalComponent,
+          "exA",
+          getRegisterValue(values, parseRegister(operands[1])),
+        ) ?? 0;
+      const imm =
+        applySignalComponentToPathNumber(activeSignalComponent, "imm", parseImmediate(operands[2]) >>> 0) ?? 0;
       const result =
         mnemonic === "addi" || mnemonic === "addiu"
           ? (rs + imm) >>> 0
@@ -188,7 +235,12 @@ export function applyWriteBack(
     if (mnemonic === "move") {
       if (operands.length !== 2) return values;
       const rd = parseRegister(operands[0]);
-      const rs = getRegisterValue(values, parseRegister(operands[1]));
+      const rs =
+        applySignalComponentToPathNumber(
+          activeSignalComponent,
+          "exA",
+          getRegisterValue(values, parseRegister(operands[1])),
+        ) ?? 0;
       return writeRegisterValue(
         values,
         rd,

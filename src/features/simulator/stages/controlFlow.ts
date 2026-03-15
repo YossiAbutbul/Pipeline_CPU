@@ -1,6 +1,9 @@
 import { parseRegister } from "@/features/compiler/registers";
 import type { ParsedInstruction } from "@/features/compiler/types";
-import { applySignalComponentToNumber, type ActiveSignalComponent } from "@/features/components/placement/componentSignalRuntime";
+import {
+  applySignalComponentToPathNumber,
+  type ActiveSignalComponent,
+} from "@/features/components/placement/componentSignalRuntime";
 import { parseRegisterValue } from "@/features/statePanels/registerEditorModel";
 import { createRuntimeStageError } from "./runtimeError";
 
@@ -91,14 +94,14 @@ export function resolveControlFlow(
     }
 
     if (mnemonic === "beq" && operands.length === 3) {
-      const rs = applySignalComponentToNumber(
+      const rs = applySignalComponentToPathNumber(
         activeSignalComponent,
-        "rsValue",
+        "branchRs",
         getRegisterValue(registerValues, parseRegister(operands[0])),
       );
-      const rt = applySignalComponentToNumber(
+      const rt = applySignalComponentToPathNumber(
         activeSignalComponent,
-        "rtValue",
+        "branchRt",
         getRegisterValue(registerValues, parseRegister(operands[1])),
       );
       if (rs === null || rt === null) {
@@ -114,14 +117,14 @@ export function resolveControlFlow(
     }
 
     if (mnemonic === "bne" && operands.length === 3) {
-      const rs = applySignalComponentToNumber(
+      const rs = applySignalComponentToPathNumber(
         activeSignalComponent,
-        "rsValue",
+        "branchRs",
         getRegisterValue(registerValues, parseRegister(operands[0])),
       );
-      const rt = applySignalComponentToNumber(
+      const rt = applySignalComponentToPathNumber(
         activeSignalComponent,
-        "rtValue",
+        "branchRt",
         getRegisterValue(registerValues, parseRegister(operands[1])),
       );
       if (rs === null || rt === null) {
@@ -137,9 +140,9 @@ export function resolveControlFlow(
     }
 
     if (mnemonic === "blez" && operands.length === 2) {
-      const rs = applySignalComponentToNumber(
+      const rs = applySignalComponentToPathNumber(
         activeSignalComponent,
-        "rsValue",
+        "branchRs",
         getRegisterValue(registerValues, parseRegister(operands[0])),
       );
       if (rs === null) {
@@ -155,9 +158,9 @@ export function resolveControlFlow(
     }
 
     if (mnemonic === "bgtz" && operands.length === 2) {
-      const rs = applySignalComponentToNumber(
+      const rs = applySignalComponentToPathNumber(
         activeSignalComponent,
-        "rsValue",
+        "branchRs",
         getRegisterValue(registerValues, parseRegister(operands[0])),
       );
       if (rs === null) {
@@ -173,9 +176,9 @@ export function resolveControlFlow(
     }
 
     if (mnemonic === "bltz" && operands.length === 2) {
-      const rs = applySignalComponentToNumber(
+      const rs = applySignalComponentToPathNumber(
         activeSignalComponent,
-        "rsValue",
+        "branchRs",
         getRegisterValue(registerValues, parseRegister(operands[0])),
       );
       if (rs === null) {
@@ -191,9 +194,9 @@ export function resolveControlFlow(
     }
 
     if (mnemonic === "bgez" && operands.length === 2) {
-      const rs = applySignalComponentToNumber(
+      const rs = applySignalComponentToPathNumber(
         activeSignalComponent,
-        "rsValue",
+        "branchRs",
         getRegisterValue(registerValues, parseRegister(operands[0])),
       );
       if (rs === null) {
