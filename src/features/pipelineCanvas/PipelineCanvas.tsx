@@ -1,6 +1,5 @@
 import { Button, GuidedTourTooltip, Panel, Tooltip } from "@/ui/components";
 import CpuDiagram from "@/assets/cpu/mips_cpu.svg?react";
-import { canAttachComponentToSignal } from "@/features/components/placement/componentSignalRuntime";
 import { getComponentValuePreview } from "@/features/components/placement/componentValueModel";
 import type { PlacedComponent } from "@/features/components/placement/usePendingComponentPlacement";
 import { FastForward, Rewind, RotateCcw, SkipBack, ZoomIn, ZoomOut } from "lucide-react";
@@ -215,8 +214,7 @@ export default function PipelineCanvas({
     sourcePaths.forEach((path) => {
       const pathId = path.id;
       const isControl = pathId.startsWith("ctrl_");
-      const signalKey = PATH_SIGNAL_MAP[pathId]?.key ?? null;
-      const canPlaceComponentHere = !isControl && canAttachComponentToSignal(signalKey);
+      const canPlaceComponentHere = !isControl;
       path.classList.add("cpuPath", isControl ? "cpuPathControl" : "cpuPathData");
       path.classList.remove("isHovered");
       targetById.set(pathId, path);
