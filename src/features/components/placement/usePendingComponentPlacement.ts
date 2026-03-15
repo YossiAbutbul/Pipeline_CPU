@@ -1,5 +1,7 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { PATH_SIGNAL_MAP, type HoverSignalKey } from "@/features/pipelineCanvas/pipelineHoverMap";
+
+const PLACED_COMPONENTS_STORAGE_KEY = "pipelineCpu.placedComponents";
 
 export type PlacedComponent = {
   id: number;
@@ -10,6 +12,39 @@ export type PlacedComponent = {
   y: number;
 };
 
+function readPersistedPlacedComponents(): PlacedComponent[] {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  try {
+    const raw = window.localStorage.getItem(PLACED_COMPONENTS_STORAGE_KEY);
+    if (!raw) {
+      return [];
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed.filter((component): component is PlacedComponent => {
+      return (
+        component &&
+        typeof component === "object" &&
+        typeof component.id === "number" &&
+        typeof component.label === "string" &&
+        typeof component.pathId === "string" &&
+        (typeof component.signalKey === "string" || component.signalKey === null) &&
+        typeof component.x === "number" &&
+        typeof component.y === "number"
+      );
+    });
+  } catch {
+    return [];
+  }
+}
+
 type PlacementPoint = {
   pathId: string;
   x: number;
@@ -18,7 +53,20 @@ type PlacementPoint = {
 
 export function usePendingComponentPlacement() {
   const [pendingComponentLabel, setPendingComponentLabel] = useState<string | null>(null);
-  const [placedComponents, setPlacedComponents] = useState<PlacedComponent[]>([]);
+  const [placedComponents, setPlacedComponents] = useState<PlacedComponent[]>(() => readPersistedPlacedComponents());
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (placedComponents.length === 0) {
+      window.localStorage.removeItem(PLACED_COMPONENTS_STORAGE_KEY);
+      return;
+    }
+
+    window.localStorage.setItem(PLACED_COMPONENTS_STORAGE_KEY, JSON.stringify(placedComponents));
+  }, [placedComponents]);
 
   const beginComponentPlacement = useCallback((label: string) => {
     setPendingComponentLabel(label);
