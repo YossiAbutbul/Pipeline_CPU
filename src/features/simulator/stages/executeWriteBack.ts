@@ -40,6 +40,19 @@ function writeRegisterValue(values: Record<string, string>, registerNumber: numb
   };
 }
 
+function applyDownstreamWriteBackTransforms(
+  activeSignalComponent: ActiveSignalComponent,
+  result: number,
+) {
+  const transformedAluResult =
+    applySignalComponentToPathNumber(activeSignalComponent, "aluResult", result) ?? result;
+  const transformedMemWbAluResult =
+    applySignalComponentToPathNumber(activeSignalComponent, "memWbAluResult", transformedAluResult) ??
+    transformedAluResult;
+  return applySignalComponentToNumber(activeSignalComponent, "writeBackValue", transformedMemWbAluResult) ??
+    transformedMemWbAluResult;
+}
+
 export function applyWriteBack(
   instruction: ParsedInstruction | null,
   values: Record<string, string>,
@@ -106,11 +119,7 @@ export function applyWriteBack(
       return writeRegisterValue(
         values,
         rd,
-        applySignalComponentToNumber(
-          activeSignalComponent,
-          activeSignalComponent?.signalKey === "aluResult" ? "aluResult" : "writeBackValue",
-          result,
-        ) ?? result,
+        applyDownstreamWriteBackTransforms(activeSignalComponent, result),
       );
     }
 
@@ -132,11 +141,7 @@ export function applyWriteBack(
       return writeRegisterValue(
         values,
         rd,
-        applySignalComponentToNumber(
-          activeSignalComponent,
-          activeSignalComponent?.signalKey === "aluResult" ? "aluResult" : "writeBackValue",
-          result,
-        ) ?? result,
+        applyDownstreamWriteBackTransforms(activeSignalComponent, result),
       );
     }
 
@@ -163,11 +168,7 @@ export function applyWriteBack(
       return writeRegisterValue(
         values,
         rd,
-        applySignalComponentToNumber(
-          activeSignalComponent,
-          activeSignalComponent?.signalKey === "aluResult" ? "aluResult" : "writeBackValue",
-          result,
-        ) ?? result,
+        applyDownstreamWriteBackTransforms(activeSignalComponent, result),
       );
     }
 
@@ -201,11 +202,7 @@ export function applyWriteBack(
       return writeRegisterValue(
         values,
         rt,
-        applySignalComponentToNumber(
-          activeSignalComponent,
-          activeSignalComponent?.signalKey === "aluResult" ? "aluResult" : "writeBackValue",
-          result,
-        ) ?? result,
+        applyDownstreamWriteBackTransforms(activeSignalComponent, result),
       );
     }
 

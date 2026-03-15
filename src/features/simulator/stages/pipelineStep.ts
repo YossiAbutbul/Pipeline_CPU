@@ -3,6 +3,7 @@ import { resolveControlFlow } from "./controlFlow";
 import { shouldStallForLoadUseHazard } from "./hazards";
 import { runMemoryStage } from "./memoryStage";
 import { applySignalComponentToPathNumber } from "@/features/components/placement/componentSignalRuntime";
+import { resolveForwardedExOperands } from "../signals/pipelineSignals";
 import type { ForwardStepInput, ForwardStepResult } from "../core/types";
 
 export function stepPipelineForward(input: ForwardStepInput): ForwardStepResult {
@@ -20,14 +21,36 @@ export function stepPipelineForward(input: ForwardStepInput): ForwardStepResult 
   } = input;
 
   let incomingInstructionIndex = instructions[nextInstructionIndex] ? nextInstructionIndex : null;
-  const wbInstructionIndex = pipelineInstructionIndices.MEM;
+  const wbInstructionIndex = pipelineInstructionIndices.WB;
   const wbInstruction = wbInstructionIndex !== null ? instructions[wbInstructionIndex] : null;
-  const wbEffect = pipelineEffects.MEM;
+  const wbEffect = pipelineEffects.WB;
+  const currentMemInstructionIndex = pipelineInstructionIndices.MEM;
+  const currentMemInstruction =
+    currentMemInstructionIndex !== null ? instructions[currentMemInstructionIndex] : null;
   const memInstructionIndex = pipelineInstructionIndices.EX;
   const memInstruction = memInstructionIndex !== null ? instructions[memInstructionIndex] : null;
   const exInstruction = pipelineInstructionIndices.EX !== null ? instructions[pipelineInstructionIndices.EX] : null;
   const idInstruction = pipelineInstructionIndices.ID !== null ? instructions[pipelineInstructionIndices.ID] : null;
-  const memResult = runMemoryStage(memInstruction, registerValues, memoryWords, activeSignalComponent);
+  const exResolvedValues = resolveForwardedExOperands({
+    exInstruction: memInstruction,
+    memInstruction: currentMemInstruction,
+    wbInstruction,
+    pipelineEffects,
+    registerValues,
+    memoryWords,
+  });
+  const memResult = runMemoryStage(
+    memInstruction,
+    registerValues,
+    memoryWords,
+    activeSignalComponent,
+    {
+      aluResult: exResolvedValues.aluResult ? (Number.parseInt(exResolvedValues.aluResult, 16) >>> 0) : undefined,
+      forwardedBValue: exResolvedValues.forwardedBValue
+        ? (Number.parseInt(exResolvedValues.forwardedBValue, 16) >>> 0)
+        : undefined,
+    },
+  );
   const hasLoadUseHazard = shouldStallForLoadUseHazard(exInstruction, idInstruction);
   const controlFlow = resolveControlFlow(
     exInstruction,

@@ -17,6 +17,8 @@ export const SUPPORTED_COMPONENT_SIGNAL_KEYS = new Set<HoverSignalKey>([
   "aluInputA",
   "aluInputB",
   "aluResult",
+  "memStageAluResultToMemwb",
+  "wbLatchedAluResult",
   "exForwardBValue",
   "memoryAddress",
   "memoryWriteData",
@@ -49,11 +51,10 @@ const ALU_INPUT_B_PATHS = new Set(["w_mux_alusrc_to_alu_b"]);
 const ALU_RESULT_PATHS = new Set([
   "w_alu_out_to_exmem",
   "w_exmem_alu_out4_to_dmem",
-  "w_exmem_alu_out_to_memwb",
-  "w_exmem_aluout_to_mux_memtoreg",
   "w_exmem_alu_out_to_mux_fwd_a",
   "w_exmem_alu_out4_to_mux_fwd_b",
 ]);
+const MEMWB_ALU_RESULT_PATHS = new Set(["w_exmem_alu_out_to_memwb", "w_exmem_aluout_to_mux_memtoreg"]);
 const MEMORY_ADDRESS_PATHS = new Set(["w_exmem_alu_out4_to_dmem"]);
 const MEMORY_WRITE_DATA_PATHS = new Set(["w_fwd_b_exmem_to_dmem", "w_mux_fwd_b_to_exmem"]);
 const MEMORY_READ_DATA_PATHS = new Set(["w_dmem_readdata_to_mux_memtoreg", "w_dmem_aluout_to_memwb"]);
@@ -112,6 +113,7 @@ export function applySignalComponentToPathNumber(
     | "imm"
     | "aluB"
     | "aluResult"
+    | "memWbAluResult"
     | "memoryAddress"
     | "memoryWriteData"
     | "memoryReadData"
@@ -131,6 +133,7 @@ export function applySignalComponentToPathNumber(
     imm: EX_IMMEDIATE_PATHS,
     aluB: ALU_INPUT_B_PATHS,
     aluResult: ALU_RESULT_PATHS,
+    memWbAluResult: MEMWB_ALU_RESULT_PATHS,
     memoryAddress: MEMORY_ADDRESS_PATHS,
     memoryWriteData: MEMORY_WRITE_DATA_PATHS,
     memoryReadData: MEMORY_READ_DATA_PATHS,

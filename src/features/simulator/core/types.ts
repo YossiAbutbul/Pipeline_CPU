@@ -32,6 +32,7 @@ export type WbWriteEffect = {
 
 export type StageEffect = {
   wbWrite?: WbWriteEffect;
+  latchedAluResult?: number;
 };
 
 export type PipelineEffectSlots = Record<StageName, StageEffect | null>;

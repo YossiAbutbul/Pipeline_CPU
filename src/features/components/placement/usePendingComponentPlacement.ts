@@ -28,17 +28,30 @@ function readPersistedPlacedComponents(): PlacedComponent[] {
       return [];
     }
 
-    return parsed.filter((component): component is PlacedComponent => {
-      return (
-        component &&
-        typeof component === "object" &&
-        typeof component.id === "number" &&
-        typeof component.label === "string" &&
-        typeof component.pathId === "string" &&
-        (typeof component.signalKey === "string" || component.signalKey === null) &&
-        typeof component.x === "number" &&
-        typeof component.y === "number"
-      );
+    return parsed.flatMap((component) => {
+      if (
+        !component ||
+        typeof component !== "object" ||
+        typeof component.id !== "number" ||
+        typeof component.label !== "string" ||
+        typeof component.pathId !== "string" ||
+        typeof component.x !== "number" ||
+        typeof component.y !== "number"
+      ) {
+        return [];
+      }
+
+      return [
+        {
+          id: component.id,
+          label: component.label,
+          pathId: component.pathId,
+          // Re-resolve from the current path map so persisted components survive signal-map refactors.
+          signalKey: PATH_SIGNAL_MAP[component.pathId]?.key ?? null,
+          x: component.x,
+          y: component.y,
+        } satisfies PlacedComponent,
+      ];
     });
   } catch {
     return [];

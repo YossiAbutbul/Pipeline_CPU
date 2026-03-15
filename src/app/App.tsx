@@ -62,6 +62,8 @@ export default function App() {
 
   const {
     pipeline,
+    pipelineEffects,
+    runtimeRegisterValues,
     memoryWords,
     changedMemoryWords,
     runSessionActive,
@@ -189,6 +191,8 @@ export default function App() {
         </GuidedTourTooltip>
         <PipelineCanvas
           pipeline={pipeline}
+          pipelineEffects={pipelineEffects}
+          runtimeRegisterValues={runtimeRegisterValues}
           hoveredSignalValues={hoveredSignalValues}
           clockCycle={clockCycle}
           showClockCycle={runSessionActive}

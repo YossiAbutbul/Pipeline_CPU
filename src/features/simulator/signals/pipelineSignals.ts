@@ -442,7 +442,7 @@ function formatFullControlBundle(bundle: InstructionControlBundle | null): strin
   return `EX{${formatExControlBundle(bundle)}} M{${formatMControlBundle(bundle)}} WB{${formatWbControlBundle(bundle)}}`;
 }
 
-function resolveForwardedExOperands(args: {
+export function resolveForwardedExOperands(args: {
   exInstruction: ParsedInstruction | null;
   memInstruction: ParsedInstruction | null;
   wbInstruction: ParsedInstruction | null;
@@ -475,7 +475,13 @@ function resolveForwardedExOperands(args: {
   const memCanForward = memInstruction !== null && memInstruction.mnemonic !== "lw" && memDestRegister !== null && memDestRegister !== 0;
   const wbCanForward = wbDestRegister !== null && wbDestRegister !== 0;
   const memForwardValue = getExSignalValues(memInstruction, registerValues).aluResult;
-  const wbForwardValue = getWbSignalValues(wbInstruction, pipelineEffects.WB, registerValues, memoryWords).writeBackValue;
+  const wbForwardValue = getWbSignalValues(
+    wbInstruction,
+    pipelineEffects.WB,
+    registerValues,
+    memoryWords,
+    null,
+  ).writeBackValue;
 
   const [sourceARegister, sourceBRegister] = getExForwardRegisterNumbers(exInstruction);
 
@@ -702,6 +708,7 @@ function getWbSignalValues(
   effect: StageEffect | null,
   values: Record<string, string>,
   memoryWords: SparseMemoryWords,
+  activeSignalComponent: ActiveSignalComponent,
 ): {
   writeBackValue?: string;
   writeBackDest?: string;
@@ -726,12 +733,78 @@ function getWbSignalValues(
 
   const exSignals = getExSignalValues(instruction, values);
   const memSignals = getMemSignalValues(instruction, values, memoryWords);
-  const writeBackValue = instruction.mnemonic === "lw" ? memSignals.memoryReadData : exSignals.aluResult;
+  const rawAluResult = exSignals.aluResult;
+  const transformedAluResult =
+    rawAluResult === undefined
+      ? undefined
+      : toHex32(
+          applySignalComponentToPathNumber(
+            activeSignalComponent,
+            "memWbAluResult",
+            applySignalComponentToPathNumber(
+              activeSignalComponent,
+              "aluResult",
+              Number.parseInt(rawAluResult, 16) >>> 0,
+            ) ?? (Number.parseInt(rawAluResult, 16) >>> 0),
+          ) ??
+            (applySignalComponentToPathNumber(
+              activeSignalComponent,
+              "aluResult",
+              Number.parseInt(rawAluResult, 16) >>> 0,
+            ) ?? (Number.parseInt(rawAluResult, 16) >>> 0)),
+        );
+  const writeBackValue = instruction.mnemonic === "lw" ? memSignals.memoryReadData : transformedAluResult;
 
   return {
     writeBackValue,
     writeBackDest,
   };
+}
+
+function getMemStageAluResultToMemwb(
+  instruction: ParsedInstruction | null,
+  effect: StageEffect | null,
+  values: Record<string, string>,
+  activeSignalComponent: ActiveSignalComponent,
+) {
+  const numericValue =
+    effect?.latchedAluResult ??
+    (() => {
+      const aluResult = getExSignalValues(instruction, values).aluResult;
+      return aluResult ? (Number.parseInt(aluResult, 16) >>> 0) : undefined;
+    })();
+
+  if (numericValue === undefined) {
+    return undefined;
+  }
+  const transformedValue =
+    applySignalComponentToPathNumber(activeSignalComponent, "aluResult", numericValue) ?? numericValue;
+  const transformedForMemWb =
+    applySignalComponentToPathNumber(activeSignalComponent, "memWbAluResult", transformedValue) ?? transformedValue;
+  return toHex32(transformedForMemWb);
+}
+
+function getWbLatchedAluResult(
+  instruction: ParsedInstruction | null,
+  effect: StageEffect | null,
+  values: Record<string, string>,
+  activeSignalComponent: ActiveSignalComponent,
+) {
+  const numericValue =
+    effect?.latchedAluResult ??
+    (() => {
+      const aluResult = getExSignalValues(instruction, values).aluResult;
+      return aluResult ? (Number.parseInt(aluResult, 16) >>> 0) : undefined;
+    })();
+
+  if (numericValue === undefined) {
+    return undefined;
+  }
+  const transformedValue =
+    applySignalComponentToPathNumber(activeSignalComponent, "aluResult", numericValue) ?? numericValue;
+  const transformedForMemWb =
+    applySignalComponentToPathNumber(activeSignalComponent, "memWbAluResult", transformedValue) ?? transformedValue;
+  return toHex32(transformedForMemWb);
 }
 
 function getForwardingDataSignals(args: {
@@ -955,7 +1028,25 @@ export function buildPipelineSignalValues(args: {
     memoryWords,
   });
   const memSignalValues = getMemSignalValues(memInstruction, registerValues, memoryWords);
-  const wbSignalValues = getWbSignalValues(wbInstruction, pipelineEffects.WB, registerValues, memoryWords);
+  const wbSignalValues = getWbSignalValues(
+    wbInstruction,
+    pipelineEffects.WB,
+    registerValues,
+    memoryWords,
+    activeSignalComponent,
+  );
+  const memStageAluResultToMemwb = getMemStageAluResultToMemwb(
+    memInstruction,
+    pipelineEffects.MEM,
+    registerValues,
+    activeSignalComponent,
+  );
+  const wbLatchedAluResult = getWbLatchedAluResult(
+    wbInstruction,
+    pipelineEffects.WB,
+    registerValues,
+    activeSignalComponent,
+  );
   const forwardingDataSignals = getForwardingDataSignals({
     exInstruction,
     memInstruction,
@@ -1033,6 +1124,9 @@ export function buildPipelineSignalValues(args: {
     aluInputA: exResolvedValues.forwardedAValue,
     aluInputB: exResolvedValues.aluInputBValue,
     aluResult: exResolvedValues.aluResult,
+    memStageAluResultToMemwb,
+    memStageWriteBackDestToMemwb: toHexRegister(getWriteBackRegisterNumber(memInstruction, pipelineEffects.MEM)),
+    wbLatchedAluResult,
     exRtRegister: exResolvedValues.exRtRegister,
     exRdRegister: exResolvedValues.exRdRegister,
     exDestRegister: exResolvedValues.exDestRegister,

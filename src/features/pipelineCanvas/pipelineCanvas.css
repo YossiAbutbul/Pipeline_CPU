@@ -367,6 +367,16 @@
   line-height: 1.2;
 }
 
+.pipelineTooltipPathId {
+  color: var(--muted);
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+  font-size: 11px;
+  line-height: 1.25;
+  word-break: break-all;
+}
+
 .pipelineTooltipContent {
   color: var(--muted);
   font-family:

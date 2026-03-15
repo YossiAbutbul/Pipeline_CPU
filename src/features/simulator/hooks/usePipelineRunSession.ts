@@ -16,6 +16,7 @@ import {
   runComponentPathTest,
   runExInputSuite,
   runMemorySuite,
+  traceComponentPathScenario,
   runWritebackSuite,
 } from "../testing/componentPathTester";
 import type {
@@ -35,6 +36,7 @@ declare global {
       memorySuite: typeof runMemorySuite;
       exInputSuite: typeof runExInputSuite;
       allSuites: typeof runAllComponentPathSuites;
+      trace: typeof traceComponentPathScenario;
     };
   }
 }
@@ -54,6 +56,29 @@ function hasExecutableSource(program: string) {
   return program
     .split(/\r?\n/)
     .some((line) => line.replace(/#.*$/, "").trim().length > 0);
+}
+
+function hydrateInstructionMemory(
+  memoryWords: SparseMemoryWords,
+  encodedInstructionHexByPc: Record<number, string>,
+) {
+  const hydrated = new Map(memoryWords);
+
+  Object.entries(encodedInstructionHexByPc).forEach(([pcKey, hex]) => {
+    const pc = Number(pcKey);
+    if (!Number.isInteger(pc) || pc < 0 || pc % 4 !== 0) {
+      return;
+    }
+
+    const wordIndex = pc / 4;
+    if (hydrated.has(wordIndex)) {
+      return;
+    }
+
+    hydrated.set(wordIndex, Number.parseInt(hex, 16) >>> 0);
+  });
+
+  return hydrated;
 }
 
 export function usePipelineRunSession({
@@ -76,6 +101,7 @@ export function usePipelineRunSession({
   const [history, setHistory] = useState<PipelineSnapshot[]>([]);
   const [runSessionActive, setRunSessionActive] = useState(false);
   const [registerHighlightCycle, setRegisterHighlightCycle] = useState(0);
+  const [runtimeRegisterValues, setRuntimeRegisterValues] = useState<Record<string, string>>(registerValues);
   const initialRegisterValuesRef = useRef<Record<string, string> | null>(null);
   const initialMemoryWordsRef = useRef<SparseMemoryWords | null>(null);
 
@@ -127,13 +153,27 @@ export function usePipelineRunSession({
       pipelineInstructionIndices,
       pipelineEffects,
       encodedInstructionHexByPc,
-      registerValues,
+      registerValues: runtimeRegisterValues,
       memoryWords,
       labels: parsedProgram.labels,
       pcToInstructionIndex,
       activeSignalComponent,
     });
-  }, [encodedInstructionHexByPc, instructions, memoryWords, parsedProgram.labels, pcToInstructionIndex, pipelineEffects, pipelineInstructionIndices, placedComponents, registerValues]);
+  }, [encodedInstructionHexByPc, instructions, memoryWords, parsedProgram.labels, pcToInstructionIndex, pipelineEffects, pipelineInstructionIndices, placedComponents, runtimeRegisterValues]);
+
+  useEffect(() => {
+    if (!runSessionActive) {
+      setRuntimeRegisterValues(registerValues);
+    }
+  }, [registerValues, runSessionActive]);
+
+  useEffect(() => {
+    if (runSessionActive) {
+      return;
+    }
+
+    setMemoryWords(hydrateInstructionMemory(createMemoryFromRules(memoryRules), encodedInstructionHexByPc));
+  }, [encodedInstructionHexByPc, memoryRules, runSessionActive]);
 
   useEffect(() => {
     if (!import.meta.env.DEV || typeof window === "undefined") {
@@ -147,6 +187,7 @@ export function usePipelineRunSession({
       memorySuite: runMemorySuite,
       exInputSuite: runExInputSuite,
       allSuites: runAllComponentPathSuites,
+      trace: traceComponentPathScenario,
     };
 
     return () => {
@@ -160,7 +201,7 @@ export function usePipelineRunSession({
     const restoredMemory =
       shouldRestoreRunState && initialMemoryWordsRef.current
         ? new Map(initialMemoryWordsRef.current)
-        : createMemoryFromRules(memoryRules);
+        : hydrateInstructionMemory(createMemoryFromRules(memoryRules), encodedInstructionHexByPc);
 
     setPipeline(EMPTY_PIPELINE);
     setPipelineInstructionIndices(EMPTY_PIPELINE_INDICES);
@@ -170,6 +211,7 @@ export function usePipelineRunSession({
     setNextInstructionIndex(0);
     setHistory([]);
     setRunSessionActive(false);
+    setRuntimeRegisterValues(registerValues);
     setRegisterHighlightCycle(0);
 
     if (shouldRestoreRunState && initialRegisterValuesRef.current) {
@@ -206,7 +248,10 @@ export function usePipelineRunSession({
       return;
     }
 
-    const initialMemoryWords = createMemoryFromRules(memoryRules);
+    const initialMemoryWords = hydrateInstructionMemory(
+      createMemoryFromRules(memoryRules),
+      encodedInstructionHexByPc,
+    );
     initialRegisterValuesRef.current = { ...registerValues };
     initialMemoryWordsRef.current = new Map(initialMemoryWords);
     const firstInstruction = instructions[0] ?? null;
@@ -225,6 +270,7 @@ export function usePipelineRunSession({
     setNextInstructionIndex(firstInstruction ? 1 : 0);
     setHistory([]);
     setRunSessionActive(true);
+    setRuntimeRegisterValues({ ...registerValues });
     setRegisterHighlightCycle(0);
   };
 
@@ -243,7 +289,7 @@ export function usePipelineRunSession({
         instructions,
         labels: parsedProgram.labels,
         pcToInstructionIndex,
-        registerValues,
+        registerValues: runtimeRegisterValues,
         memoryWords,
         activeSignalComponent: getActiveSignalComponent(placedComponents),
       });
@@ -259,11 +305,12 @@ export function usePipelineRunSession({
     setPipelineInstructionIndices(result.pipelineInstructionIndices);
     setPipelineEffects(result.pipelineEffects);
     setMemoryWords(result.memoryWords);
+    setRuntimeRegisterValues(result.registerValues);
     setChangedMemoryWords(result.changedMemoryWords);
     setNextInstructionIndex(result.nextInstructionIndex);
     setRegisterHighlightCycle((prev) => prev + 1);
 
-    if (result.registerValues !== registerValues) {
+    if (result.registerValues !== runtimeRegisterValues) {
       onRegisterValuesChange(result.registerValues);
     }
   };
@@ -295,6 +342,7 @@ export function usePipelineRunSession({
       });
       setChangedMemoryWords(previous.changedMemoryWords);
       setNextInstructionIndex(previous.nextInstructionIndex);
+      setRuntimeRegisterValues(previous.registerValues);
       setRegisterHighlightCycle((currentCycle) => currentCycle + 1);
       onRegisterValuesChange(previous.registerValues);
 
@@ -304,6 +352,8 @@ export function usePipelineRunSession({
 
   return {
     pipeline,
+    pipelineEffects,
+    runtimeRegisterValues,
     memoryWords,
     changedMemoryWords,
     runSessionActive,

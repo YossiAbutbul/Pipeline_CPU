@@ -9,6 +9,7 @@ import { parseInitialPc } from "../core/parse";
 import { EMPTY_PIPELINE, EMPTY_PIPELINE_EFFECTS, EMPTY_PIPELINE_INDICES } from "../core/state";
 import type { PipelineEffectSlots, PipelineInstructionSlots, PipelineSlots } from "../core/types";
 import { createMemoryFromRules } from "../runtime/memoryRuntime";
+import { buildPipelineSignalValues, type PipelineSignalValues } from "../signals/pipelineSignals";
 import { stepPipelineForward } from "../stages/pipelineStep";
 
 type ComponentPathTestInput = {
@@ -55,6 +56,26 @@ type ComponentPathTestResult = {
   expected?: ComponentPathTestInput["expected"];
   pass?: boolean;
   mismatches?: ComponentPathTestMismatch[];
+};
+
+type ComponentPathTraceStep = {
+  cycle: number;
+  pipeline: PipelineSlots;
+  pipelineInstructionIndices: PipelineInstructionSlots;
+  pipelineEffects: PipelineEffectSlots;
+  nextInstructionIndex: number;
+  registers: Record<string, string>;
+  memoryWords: Record<string, string>;
+  hoveredSignalValues: PipelineSignalValues;
+};
+
+type ComponentPathTraceResult = {
+  component: {
+    pathId: string;
+    componentLabel: string;
+    signalKey: string | null;
+  };
+  steps: ComponentPathTraceStep[];
 };
 
 type BaseComponentPathTestResult = Omit<ComponentPathTestResult, "expected" | "pass" | "mismatches">;
@@ -322,9 +343,41 @@ function toMemoryWordRecord(memoryWords: Map<number, number>) {
     }, {});
 }
 
+function buildEncodedInstructionHexByPc(program: string, initialPc: number) {
+  const compiled = compileProgram(program, { initialPc });
+  return compiled.encoded.reduce<Record<number, string>>((acc, instruction) => {
+    acc[instruction.pc] = instruction.hex;
+    return acc;
+  }, {});
+}
+
+function hydrateInstructionMemory(
+  memoryWords: Map<number, number>,
+  encodedInstructionHexByPc: Record<number, string>,
+) {
+  const hydrated = new Map(memoryWords);
+
+  Object.entries(encodedInstructionHexByPc).forEach(([pcKey, hex]) => {
+    const pc = Number(pcKey);
+    if (!Number.isInteger(pc) || pc < 0 || pc % 4 !== 0) {
+      return;
+    }
+
+    const wordIndex = pc / 4;
+    if (hydrated.has(wordIndex)) {
+      return;
+    }
+
+    hydrated.set(wordIndex, Number.parseInt(hex, 16) >>> 0);
+  });
+
+  return hydrated;
+}
+
 function createInitialMemoryWords(
   memoryRules: MemoryRuleConfig[],
   initialMemoryWords: Record<string, string | number> | undefined,
+  encodedInstructionHexByPc: Record<number, string>,
 ) {
   const memoryWords = createMemoryFromRules(memoryRules);
 
@@ -344,7 +397,7 @@ function createInitialMemoryWords(
     memoryWords.set(parsedWordIndex, parsedValue);
   });
 
-  return memoryWords;
+  return hydrateInstructionMemory(memoryWords, encodedInstructionHexByPc);
 }
 
 function createPlacedComponent(pathId: string, componentLabel: string): PlacedComponent[] {
@@ -448,7 +501,7 @@ export function runComponentPathTest({
 }: ComponentPathTestInput): ComponentPathTestResult {
   const parsedInitialPc = parseInitialPc(initialPc);
   const parsedProgram = parseProgram(program, { initialPc: parsedInitialPc });
-  compileProgram(program, { initialPc: parsedInitialPc });
+  const encodedInstructionHexByPc = buildEncodedInstructionHexByPc(program, parsedInitialPc);
 
   const instructions = parsedProgram.instructions;
   const pcToInstructionIndex = new Map<number, number>();
@@ -466,7 +519,7 @@ export function runComponentPathTest({
     ...registerValues,
     zero: "0x00000000",
   };
-  let currentMemoryWords = createInitialMemoryWords(memoryRules, initialMemoryWords);
+  let currentMemoryWords = createInitialMemoryWords(memoryRules, initialMemoryWords, encodedInstructionHexByPc);
   let steps = 0;
 
   const firstInstruction = instructions[0] ?? null;
@@ -547,6 +600,113 @@ export function runComponentPathTest({
   return {
     ...stepLimitResult,
     ...buildAssertions(expected, stepLimitResult),
+  };
+}
+
+export function traceComponentPathScenario({
+  program,
+  pathId,
+  componentLabel,
+  initialPc = "0x00400000",
+  maxSteps = 16,
+  registerValues,
+  memoryRules = [],
+  initialMemoryWords,
+}: Omit<ComponentPathTestInput, "expected">): ComponentPathTraceResult {
+  const parsedInitialPc = parseInitialPc(initialPc);
+  const parsedProgram = parseProgram(program, { initialPc: parsedInitialPc });
+  const encodedInstructionHexByPc = buildEncodedInstructionHexByPc(program, parsedInitialPc);
+
+  const instructions = parsedProgram.instructions;
+  const pcToInstructionIndex = new Map<number, number>();
+  instructions.forEach((instruction, index) => {
+    pcToInstructionIndex.set(instruction.pc, index);
+  });
+
+  const activeSignalComponent = getActiveSignalComponent(createPlacedComponent(pathId, componentLabel));
+  let pipeline: PipelineSlots = { ...EMPTY_PIPELINE };
+  let pipelineInstructionIndices: PipelineInstructionSlots = { ...EMPTY_PIPELINE_INDICES };
+  let pipelineEffects: PipelineEffectSlots = { ...EMPTY_PIPELINE_EFFECTS };
+  let nextInstructionIndex = 0;
+  let currentRegisterValues: Record<string, string> = {
+    ...createDefaultRegisterValues(),
+    ...registerValues,
+    zero: "0x00000000",
+  };
+  let currentMemoryWords = createInitialMemoryWords(memoryRules, initialMemoryWords, encodedInstructionHexByPc);
+  const steps: ComponentPathTraceStep[] = [];
+
+  const firstInstruction = instructions[0] ?? null;
+  if (firstInstruction) {
+    pipeline = {
+      ...EMPTY_PIPELINE,
+      IF: firstInstruction.source,
+    };
+    pipelineInstructionIndices = {
+      ...EMPTY_PIPELINE_INDICES,
+      IF: 0,
+    };
+    nextInstructionIndex = 1;
+  }
+
+  for (let cycle = 0; cycle <= maxSteps; cycle += 1) {
+    const hoveredSignalValues = buildPipelineSignalValues({
+      instructions,
+      pipelineInstructionIndices,
+      pipelineEffects,
+      encodedInstructionHexByPc,
+      registerValues: currentRegisterValues,
+      memoryWords: currentMemoryWords,
+      labels: parsedProgram.labels,
+      pcToInstructionIndex,
+      activeSignalComponent,
+    });
+
+    steps.push({
+      cycle,
+      pipeline: { ...pipeline },
+      pipelineInstructionIndices: { ...pipelineInstructionIndices },
+      pipelineEffects: { ...pipelineEffects },
+      nextInstructionIndex,
+      registers: { ...currentRegisterValues },
+      memoryWords: toMemoryWordRecord(currentMemoryWords),
+      hoveredSignalValues,
+    });
+
+    const hasInstructionsToInject = nextInstructionIndex < instructions.length;
+    const hasPipelineWork = Object.values(pipelineInstructionIndices).some((value) => value !== null);
+    if (!hasInstructionsToInject && !hasPipelineWork) {
+      break;
+    }
+
+    const result = stepPipelineForward({
+      pipeline,
+      pipelineInstructionIndices,
+      pipelineEffects,
+      nextInstructionIndex,
+      instructions,
+      labels: parsedProgram.labels,
+      pcToInstructionIndex,
+      registerValues: currentRegisterValues,
+      memoryWords: currentMemoryWords,
+      activeSignalComponent,
+    });
+
+    pipeline = result.pipeline;
+    pipelineInstructionIndices = result.pipelineInstructionIndices;
+    pipelineEffects = result.pipelineEffects;
+    nextInstructionIndex = result.nextInstructionIndex;
+    currentMemoryWords = result.memoryWords;
+    currentRegisterValues = result.registerValues;
+  }
+
+  return {
+    component: {
+      pathId,
+      componentLabel,
+      signalKey: activeSignalComponent?.signalKey ?? null,
+    },
+    steps,
   };
 }
 
