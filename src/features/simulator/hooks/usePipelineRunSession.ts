@@ -1,13 +1,24 @@
 import { compileAndLog, compileProgram } from "@/features/compiler";
 import { parseProgram } from "@/features/compiler/parser";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { MemoryRuleConfig } from "@/app/store/appStore";
 import { notifyAppError } from "@/app/errors/appError";
+import { getActiveSignalComponent } from "@/features/components/placement/componentSignalRuntime";
+import type { PlacedComponent } from "@/features/components/placement/usePendingComponentPlacement";
 import { createMemoryFromRules } from "../runtime/memoryRuntime";
 import { parseInitialPc } from "../core/parse";
 import { buildPipelineSignalValues, type PipelineSignalValues } from "../signals/pipelineSignals";
 import { stepPipelineForward } from "../stages/pipelineStep";
 import { EMPTY_PIPELINE, EMPTY_PIPELINE_EFFECTS, EMPTY_PIPELINE_INDICES } from "../core/state";
+import {
+  runAllComponentPathSuites,
+  runBranchSuite,
+  runComponentPathTest,
+  runExInputSuite,
+  runMemorySuite,
+  traceComponentPathScenario,
+  runWritebackSuite,
+} from "../testing/componentPathTester";
 import type {
   PipelineEffectSlots,
   PipelineInstructionSlots,
@@ -16,10 +27,25 @@ import type {
   SparseMemoryWords,
 } from "../core/types";
 
+declare global {
+  interface Window {
+    __componentPathTest?: {
+      run: typeof runComponentPathTest;
+      branchSuite: typeof runBranchSuite;
+      writebackSuite: typeof runWritebackSuite;
+      memorySuite: typeof runMemorySuite;
+      exInputSuite: typeof runExInputSuite;
+      allSuites: typeof runAllComponentPathSuites;
+      trace: typeof traceComponentPathScenario;
+    };
+  }
+}
+
 type UsePipelineRunSessionArgs = {
   program: string;
   initialPc: string;
   memoryRules: MemoryRuleConfig[];
+  placedComponents: PlacedComponent[];
   registerValues: Record<string, string>;
   onRegisterValuesChange: (values: Record<string, string>) => void;
   onRunError: (message: string) => void;
@@ -32,10 +58,34 @@ function hasExecutableSource(program: string) {
     .some((line) => line.replace(/#.*$/, "").trim().length > 0);
 }
 
+function hydrateInstructionMemory(
+  memoryWords: SparseMemoryWords,
+  encodedInstructionHexByPc: Record<number, string>,
+) {
+  const hydrated = new Map(memoryWords);
+
+  Object.entries(encodedInstructionHexByPc).forEach(([pcKey, hex]) => {
+    const pc = Number(pcKey);
+    if (!Number.isInteger(pc) || pc < 0 || pc % 4 !== 0) {
+      return;
+    }
+
+    const wordIndex = pc / 4;
+    if (hydrated.has(wordIndex)) {
+      return;
+    }
+
+    hydrated.set(wordIndex, Number.parseInt(hex, 16) >>> 0);
+  });
+
+  return hydrated;
+}
+
 export function usePipelineRunSession({
   program,
   initialPc,
   memoryRules,
+  placedComponents,
   registerValues,
   onRegisterValuesChange,
   onRunError,
@@ -51,6 +101,7 @@ export function usePipelineRunSession({
   const [history, setHistory] = useState<PipelineSnapshot[]>([]);
   const [runSessionActive, setRunSessionActive] = useState(false);
   const [registerHighlightCycle, setRegisterHighlightCycle] = useState(0);
+  const [runtimeRegisterValues, setRuntimeRegisterValues] = useState<Record<string, string>>(registerValues);
   const initialRegisterValuesRef = useRef<Record<string, string> | null>(null);
   const initialMemoryWordsRef = useRef<SparseMemoryWords | null>(null);
 
@@ -94,19 +145,55 @@ export function usePipelineRunSession({
   const hasPipelineWork = Object.values(pipelineInstructionIndices).some((value) => value !== null);
   const canStepForward = runSessionActive && (hasInstructionsToInject || hasPipelineWork);
   const canStepBackward = runSessionActive && history.length > 0;
-  const clockCycle = history.length;
+  const clockCycle = runSessionActive ? history.length + 1 : 0;
   const hoveredSignalValues = useMemo<PipelineSignalValues>(() => {
+    const activeSignalComponent = getActiveSignalComponent(placedComponents);
     return buildPipelineSignalValues({
       instructions,
       pipelineInstructionIndices,
       pipelineEffects,
       encodedInstructionHexByPc,
-      registerValues,
+      registerValues: runtimeRegisterValues,
       memoryWords,
       labels: parsedProgram.labels,
       pcToInstructionIndex,
+      activeSignalComponent,
     });
-  }, [encodedInstructionHexByPc, instructions, memoryWords, parsedProgram.labels, pcToInstructionIndex, pipelineEffects, pipelineInstructionIndices, registerValues]);
+  }, [encodedInstructionHexByPc, instructions, memoryWords, parsedProgram.labels, pcToInstructionIndex, pipelineEffects, pipelineInstructionIndices, placedComponents, runtimeRegisterValues]);
+
+  useEffect(() => {
+    if (!runSessionActive) {
+      setRuntimeRegisterValues(registerValues);
+    }
+  }, [registerValues, runSessionActive]);
+
+  useEffect(() => {
+    if (runSessionActive) {
+      return;
+    }
+
+    setMemoryWords(hydrateInstructionMemory(createMemoryFromRules(memoryRules), encodedInstructionHexByPc));
+  }, [encodedInstructionHexByPc, memoryRules, runSessionActive]);
+
+  useEffect(() => {
+    if (!import.meta.env.DEV || typeof window === "undefined") {
+      return;
+    }
+
+    window.__componentPathTest = {
+      run: runComponentPathTest,
+      branchSuite: runBranchSuite,
+      writebackSuite: runWritebackSuite,
+      memorySuite: runMemorySuite,
+      exInputSuite: runExInputSuite,
+      allSuites: runAllComponentPathSuites,
+      trace: traceComponentPathScenario,
+    };
+
+    return () => {
+      delete window.__componentPathTest;
+    };
+  }, []);
 
   const resetPipeline = () => {
     const shouldRestoreRunState =
@@ -114,7 +201,7 @@ export function usePipelineRunSession({
     const restoredMemory =
       shouldRestoreRunState && initialMemoryWordsRef.current
         ? new Map(initialMemoryWordsRef.current)
-        : createMemoryFromRules(memoryRules);
+        : hydrateInstructionMemory(createMemoryFromRules(memoryRules), encodedInstructionHexByPc);
 
     setPipeline(EMPTY_PIPELINE);
     setPipelineInstructionIndices(EMPTY_PIPELINE_INDICES);
@@ -124,6 +211,7 @@ export function usePipelineRunSession({
     setNextInstructionIndex(0);
     setHistory([]);
     setRunSessionActive(false);
+    setRuntimeRegisterValues(registerValues);
     setRegisterHighlightCycle(0);
 
     if (shouldRestoreRunState && initialRegisterValuesRef.current) {
@@ -160,7 +248,10 @@ export function usePipelineRunSession({
       return;
     }
 
-    const initialMemoryWords = createMemoryFromRules(memoryRules);
+    const initialMemoryWords = hydrateInstructionMemory(
+      createMemoryFromRules(memoryRules),
+      encodedInstructionHexByPc,
+    );
     initialRegisterValuesRef.current = { ...registerValues };
     initialMemoryWordsRef.current = new Map(initialMemoryWords);
     const firstInstruction = instructions[0] ?? null;
@@ -179,6 +270,7 @@ export function usePipelineRunSession({
     setNextInstructionIndex(firstInstruction ? 1 : 0);
     setHistory([]);
     setRunSessionActive(true);
+    setRuntimeRegisterValues({ ...registerValues });
     setRegisterHighlightCycle(0);
   };
 
@@ -197,8 +289,9 @@ export function usePipelineRunSession({
         instructions,
         labels: parsedProgram.labels,
         pcToInstructionIndex,
-        registerValues,
+        registerValues: runtimeRegisterValues,
         memoryWords,
+        activeSignalComponent: getActiveSignalComponent(placedComponents),
       });
     } catch (error) {
       const appError = notifyAppError(onRuntimeError, error, "runtime", "Runtime execution failed");
@@ -212,11 +305,12 @@ export function usePipelineRunSession({
     setPipelineInstructionIndices(result.pipelineInstructionIndices);
     setPipelineEffects(result.pipelineEffects);
     setMemoryWords(result.memoryWords);
+    setRuntimeRegisterValues(result.registerValues);
     setChangedMemoryWords(result.changedMemoryWords);
     setNextInstructionIndex(result.nextInstructionIndex);
     setRegisterHighlightCycle((prev) => prev + 1);
 
-    if (result.registerValues !== registerValues) {
+    if (result.registerValues !== runtimeRegisterValues) {
       onRegisterValuesChange(result.registerValues);
     }
   };
@@ -248,6 +342,7 @@ export function usePipelineRunSession({
       });
       setChangedMemoryWords(previous.changedMemoryWords);
       setNextInstructionIndex(previous.nextInstructionIndex);
+      setRuntimeRegisterValues(previous.registerValues);
       setRegisterHighlightCycle((currentCycle) => currentCycle + 1);
       onRegisterValuesChange(previous.registerValues);
 
@@ -257,6 +352,8 @@ export function usePipelineRunSession({
 
   return {
     pipeline,
+    pipelineEffects,
+    runtimeRegisterValues,
     memoryWords,
     changedMemoryWords,
     runSessionActive,

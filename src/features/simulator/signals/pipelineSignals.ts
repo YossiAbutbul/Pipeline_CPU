@@ -1,5 +1,7 @@
 import { parseRegister } from "@/features/compiler/registers";
 import type { ParsedInstruction } from "@/features/compiler/types";
+import type { ActiveSignalComponent } from "@/features/components/placement/componentSignalRuntime";
+import { applySignalComponentToPathNumber } from "@/features/components/placement/componentSignalRuntime";
 import type { PipelineEffectSlots, PipelineInstructionSlots, StageEffect, SparseMemoryWords } from "../core/types";
 import { REG_INFO } from "@/monaco/mips/mipsData";
 import { parseRegisterValue, toHex32 } from "@/features/statePanels/registerEditorModel";
@@ -440,7 +442,7 @@ function formatFullControlBundle(bundle: InstructionControlBundle | null): strin
   return `EX{${formatExControlBundle(bundle)}} M{${formatMControlBundle(bundle)}} WB{${formatWbControlBundle(bundle)}}`;
 }
 
-function resolveForwardedExOperands(args: {
+export function resolveForwardedExOperands(args: {
   exInstruction: ParsedInstruction | null;
   memInstruction: ParsedInstruction | null;
   wbInstruction: ParsedInstruction | null;
@@ -473,7 +475,13 @@ function resolveForwardedExOperands(args: {
   const memCanForward = memInstruction !== null && memInstruction.mnemonic !== "lw" && memDestRegister !== null && memDestRegister !== 0;
   const wbCanForward = wbDestRegister !== null && wbDestRegister !== 0;
   const memForwardValue = getExSignalValues(memInstruction, registerValues).aluResult;
-  const wbForwardValue = getWbSignalValues(wbInstruction, pipelineEffects.WB, registerValues, memoryWords).writeBackValue;
+  const wbForwardValue = getWbSignalValues(
+    wbInstruction,
+    pipelineEffects.WB,
+    registerValues,
+    memoryWords,
+    null,
+  ).writeBackValue;
 
   const [sourceARegister, sourceBRegister] = getExForwardRegisterNumbers(exInstruction);
 
@@ -700,6 +708,7 @@ function getWbSignalValues(
   effect: StageEffect | null,
   values: Record<string, string>,
   memoryWords: SparseMemoryWords,
+  activeSignalComponent: ActiveSignalComponent,
 ): {
   writeBackValue?: string;
   writeBackDest?: string;
@@ -724,12 +733,78 @@ function getWbSignalValues(
 
   const exSignals = getExSignalValues(instruction, values);
   const memSignals = getMemSignalValues(instruction, values, memoryWords);
-  const writeBackValue = instruction.mnemonic === "lw" ? memSignals.memoryReadData : exSignals.aluResult;
+  const rawAluResult = exSignals.aluResult;
+  const transformedAluResult =
+    rawAluResult === undefined
+      ? undefined
+      : toHex32(
+          applySignalComponentToPathNumber(
+            activeSignalComponent,
+            "memWbAluResult",
+            applySignalComponentToPathNumber(
+              activeSignalComponent,
+              "aluResult",
+              Number.parseInt(rawAluResult, 16) >>> 0,
+            ) ?? (Number.parseInt(rawAluResult, 16) >>> 0),
+          ) ??
+            (applySignalComponentToPathNumber(
+              activeSignalComponent,
+              "aluResult",
+              Number.parseInt(rawAluResult, 16) >>> 0,
+            ) ?? (Number.parseInt(rawAluResult, 16) >>> 0)),
+        );
+  const writeBackValue = instruction.mnemonic === "lw" ? memSignals.memoryReadData : transformedAluResult;
 
   return {
     writeBackValue,
     writeBackDest,
   };
+}
+
+function getMemStageAluResultToMemwb(
+  instruction: ParsedInstruction | null,
+  effect: StageEffect | null,
+  values: Record<string, string>,
+  activeSignalComponent: ActiveSignalComponent,
+) {
+  const numericValue =
+    effect?.latchedAluResult ??
+    (() => {
+      const aluResult = getExSignalValues(instruction, values).aluResult;
+      return aluResult ? (Number.parseInt(aluResult, 16) >>> 0) : undefined;
+    })();
+
+  if (numericValue === undefined) {
+    return undefined;
+  }
+  const transformedValue =
+    applySignalComponentToPathNumber(activeSignalComponent, "aluResult", numericValue) ?? numericValue;
+  const transformedForMemWb =
+    applySignalComponentToPathNumber(activeSignalComponent, "memWbAluResult", transformedValue) ?? transformedValue;
+  return toHex32(transformedForMemWb);
+}
+
+function getWbLatchedAluResult(
+  instruction: ParsedInstruction | null,
+  effect: StageEffect | null,
+  values: Record<string, string>,
+  activeSignalComponent: ActiveSignalComponent,
+) {
+  const numericValue =
+    effect?.latchedAluResult ??
+    (() => {
+      const aluResult = getExSignalValues(instruction, values).aluResult;
+      return aluResult ? (Number.parseInt(aluResult, 16) >>> 0) : undefined;
+    })();
+
+  if (numericValue === undefined) {
+    return undefined;
+  }
+  const transformedValue =
+    applySignalComponentToPathNumber(activeSignalComponent, "aluResult", numericValue) ?? numericValue;
+  const transformedForMemWb =
+    applySignalComponentToPathNumber(activeSignalComponent, "memWbAluResult", transformedValue) ?? transformedValue;
+  return toHex32(transformedForMemWb);
 }
 
 function getForwardingDataSignals(args: {
@@ -769,6 +844,7 @@ function getControlSignalValues(args: {
   registerValues: Record<string, string>;
   labels: Record<string, number>;
   pcToInstructionIndex: Map<number, number>;
+  activeSignalComponent: ActiveSignalComponent;
 }): {
   pcSrcCtrl?: string;
   regDstCtrl?: string;
@@ -779,7 +855,17 @@ function getControlSignalValues(args: {
   fwdACtrl?: string;
   fwdBCtrl?: string;
 } {
-  const { idInstruction, exInstruction, memInstruction, wbInstruction, pipelineEffects, registerValues, labels, pcToInstructionIndex } = args;
+  const {
+    idInstruction,
+    exInstruction,
+    memInstruction,
+    wbInstruction,
+    pipelineEffects,
+    registerValues,
+    labels,
+    pcToInstructionIndex,
+    activeSignalComponent,
+  } = args;
 
   const idMnemonic = idInstruction?.mnemonic;
   const memMnemonic = memInstruction?.mnemonic;
@@ -799,7 +885,7 @@ function getControlSignalValues(args: {
   const memToReg = Boolean(memMnemonic) && ["lw"].includes(memMnemonic!);
   const pcSrc =
     exInstruction !== null
-      ? resolveControlFlow(exInstruction, registerValues, labels, pcToInstructionIndex).taken
+      ? resolveControlFlow(exInstruction, registerValues, labels, pcToInstructionIndex, activeSignalComponent).taken
       : false;
   const [fwdARegister, fwdBRegister] = getExForwardRegisterNumbers(exInstruction);
   const memDestRegister = getWriteBackRegisterNumber(memInstruction, pipelineEffects.MEM);
@@ -907,6 +993,7 @@ export function buildPipelineSignalValues(args: {
   memoryWords: SparseMemoryWords;
   labels: Record<string, number>;
   pcToInstructionIndex: Map<number, number>;
+  activeSignalComponent: ActiveSignalComponent;
 }): PipelineSignalValues {
   const {
     instructions,
@@ -917,6 +1004,7 @@ export function buildPipelineSignalValues(args: {
     memoryWords,
     labels,
     pcToInstructionIndex,
+    activeSignalComponent,
   } = args;
   const ifInstructionIndex = pipelineInstructionIndices.IF;
   const idInstructionIndex = pipelineInstructionIndices.ID;
@@ -940,7 +1028,25 @@ export function buildPipelineSignalValues(args: {
     memoryWords,
   });
   const memSignalValues = getMemSignalValues(memInstruction, registerValues, memoryWords);
-  const wbSignalValues = getWbSignalValues(wbInstruction, pipelineEffects.WB, registerValues, memoryWords);
+  const wbSignalValues = getWbSignalValues(
+    wbInstruction,
+    pipelineEffects.WB,
+    registerValues,
+    memoryWords,
+    activeSignalComponent,
+  );
+  const memStageAluResultToMemwb = getMemStageAluResultToMemwb(
+    memInstruction,
+    pipelineEffects.MEM,
+    registerValues,
+    activeSignalComponent,
+  );
+  const wbLatchedAluResult = getWbLatchedAluResult(
+    wbInstruction,
+    pipelineEffects.WB,
+    registerValues,
+    activeSignalComponent,
+  );
   const forwardingDataSignals = getForwardingDataSignals({
     exInstruction,
     memInstruction,
@@ -957,13 +1063,20 @@ export function buildPipelineSignalValues(args: {
     registerValues,
     labels,
     pcToInstructionIndex,
+    activeSignalComponent,
   });
   const idBundle = getInstructionControlBundle(idInstruction);
   const exBundle = getInstructionControlBundle(exInstruction);
   const memBundle = getInstructionControlBundle(memInstruction);
   const wbBundle = getInstructionControlBundle(wbInstruction);
   const hasLoadUseHazard = shouldStallForLoadUseHazard(exInstruction, idInstruction);
-  const controlFlow = resolveControlFlow(exInstruction, registerValues, labels, pcToInstructionIndex);
+  const controlFlow = resolveControlFlow(
+    exInstruction,
+    registerValues,
+    labels,
+    pcToInstructionIndex,
+    activeSignalComponent,
+  );
   const branchTaken = !hasLoadUseHazard && controlFlow.taken && controlFlow.targetInstructionIndex !== null;
   const branchTargetInstruction =
     controlFlow.targetInstructionIndex === null ? null : instructions[controlFlow.targetInstructionIndex] ?? null;
@@ -973,13 +1086,25 @@ export function buildPipelineSignalValues(args: {
     : branchTaken
       ? (branchTargetInstruction ? toHex32(branchTargetInstruction.pc >>> 0) : undefined)
       : sequentialNextPc;
+  const selectedNextPcNumeric =
+    selectedNextPc === undefined ? null : (Number.parseInt(selectedNextPc, 16) >>> 0);
+  const transformedSelectedNextPc =
+    selectedNextPcNumeric === null
+      ? undefined
+      : toHex32(
+          applySignalComponentToPathNumber(
+            activeSignalComponent,
+            "nextPcSelected",
+            selectedNextPcNumeric,
+          ) ?? selectedNextPcNumeric,
+        );
 
   return {
     pc: ifInstruction ? `0x${(ifInstruction.pc >>> 0).toString(16).toUpperCase().padStart(8, "0")}` : undefined,
     pcPlus4: ifInstruction ? `0x${(((ifInstruction.pc >>> 0) + 4) >>> 0).toString(16).toUpperCase().padStart(8, "0")}` : undefined,
     constant4: ifInstruction ? "0x00000004" : undefined,
     nextPcSequential: sequentialNextPc,
-    nextPcSelected: selectedNextPc,
+    nextPcSelected: transformedSelectedNextPc,
     exceptionVector: EXCEPTION_PC_VALUE,
     instructionWord: ifInstruction ? encodedInstructionHexByPc[ifInstruction.pc >>> 0] : undefined,
     idInstructionWord: idInstruction ? encodedInstructionHexByPc[idInstruction.pc >>> 0] : undefined,
@@ -999,6 +1124,9 @@ export function buildPipelineSignalValues(args: {
     aluInputA: exResolvedValues.forwardedAValue,
     aluInputB: exResolvedValues.aluInputBValue,
     aluResult: exResolvedValues.aluResult,
+    memStageAluResultToMemwb,
+    memStageWriteBackDestToMemwb: toHexRegister(getWriteBackRegisterNumber(memInstruction, pipelineEffects.MEM)),
+    wbLatchedAluResult,
     exRtRegister: exResolvedValues.exRtRegister,
     exRdRegister: exResolvedValues.exRdRegister,
     exDestRegister: exResolvedValues.exDestRegister,

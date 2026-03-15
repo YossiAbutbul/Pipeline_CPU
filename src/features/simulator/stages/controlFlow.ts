@@ -1,6 +1,11 @@
 import { parseRegister } from "@/features/compiler/registers";
 import type { ParsedInstruction } from "@/features/compiler/types";
+import {
+  applySignalComponentToPathNumber,
+  type ActiveSignalComponent,
+} from "@/features/components/placement/componentSignalRuntime";
 import { parseRegisterValue } from "@/features/statePanels/registerEditorModel";
+import { parseImmediate } from "../core/parse";
 import { createRuntimeStageError } from "./runtimeError";
 
 type ControlFlowResult = {
@@ -68,11 +73,62 @@ function toSigned32(value: number): number {
   return value >> 0;
 }
 
+function getBranchImmediateValue(instruction: ParsedInstruction): number | null {
+  const labelOperand = instruction.operands[instruction.operands.length - 1];
+  if (typeof labelOperand !== "string") {
+    return null;
+  }
+
+  try {
+    return parseImmediate(labelOperand);
+  } catch {
+    return null;
+  }
+}
+
+function getBranchTargetInstructionIndex(
+  instruction: ParsedInstruction,
+  label: string,
+  labels: Record<string, number>,
+  pcToInstructionIndex: Map<number, number>,
+  activeSignalComponent: ActiveSignalComponent,
+) {
+  const rawTargetPc = labels[label];
+  if (typeof rawTargetPc !== "number") {
+    return null;
+  }
+
+  const rawBasePcPlus4 = ((instruction.pc >>> 0) + 4) >>> 0;
+  const branchImmediate = getBranchImmediateValue(instruction);
+  const rawOffsetBeforeShift =
+    branchImmediate === null ? (((rawTargetPc - rawBasePcPlus4) >> 2) >>> 0) : (branchImmediate >>> 0);
+  const transformedOffsetBeforeShift =
+    applySignalComponentToPathNumber(activeSignalComponent, "branchImm", rawOffsetBeforeShift) ??
+    rawOffsetBeforeShift;
+  const rawShiftedOffset = (transformedOffsetBeforeShift << 2) >>> 0;
+  const transformedBasePcPlus4 =
+    applySignalComponentToPathNumber(activeSignalComponent, "branchBase", rawBasePcPlus4) ?? rawBasePcPlus4;
+  const transformedShiftedOffset =
+    applySignalComponentToPathNumber(activeSignalComponent, "branchOffsetShifted", rawShiftedOffset) ??
+    rawShiftedOffset;
+  const transformedTargetPc =
+    applySignalComponentToPathNumber(
+      activeSignalComponent,
+      "branchTarget",
+      (transformedBasePcPlus4 + transformedShiftedOffset) >>> 0,
+    ) ??
+    ((transformedBasePcPlus4 + transformedShiftedOffset) >>> 0);
+
+  const targetInstructionIndex = pcToInstructionIndex.get(transformedTargetPc);
+  return typeof targetInstructionIndex === "number" ? targetInstructionIndex : null;
+}
+
 export function resolveControlFlow(
   instruction: ParsedInstruction | null,
   registerValues: Record<string, string>,
   labels: Record<string, number>,
   pcToInstructionIndex: Map<number, number>,
+  activeSignalComponent: ActiveSignalComponent = null,
 ): ControlFlowResult {
   if (!instruction) {
     return { taken: false, targetInstructionIndex: null };
@@ -89,68 +145,154 @@ export function resolveControlFlow(
     }
 
     if (mnemonic === "beq" && operands.length === 3) {
-      const rs = getRegisterValue(registerValues, parseRegister(operands[0]));
-      const rt = getRegisterValue(registerValues, parseRegister(operands[1]));
+      const rs = applySignalComponentToPathNumber(
+        activeSignalComponent,
+        "branchRs",
+        getRegisterValue(registerValues, parseRegister(operands[0])),
+      );
+      const rt = applySignalComponentToPathNumber(
+        activeSignalComponent,
+        "branchRt",
+        getRegisterValue(registerValues, parseRegister(operands[1])),
+      );
+      if (rs === null || rt === null) {
+        return { taken: false, targetInstructionIndex: null };
+      }
       if (rs === rt) {
         return {
           taken: true,
-          targetInstructionIndex: getLabelTargetInstructionIndex(operands[2], labels, pcToInstructionIndex),
+          targetInstructionIndex: getBranchTargetInstructionIndex(
+            instruction,
+            operands[2],
+            labels,
+            pcToInstructionIndex,
+            activeSignalComponent,
+          ),
         };
       }
       return { taken: false, targetInstructionIndex: null };
     }
 
     if (mnemonic === "bne" && operands.length === 3) {
-      const rs = getRegisterValue(registerValues, parseRegister(operands[0]));
-      const rt = getRegisterValue(registerValues, parseRegister(operands[1]));
+      const rs = applySignalComponentToPathNumber(
+        activeSignalComponent,
+        "branchRs",
+        getRegisterValue(registerValues, parseRegister(operands[0])),
+      );
+      const rt = applySignalComponentToPathNumber(
+        activeSignalComponent,
+        "branchRt",
+        getRegisterValue(registerValues, parseRegister(operands[1])),
+      );
+      if (rs === null || rt === null) {
+        return { taken: false, targetInstructionIndex: null };
+      }
       if (rs !== rt) {
         return {
           taken: true,
-          targetInstructionIndex: getLabelTargetInstructionIndex(operands[2], labels, pcToInstructionIndex),
+          targetInstructionIndex: getBranchTargetInstructionIndex(
+            instruction,
+            operands[2],
+            labels,
+            pcToInstructionIndex,
+            activeSignalComponent,
+          ),
         };
       }
       return { taken: false, targetInstructionIndex: null };
     }
 
     if (mnemonic === "blez" && operands.length === 2) {
-      const rs = getRegisterValue(registerValues, parseRegister(operands[0]));
+      const rs = applySignalComponentToPathNumber(
+        activeSignalComponent,
+        "branchRs",
+        getRegisterValue(registerValues, parseRegister(operands[0])),
+      );
+      if (rs === null) {
+        return { taken: false, targetInstructionIndex: null };
+      }
       if (toSigned32(rs) <= 0) {
         return {
           taken: true,
-          targetInstructionIndex: getLabelTargetInstructionIndex(operands[1], labels, pcToInstructionIndex),
+          targetInstructionIndex: getBranchTargetInstructionIndex(
+            instruction,
+            operands[1],
+            labels,
+            pcToInstructionIndex,
+            activeSignalComponent,
+          ),
         };
       }
       return { taken: false, targetInstructionIndex: null };
     }
 
     if (mnemonic === "bgtz" && operands.length === 2) {
-      const rs = getRegisterValue(registerValues, parseRegister(operands[0]));
+      const rs = applySignalComponentToPathNumber(
+        activeSignalComponent,
+        "branchRs",
+        getRegisterValue(registerValues, parseRegister(operands[0])),
+      );
+      if (rs === null) {
+        return { taken: false, targetInstructionIndex: null };
+      }
       if (toSigned32(rs) > 0) {
         return {
           taken: true,
-          targetInstructionIndex: getLabelTargetInstructionIndex(operands[1], labels, pcToInstructionIndex),
+          targetInstructionIndex: getBranchTargetInstructionIndex(
+            instruction,
+            operands[1],
+            labels,
+            pcToInstructionIndex,
+            activeSignalComponent,
+          ),
         };
       }
       return { taken: false, targetInstructionIndex: null };
     }
 
     if (mnemonic === "bltz" && operands.length === 2) {
-      const rs = getRegisterValue(registerValues, parseRegister(operands[0]));
+      const rs = applySignalComponentToPathNumber(
+        activeSignalComponent,
+        "branchRs",
+        getRegisterValue(registerValues, parseRegister(operands[0])),
+      );
+      if (rs === null) {
+        return { taken: false, targetInstructionIndex: null };
+      }
       if (toSigned32(rs) < 0) {
         return {
           taken: true,
-          targetInstructionIndex: getLabelTargetInstructionIndex(operands[1], labels, pcToInstructionIndex),
+          targetInstructionIndex: getBranchTargetInstructionIndex(
+            instruction,
+            operands[1],
+            labels,
+            pcToInstructionIndex,
+            activeSignalComponent,
+          ),
         };
       }
       return { taken: false, targetInstructionIndex: null };
     }
 
     if (mnemonic === "bgez" && operands.length === 2) {
-      const rs = getRegisterValue(registerValues, parseRegister(operands[0]));
+      const rs = applySignalComponentToPathNumber(
+        activeSignalComponent,
+        "branchRs",
+        getRegisterValue(registerValues, parseRegister(operands[0])),
+      );
+      if (rs === null) {
+        return { taken: false, targetInstructionIndex: null };
+      }
       if (toSigned32(rs) >= 0) {
         return {
           taken: true,
-          targetInstructionIndex: getLabelTargetInstructionIndex(operands[1], labels, pcToInstructionIndex),
+          targetInstructionIndex: getBranchTargetInstructionIndex(
+            instruction,
+            operands[1],
+            labels,
+            pcToInstructionIndex,
+            activeSignalComponent,
+          ),
         };
       }
       return { taken: false, targetInstructionIndex: null };

@@ -1,5 +1,9 @@
 import { parseRegister } from "@/features/compiler/registers";
 import type { ParsedInstruction } from "@/features/compiler/types";
+import {
+  applySignalComponentToPathNumber,
+  type ActiveSignalComponent,
+} from "@/features/components/placement/componentSignalRuntime";
 import { parseRegisterValue } from "@/features/statePanels/registerEditorModel";
 import { parseImmediate } from "../core/parse";
 import { MEMORY_BYTE_COUNT, readWord, writeWord } from "../runtime/memoryRuntime";
@@ -11,6 +15,11 @@ type MemoryStageResult = {
   effect: StageEffect | null;
   changedMemoryWords: number[];
   deltas: MemoryWordDelta[];
+};
+
+type ExLatchedValues = {
+  aluResult?: number;
+  forwardedBValue?: number;
 };
 
 const REGISTER_ALIAS_BY_NUMBER: Record<number, string> = {
@@ -71,6 +80,8 @@ export function runMemoryStage(
   instruction: ParsedInstruction | null,
   registerValues: Record<string, string>,
   memoryWords: SparseMemoryWords,
+  activeSignalComponent: ActiveSignalComponent = null,
+  exLatchedValues: ExLatchedValues = {},
 ): MemoryStageResult {
   if (!instruction) {
     return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
@@ -85,7 +96,22 @@ export function runMemoryStage(
 
     const rt = parseRegister(operands[0]);
     const { offset, base } = parseMemoryOperand(operands[1]);
-    const address = getRegisterValue(registerValues, base) + offset;
+    const baseValue =
+      applySignalComponentToPathNumber(activeSignalComponent, "exA", getRegisterValue(registerValues, base)) ?? 0;
+    const immediateValue =
+      applySignalComponentToPathNumber(activeSignalComponent, "imm", offset >>> 0) ?? (offset >>> 0);
+    const address =
+      applySignalComponentToPathNumber(
+        activeSignalComponent,
+        "memoryAddress",
+        exLatchedValues.aluResult ?? ((baseValue + immediateValue) >>> 0),
+      ) ??
+      (applySignalComponentToPathNumber(
+        activeSignalComponent,
+        "aluResult",
+        exLatchedValues.aluResult ?? ((baseValue + immediateValue) >>> 0),
+      ) ??
+        (exLatchedValues.aluResult ?? ((baseValue + immediateValue) >>> 0)));
     if (address % 4 !== 0) {
       throw createRuntimeStageError("MEM", instruction, `unaligned word store at address ${address}`);
     }
@@ -94,7 +120,18 @@ export function runMemoryStage(
     }
 
     const currentValue = readWord(memoryWords, address);
-    const nextValue = getRegisterValue(registerValues, rt);
+    const nextValue =
+      applySignalComponentToPathNumber(
+        activeSignalComponent,
+        "memoryWriteData",
+        exLatchedValues.forwardedBValue ?? getRegisterValue(registerValues, rt),
+      ) ??
+      (applySignalComponentToPathNumber(
+        activeSignalComponent,
+        "exB",
+        exLatchedValues.forwardedBValue ?? getRegisterValue(registerValues, rt),
+      ) ??
+        0);
     if (currentValue === nextValue) {
       return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
     }
@@ -103,7 +140,9 @@ export function runMemoryStage(
     writeWord(nextMemory, address, nextValue);
     return {
       memoryWords: nextMemory,
-      effect: null,
+      effect: {
+        latchedAluResult: exLatchedValues.aluResult ?? ((baseValue + immediateValue) >>> 0),
+      },
       changedMemoryWords: [address / 4],
       deltas: [
         {
@@ -122,7 +161,22 @@ export function runMemoryStage(
 
     const rt = parseRegister(operands[0]);
     const { offset, base } = parseMemoryOperand(operands[1]);
-    const address = getRegisterValue(registerValues, base) + offset;
+    const baseValue =
+      applySignalComponentToPathNumber(activeSignalComponent, "exA", getRegisterValue(registerValues, base)) ?? 0;
+    const immediateValue =
+      applySignalComponentToPathNumber(activeSignalComponent, "imm", offset >>> 0) ?? (offset >>> 0);
+    const address =
+      applySignalComponentToPathNumber(
+        activeSignalComponent,
+        "memoryAddress",
+        exLatchedValues.aluResult ?? ((baseValue + immediateValue) >>> 0),
+      ) ??
+      (applySignalComponentToPathNumber(
+        activeSignalComponent,
+        "aluResult",
+        exLatchedValues.aluResult ?? ((baseValue + immediateValue) >>> 0),
+      ) ??
+        (exLatchedValues.aluResult ?? ((baseValue + immediateValue) >>> 0)));
     if (address % 4 !== 0) {
       throw createRuntimeStageError("MEM", instruction, `unaligned word load at address ${address}`);
     }
@@ -130,12 +184,14 @@ export function runMemoryStage(
       throw createRuntimeStageError("MEM", instruction, `memory load out of range at address ${address}`);
     }
 
+    const loadedValue = readWord(memoryWords, address);
     return {
       memoryWords,
       effect: {
+        latchedAluResult: exLatchedValues.aluResult ?? ((baseValue + immediateValue) >>> 0),
         wbWrite: {
           registerNumber: rt,
-          value: readWord(memoryWords, address),
+          value: applySignalComponentToPathNumber(activeSignalComponent, "memoryReadData", loadedValue) ?? loadedValue,
         },
       },
       changedMemoryWords: [],

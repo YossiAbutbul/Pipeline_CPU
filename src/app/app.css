@@ -70,3 +70,76 @@
   overflow: visible;
   z-index: 20;
 }
+
+.leftPane {
+  overflow: visible;
+  z-index: 20;
+}
+
+.dragCancelZone {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  z-index: 160;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px 8px 10px;
+  border: 1px solid color-mix(in oklab, #ef4444 34%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--surface-1) 92%, #ef4444 8%);
+  box-shadow: var(--shadow);
+  transform: translateX(-50%);
+  cursor: var(--cursor-action);
+}
+
+.dragCancelIcon {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: color-mix(in oklab, #ef4444 18%, var(--surface-1));
+  color: #ef4444;
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.dragCancelText {
+  color: var(--text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.componentAttachLayer {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 170;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.componentAttachToken {
+  min-width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  border: 1px solid
+    color-mix(in oklab, var(--accent) 20%, var(--register-tooltip-border));
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--surface-1) 90%, var(--accent) 10%);
+  color: var(--register-tooltip-title);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.05;
+  text-transform: uppercase;
+  opacity: 0.48;
+  box-shadow: 0 8px 16px color-mix(in oklab, #000 8%, transparent);
+}

@@ -1,48 +1,39 @@
 import PipelineCanvas from "@/features/pipelineCanvas/PipelineCanvas";
+import { PendingComponentOverlay } from "@/features/components/placement/PendingComponentOverlay";
+import { usePendingComponentPlacement } from "@/features/components/placement/usePendingComponentPlacement";
 import ProgramEditor from "@/features/program/ProgramEditor";
 import { usePipelineRunSession } from "@/features/simulator/hooks/usePipelineRunSession";
 import StatePanel from "@/features/statePanels/StatePanel";
 import { GuidedTourTooltip, NotificationToast } from "@/ui/components";
-import { useCallback, useEffect, useState } from "react";
-import type { NotificationItem } from "@/ui/components/NotificationToast/NotificationToast";
+import { useCallback, useEffect } from "react";
+import { useGuidedTour } from "./hooks/useGuidedTour";
+import { useNotificationQueue } from "./hooks/useNotificationQueue";
 import { clearPersistedAppState, createDefaultAppState, usePersistedAppState } from "./store/appStore";
 import "./app.css";
 
-const GUIDED_TOUR_STORAGE_KEY = "pipeline-cpu.guided-tour-completed";
-const GUIDED_TOUR_TOTAL_STEPS = 8;
-
-function loadInitialGuidedTourStep() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  return window.localStorage.getItem(GUIDED_TOUR_STORAGE_KEY) === "true" ? null : 0;
-}
+const GUIDED_TOUR_TOTAL_STEPS = 9;
 
 export default function App() {
   const [appState, setAppState] = usePersistedAppState();
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [guidedTourStep, setGuidedTourStep] = useState<number | null>(() => loadInitialGuidedTourStep());
+  const { notifications, pushNotification, dismissNotification } = useNotificationQueue();
+  const {
+    guidedTourStep,
+    setGuidedTourStep,
+    completeGuidedTour,
+    resetGuidedTour,
+    goToNextTourStep,
+    goToPreviousTourStep,
+  } = useGuidedTour(GUIDED_TOUR_TOTAL_STEPS);
+  const {
+    pendingComponentLabel,
+    placedComponents,
+    beginComponentPlacement,
+    cancelComponentPlacement,
+    placePendingComponent,
+    deletePlacedComponent,
+    resetComponentPlacement,
+  } = usePendingComponentPlacement();
   const { program, initialPc, statePanelTab, registers, memory } = appState;
-
-  const pushNotification = useCallback((notification: Omit<NotificationItem, "id">) => {
-    const id = Date.now() + Math.floor(Math.random() * 1000);
-    setNotifications((prev) => {
-      const duplicateIndex = prev.findIndex((item) =>
-        item.tone === notification.tone &&
-        item.title === notification.title &&
-        item.message === notification.message
-      );
-
-      if (duplicateIndex !== -1) {
-        const next = [...prev];
-        next[duplicateIndex] = { ...next[duplicateIndex], ...notification, id };
-        return next;
-      }
-
-      return [...prev, { ...notification, id }].slice(-2);
-    });
-  }, []);
 
   const pushSuccessNotification = (message: string) => {
     pushNotification({ title: "Registers updated", message, tone: "success" });
@@ -60,35 +51,10 @@ export default function App() {
   const pushRuntimeErrorNotification = (message: string) =>
     pushNotification({ title: "Runtime error", message, tone: "error" });
 
-  const dismissNotification = useCallback((id: number) => {
-    setNotifications((prev) => prev.filter((notification) => notification.id !== id));
-  }, []);
-
-  const completeGuidedTour = useCallback(() => {
-    setGuidedTourStep(null);
+  const handleCompleteGuidedTour = useCallback(() => {
+    completeGuidedTour();
     setAppState((prev) => ({ ...prev, statePanelTab: "registers" }));
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(GUIDED_TOUR_STORAGE_KEY, "true");
-    }
-  }, [setAppState]);
-
-  const goToNextTourStep = useCallback(() => {
-    setGuidedTourStep((current) => {
-      if (current === null) {
-        return current;
-      }
-      return current >= GUIDED_TOUR_TOTAL_STEPS - 1 ? current : current + 1;
-    });
-  }, []);
-
-  const goToPreviousTourStep = useCallback(() => {
-    setGuidedTourStep((current) => {
-      if (current === null) {
-        return current;
-      }
-      return current <= 0 ? current : current - 1;
-    });
-  }, []);
+  }, [completeGuidedTour, setAppState]);
 
   const setRegisterValues = (values: Record<string, string>) => {
     setAppState((prev) => ({ ...prev, registers: { ...prev.registers, values } }));
@@ -96,6 +62,8 @@ export default function App() {
 
   const {
     pipeline,
+    pipelineEffects,
+    runtimeRegisterValues,
     memoryWords,
     changedMemoryWords,
     runSessionActive,
@@ -112,6 +80,7 @@ export default function App() {
     program,
     initialPc,
     memoryRules: memory.rules,
+    placedComponents,
     registerValues: registers.values,
     onRegisterValuesChange: setRegisterValues,
     onRunError: pushProgramErrorNotification,
@@ -123,7 +92,7 @@ export default function App() {
       setAppState((prev) => ({ ...prev, statePanelTab: "registers" }));
     }
 
-    if ((guidedTourStep === 3 || guidedTourStep === 6) && statePanelTab !== "memory") {
+    if ((guidedTourStep === 3 || guidedTourStep === 7) && statePanelTab !== "memory") {
       setAppState((prev) => ({ ...prev, statePanelTab: "memory" }));
     }
   }, [guidedTourStep, setAppState, statePanelTab]);
@@ -140,17 +109,15 @@ export default function App() {
 
   const handleResetPersistedData = () => {
     clearPersistedAppState();
-    if (typeof window !== "undefined") {
-      window.localStorage.removeItem(GUIDED_TOUR_STORAGE_KEY);
-    }
     setAppState(createDefaultAppState());
     resetPipeline();
-    setGuidedTourStep(0);
+    resetComponentPlacement();
+    resetGuidedTour();
   };
 
   const handleRun = () => {
     run();
-    setGuidedTourStep((currentStep) => (currentStep === 4 ? 5 : currentStep));
+    setGuidedTourStep((currentStep) => (currentStep === 5 ? 6 : currentStep));
   };
 
   const handleStop = () => {
@@ -159,7 +126,7 @@ export default function App() {
       if (currentStep === null) {
         return currentStep;
       }
-      return currentStep >= 5 ? 4 : currentStep;
+      return currentStep >= 6 ? 5 : currentStep;
     });
   };
 
@@ -169,7 +136,7 @@ export default function App() {
       if (currentStep === null) {
         return currentStep;
       }
-      return currentStep >= 5 ? 4 : currentStep;
+      return currentStep >= 6 ? 5 : currentStep;
     });
   };
 
@@ -194,11 +161,15 @@ export default function App() {
           onInitialPcChange={handleInitialPcChange}
           onResetPersistedData={handleResetPersistedData}
           showInitialPcTourStep={guidedTourStep === 1}
+          showAddComponentTourStep={guidedTourStep === 4}
+          onBackAddComponentTourStep={goToPreviousTourStep}
+          onNextAddComponentTourStep={goToNextTourStep}
           onNextInitialPcTourStep={goToNextTourStep}
-          showRunTourStep={guidedTourStep === 4}
+          showRunTourStep={guidedTourStep === 5}
           onBackRunTourStep={goToPreviousTourStep}
           onNextRunTourStep={goToNextTourStep}
-          onDismissRunTour={completeGuidedTour}
+          onDismissRunTour={handleCompleteGuidedTour}
+          onAddComponent={beginComponentPlacement}
         />
       </aside>
 
@@ -207,33 +178,40 @@ export default function App() {
           open={guidedTourStep === 0}
           step={1}
           totalSteps={GUIDED_TOUR_TOTAL_STEPS}
-        align="start"
-        className="welcomeTourTooltip"
-        title="Welcome to Pipeline CPU"
-        description="This quick tour shows how to set up, run, and inspect the simulator."
+          align="start"
+          className="welcomeTourTooltip"
+          title="Welcome to Pipeline CPU"
+          description="This quick tour shows how to set up, run, and inspect the simulator."
           onNext={goToNextTourStep}
           nextLabel="Start"
-          onSkip={completeGuidedTour}
-          onClose={completeGuidedTour}
+          onSkip={handleCompleteGuidedTour}
+          onClose={handleCompleteGuidedTour}
         >
           <span className="welcomeTourAnchor" aria-hidden="true" />
         </GuidedTourTooltip>
         <PipelineCanvas
           pipeline={pipeline}
+          pipelineEffects={pipelineEffects}
+          runtimeRegisterValues={runtimeRegisterValues}
           hoveredSignalValues={hoveredSignalValues}
           clockCycle={clockCycle}
           showClockCycle={runSessionActive}
+          enableSignalHover={runSessionActive}
           onResetTracking={handleResetTracking}
           onStepForward={handleStepForward}
           onStepBackward={stepBackward}
           canStepBackward={canStepBackward}
           canStepForward={canStepForward}
-          showStepForwardTourStep={guidedTourStep === 5}
+          showStepForwardTourStep={guidedTourStep === 6}
           onBackStepForwardTourStep={goToPreviousTourStep}
           onNextStepForwardTourStep={goToNextTourStep}
-          showHoverDiagramTourStep={guidedTourStep === 7}
+          showHoverDiagramTourStep={guidedTourStep === 8}
           onBackHoverDiagramTourStep={goToPreviousTourStep}
-          onDismissTour={completeGuidedTour}
+          onDismissTour={handleCompleteGuidedTour}
+          placedComponents={placedComponents}
+          pendingComponentLabel={pendingComponentLabel}
+          onPlacePendingComponent={placePendingComponent}
+          onDeletePlacedComponent={deletePlacedComponent}
         />
       </main>
 
@@ -268,12 +246,25 @@ export default function App() {
           showAddRulesTourStep={guidedTourStep === 3}
           onBackAddRulesTourStep={goToPreviousTourStep}
           onNextAddRulesTourStep={goToNextTourStep}
-          showRuntimeMemoryTourStep={guidedTourStep === 6}
+          showRuntimeMemoryTourStep={guidedTourStep === 7}
           onBackRuntimeMemoryTourStep={goToPreviousTourStep}
           onNextRuntimeMemoryTourStep={goToNextTourStep}
-          onDismissTour={completeGuidedTour}
+          onDismissTour={handleCompleteGuidedTour}
         />
       </aside>
+      {pendingComponentLabel ? (
+        <div
+          className="dragCancelZone"
+          onClick={cancelComponentPlacement}
+          aria-label="Cancel pending component placement"
+        >
+          <span className="dragCancelIcon" aria-hidden="true">
+            x
+          </span>
+          <span className="dragCancelText">Cancel Placement</span>
+        </div>
+      ) : null}
+      {pendingComponentLabel ? <PendingComponentOverlay label={pendingComponentLabel} /> : null}
       <NotificationToast notifications={notifications} onDismiss={dismissNotification} />
     </div>
   );

@@ -2,6 +2,7 @@ import { Button, GuidedTourTooltip, Panel, SettingsPanel, Tooltip } from "@/ui/c
 import { MipsMonaco } from "@/ui/components/MipsMonaco";
 import "@/ui/components/ThemeToggle/themeToggle.css";
 import { useTheme } from "@/ui/theme/ThemeProvider";
+import { AddComponentPanel } from "@/features/components/AddComponentPanel";
 import { Play, Plus, RotateCcw, Settings, Square, Trash2 } from "lucide-react";
 import { useState } from "react";
 import "./programEditor.css";
@@ -19,12 +20,16 @@ type Props = {
   onInitialPcChange: (value: string) => void;
   onResetPersistedData: () => void;
   showInitialPcTourStep: boolean;
+  showAddComponentTourStep: boolean;
   onBackInitialPcTourStep?: () => void;
+  onBackAddComponentTourStep: () => void;
+  onNextAddComponentTourStep: () => void;
   onNextInitialPcTourStep: () => void;
   showRunTourStep: boolean;
   onBackRunTourStep: () => void;
   onNextRunTourStep: () => void;
   onDismissRunTour: () => void;
+  onAddComponent: (label: string) => void;
 };
 
 export default function ProgramEditor({
@@ -38,14 +43,19 @@ export default function ProgramEditor({
   onInitialPcChange,
   onResetPersistedData,
   showInitialPcTourStep,
+  showAddComponentTourStep,
   onBackInitialPcTourStep,
+  onBackAddComponentTourStep,
+  onNextAddComponentTourStep,
   onNextInitialPcTourStep,
   showRunTourStep,
   onBackRunTourStep,
   onNextRunTourStep,
   onDismissRunTour,
+  onAddComponent,
 }: Props) {
   const { theme, themeMode, toggleTheme } = useTheme();
+  const [isAddComponentOpen, setIsAddComponentOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleClearProgram = () => {
@@ -56,14 +66,48 @@ export default function ProgramEditor({
   return (
     <Panel
       title="Program"
-      className="programPanel"
+      className="programPanel panelOverflowVisible"
+      bodyClassName="panelBodyVisible"
       headerSize="lg"
       toolbar={
         <>
-          <Button size="sm" className="programToolbarButton">
-            <Plus size={14} aria-hidden="true" />
-            Add Component
-          </Button>
+          <div
+            className="programAddComponentAnchor"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <GuidedTourTooltip
+              open={showAddComponentTourStep}
+              step={5}
+              totalSteps={9}
+              align="start"
+              title="Add A Component"
+              description="Open the panel to choose a component and place it on the diagram."
+              onBack={onBackAddComponentTourStep}
+              onNext={onNextAddComponentTourStep}
+              onSkip={onDismissRunTour}
+              onClose={onDismissRunTour}
+            >
+              <Button
+                type="button"
+                size="sm"
+                className="programToolbarButton"
+                onClick={() => {
+                  setIsAddComponentOpen((prev) => !prev);
+                  setIsSettingsOpen(false);
+                }}
+                aria-expanded={isAddComponentOpen}
+              >
+                <Plus size={14} aria-hidden="true" />
+                Add Component
+              </Button>
+            </GuidedTourTooltip>
+            {isAddComponentOpen ? (
+              <AddComponentPanel
+                onClose={() => setIsAddComponentOpen(false)}
+                onAddComponent={onAddComponent}
+              />
+            ) : null}
+          </div>
           <div
             className="programSettingsAnchor"
             onMouseDown={(event) => event.stopPropagation()}
@@ -73,7 +117,10 @@ export default function ProgramEditor({
               size="sm"
               variant="secondary"
               className="programToolbarIconButton"
-              onClick={() => setIsSettingsOpen((prev) => !prev)}
+              onClick={() => {
+                setIsSettingsOpen((prev) => !prev);
+                setIsAddComponentOpen(false);
+              }}
               aria-label="Open settings"
               title="Settings"
               aria-expanded={isSettingsOpen}
@@ -124,7 +171,7 @@ export default function ProgramEditor({
             <GuidedTourTooltip
               open={showInitialPcTourStep}
               step={2}
-              totalSteps={8}
+              totalSteps={9}
               align="end"
               className="initialPcTourAnchor"
               title="Set The Initial PC"
@@ -140,6 +187,7 @@ export default function ProgramEditor({
                 className="initialPcInput"
                 value={initialPc}
                 onChange={(event) => onInitialPcChange(event.target.value)}
+                disabled={isRunActive}
                 spellCheck={false}
                 autoComplete="off"
                 aria-label="Initial PC"
@@ -175,8 +223,8 @@ export default function ProgramEditor({
           <div className="programActions">
             <GuidedTourTooltip
               open={showRunTourStep}
-              step={5}
-              totalSteps={8}
+              step={6}
+              totalSteps={9}
               align="start"
               fullWidth
               title="Run The Program"

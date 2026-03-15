@@ -411,7 +411,7 @@ export default function MemoryEditor({
         <GuidedTourTooltip
           open={showAddRulesTourStep}
           step={4}
-          totalSteps={8}
+          totalSteps={9}
           align="start"
           fullWidth
           title="Add Memory Rules"
@@ -595,8 +595,8 @@ export default function MemoryEditor({
       <div className="memoryRuntimeList" role="table" aria-label="Runtime memory words">
         <GuidedTourTooltip
           open={showRuntimeMemoryTourStep}
-          step={7}
-          totalSteps={8}
+          step={8}
+          totalSteps={9}
           align="start"
           className="memoryRuntimeTableTour"
           title="Inspect Runtime Memory"

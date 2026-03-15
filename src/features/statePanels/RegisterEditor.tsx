@@ -281,7 +281,7 @@ export default function RegisterEditor({
         <GuidedTourTooltip
           open={showEditRegistersTourStep}
           step={3}
-          totalSteps={8}
+          totalSteps={9}
           align="end"
           title="Edit Register Values"
           description="Edit the starting register values before you run the program."

@@ -1,4 +1,5 @@
 import type { ParsedInstruction } from "@/features/compiler/types";
+import type { ActiveSignalComponent } from "@/features/components/placement/componentSignalRuntime";
 
 export const PIPELINE_STAGES = ["IF", "ID", "EX", "MEM", "WB"] as const;
 
@@ -31,6 +32,7 @@ export type WbWriteEffect = {
 
 export type StageEffect = {
   wbWrite?: WbWriteEffect;
+  latchedAluResult?: number;
 };
 
 export type PipelineEffectSlots = Record<StageName, StageEffect | null>;
@@ -57,4 +59,5 @@ export type ForwardStepInput = {
   pcToInstructionIndex: Map<number, number>;
   registerValues: Record<string, string>;
   memoryWords: SparseMemoryWords;
+  activeSignalComponent: ActiveSignalComponent;
 };

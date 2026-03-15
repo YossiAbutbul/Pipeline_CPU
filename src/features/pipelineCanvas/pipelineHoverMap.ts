@@ -23,6 +23,9 @@ export type HoverSignalKey =
   | "aluInputA"
   | "aluInputB"
   | "aluResult"
+  | "memStageAluResultToMemwb"
+  | "memStageWriteBackDestToMemwb"
+  | "wbLatchedAluResult"
   | "exRtRegister"
   | "exRdRegister"
   | "exDestRegister"
@@ -113,12 +116,12 @@ export const PATH_SIGNAL_MAP: Partial<Record<string, { key: HoverSignalKey; labe
   w_fwd_b_exmem_to_dmem: { key: "memoryWriteData", label: "Memory Write Data" },
   w_dmem_readdata_to_mux_memtoreg: { key: "memoryReadData", label: "Memory Read Data" },
   w_dmem_aluout_to_memwb: { key: "memoryReadData", label: "Memory Read Data" },
-  w_exmem_alu_out_to_memwb: { key: "aluResult", label: "ALU Result" },
-  w_exmem_aluout_to_mux_memtoreg: { key: "aluResult", label: "ALU Result" },
+  w_exmem_alu_out_to_memwb: { key: "memStageAluResultToMemwb", label: "MEM/WB ALU Result In" },
+  w_exmem_aluout_to_mux_memtoreg: { key: "wbLatchedAluResult", label: "MEM/WB ALU Result" },
   w_mem_to_regfile: { key: "writeBackValue", label: "Writeback Value" },
   w_wb_value_to_mux_fwd_a: { key: "writeBackValue", label: "Writeback Value" },
   w_mux_memtoreg_to_mux_fwd_b: { key: "writeBackValue", label: "Writeback Value" },
-  w_exmem_regdst4_memwb: { key: "writeBackDest", label: "Writeback Register" },
+  w_exmem_regdst4_memwb: { key: "memStageWriteBackDestToMemwb", label: "MEM/WB Dest Register In" },
   w_dst2_reg_to_regfile: { key: "writeBackDest", label: "Writeback Register" },
   ctrl_pc_write: { key: "pcWriteCtrl", label: "PCWrite" },
   ctrl_ifid_write: { key: "ifIdWriteCtrl", label: "IF/ID Write" },
