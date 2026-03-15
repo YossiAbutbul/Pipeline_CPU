@@ -145,7 +145,7 @@ export function usePipelineRunSession({
   const hasPipelineWork = Object.values(pipelineInstructionIndices).some((value) => value !== null);
   const canStepForward = runSessionActive && (hasInstructionsToInject || hasPipelineWork);
   const canStepBackward = runSessionActive && history.length > 0;
-  const clockCycle = history.length;
+  const clockCycle = runSessionActive ? history.length + 1 : 0;
   const hoveredSignalValues = useMemo<PipelineSignalValues>(() => {
     const activeSignalComponent = getActiveSignalComponent(placedComponents);
     return buildPipelineSignalValues({
