@@ -1,6 +1,7 @@
 import { parseRegister } from "@/features/compiler/registers";
 import type { ParsedInstruction } from "@/features/compiler/types";
 import type { ActiveSignalComponent } from "@/features/components/placement/componentSignalRuntime";
+import { applySignalComponentToPathNumber } from "@/features/components/placement/componentSignalRuntime";
 import type { PipelineEffectSlots, PipelineInstructionSlots, StageEffect, SparseMemoryWords } from "../core/types";
 import { REG_INFO } from "@/monaco/mips/mipsData";
 import { parseRegisterValue, toHex32 } from "@/features/statePanels/registerEditorModel";
@@ -770,6 +771,7 @@ function getControlSignalValues(args: {
   registerValues: Record<string, string>;
   labels: Record<string, number>;
   pcToInstructionIndex: Map<number, number>;
+  activeSignalComponent: ActiveSignalComponent;
 }): {
   pcSrcCtrl?: string;
   regDstCtrl?: string;
@@ -780,7 +782,17 @@ function getControlSignalValues(args: {
   fwdACtrl?: string;
   fwdBCtrl?: string;
 } {
-  const { idInstruction, exInstruction, memInstruction, wbInstruction, pipelineEffects, registerValues, labels, pcToInstructionIndex } = args;
+  const {
+    idInstruction,
+    exInstruction,
+    memInstruction,
+    wbInstruction,
+    pipelineEffects,
+    registerValues,
+    labels,
+    pcToInstructionIndex,
+    activeSignalComponent,
+  } = args;
 
   const idMnemonic = idInstruction?.mnemonic;
   const memMnemonic = memInstruction?.mnemonic;
@@ -800,7 +812,7 @@ function getControlSignalValues(args: {
   const memToReg = Boolean(memMnemonic) && ["lw"].includes(memMnemonic!);
   const pcSrc =
     exInstruction !== null
-      ? resolveControlFlow(exInstruction, registerValues, labels, pcToInstructionIndex).taken
+      ? resolveControlFlow(exInstruction, registerValues, labels, pcToInstructionIndex, activeSignalComponent).taken
       : false;
   const [fwdARegister, fwdBRegister] = getExForwardRegisterNumbers(exInstruction);
   const memDestRegister = getWriteBackRegisterNumber(memInstruction, pipelineEffects.MEM);
@@ -919,6 +931,7 @@ export function buildPipelineSignalValues(args: {
     memoryWords,
     labels,
     pcToInstructionIndex,
+    activeSignalComponent,
   } = args;
   const ifInstructionIndex = pipelineInstructionIndices.IF;
   const idInstructionIndex = pipelineInstructionIndices.ID;
@@ -959,13 +972,20 @@ export function buildPipelineSignalValues(args: {
     registerValues,
     labels,
     pcToInstructionIndex,
+    activeSignalComponent,
   });
   const idBundle = getInstructionControlBundle(idInstruction);
   const exBundle = getInstructionControlBundle(exInstruction);
   const memBundle = getInstructionControlBundle(memInstruction);
   const wbBundle = getInstructionControlBundle(wbInstruction);
   const hasLoadUseHazard = shouldStallForLoadUseHazard(exInstruction, idInstruction);
-  const controlFlow = resolveControlFlow(exInstruction, registerValues, labels, pcToInstructionIndex);
+  const controlFlow = resolveControlFlow(
+    exInstruction,
+    registerValues,
+    labels,
+    pcToInstructionIndex,
+    activeSignalComponent,
+  );
   const branchTaken = !hasLoadUseHazard && controlFlow.taken && controlFlow.targetInstructionIndex !== null;
   const branchTargetInstruction =
     controlFlow.targetInstructionIndex === null ? null : instructions[controlFlow.targetInstructionIndex] ?? null;
@@ -975,13 +995,25 @@ export function buildPipelineSignalValues(args: {
     : branchTaken
       ? (branchTargetInstruction ? toHex32(branchTargetInstruction.pc >>> 0) : undefined)
       : sequentialNextPc;
+  const selectedNextPcNumeric =
+    selectedNextPc === undefined ? null : (Number.parseInt(selectedNextPc, 16) >>> 0);
+  const transformedSelectedNextPc =
+    selectedNextPcNumeric === null
+      ? undefined
+      : toHex32(
+          applySignalComponentToPathNumber(
+            activeSignalComponent,
+            "nextPcSelected",
+            selectedNextPcNumeric,
+          ) ?? selectedNextPcNumeric,
+        );
 
   return {
     pc: ifInstruction ? `0x${(ifInstruction.pc >>> 0).toString(16).toUpperCase().padStart(8, "0")}` : undefined,
     pcPlus4: ifInstruction ? `0x${(((ifInstruction.pc >>> 0) + 4) >>> 0).toString(16).toUpperCase().padStart(8, "0")}` : undefined,
     constant4: ifInstruction ? "0x00000004" : undefined,
     nextPcSequential: sequentialNextPc,
-    nextPcSelected: selectedNextPc,
+    nextPcSelected: transformedSelectedNextPc,
     exceptionVector: EXCEPTION_PC_VALUE,
     instructionWord: ifInstruction ? encodedInstructionHexByPc[ifInstruction.pc >>> 0] : undefined,
     idInstructionWord: idInstruction ? encodedInstructionHexByPc[idInstruction.pc >>> 0] : undefined,

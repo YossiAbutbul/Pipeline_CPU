@@ -2,6 +2,7 @@ import { applyWriteBack } from "./executeWriteBack";
 import { resolveControlFlow } from "./controlFlow";
 import { shouldStallForLoadUseHazard } from "./hazards";
 import { runMemoryStage } from "./memoryStage";
+import { applySignalComponentToPathNumber } from "@/features/components/placement/componentSignalRuntime";
 import type { ForwardStepInput, ForwardStepResult } from "../core/types";
 
 export function stepPipelineForward(input: ForwardStepInput): ForwardStepResult {
@@ -37,9 +38,19 @@ export function stepPipelineForward(input: ForwardStepInput): ForwardStepResult 
   );
   const isControlFlowTaken = !hasLoadUseHazard && controlFlow.taken && controlFlow.targetInstructionIndex !== null;
 
-  if (isControlFlowTaken) {
-    incomingInstructionIndex = controlFlow.targetInstructionIndex;
-  } else if (hasLoadUseHazard) {
+  if (isControlFlowTaken && controlFlow.targetInstructionIndex !== null) {
+    const selectedInstruction = instructions[controlFlow.targetInstructionIndex] ?? null;
+    const selectedPc = selectedInstruction?.pc ?? null;
+    const transformedSelectedPc =
+      applySignalComponentToPathNumber(activeSignalComponent, "nextPcSelected", selectedPc) ?? selectedPc;
+    if (transformedSelectedPc !== null) {
+      incomingInstructionIndex = pcToInstructionIndex.get(transformedSelectedPc) ?? null;
+    } else {
+      incomingInstructionIndex = null;
+    }
+  }
+
+  if (!isControlFlowTaken && hasLoadUseHazard) {
     incomingInstructionIndex = pipelineInstructionIndices.IF;
   }
 
@@ -56,7 +67,13 @@ export function stepPipelineForward(input: ForwardStepInput): ForwardStepResult 
   };
 
   const nextInstructionIndexValue =
-    hasLoadUseHazard ? nextInstructionIndex : incomingInstructionIndex !== null ? incomingInstructionIndex + 1 : nextInstructionIndex;
+    hasLoadUseHazard
+      ? nextInstructionIndex
+      : incomingInstructionIndex !== null
+        ? incomingInstructionIndex + 1
+        : isControlFlowTaken
+          ? instructions.length
+          : nextInstructionIndex;
 
   return {
     snapshot,

@@ -1,6 +1,6 @@
 import { compileAndLog, compileProgram } from "@/features/compiler";
 import { parseProgram } from "@/features/compiler/parser";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { MemoryRuleConfig } from "@/app/store/appStore";
 import { notifyAppError } from "@/app/errors/appError";
 import { getActiveSignalComponent } from "@/features/components/placement/componentSignalRuntime";
@@ -10,6 +10,7 @@ import { parseInitialPc } from "../core/parse";
 import { buildPipelineSignalValues, type PipelineSignalValues } from "../signals/pipelineSignals";
 import { stepPipelineForward } from "../stages/pipelineStep";
 import { EMPTY_PIPELINE, EMPTY_PIPELINE_EFFECTS, EMPTY_PIPELINE_INDICES } from "../core/state";
+import { runComponentPathTest } from "../testing/componentPathTester";
 import type {
   PipelineEffectSlots,
   PipelineInstructionSlots,
@@ -17,6 +18,14 @@ import type {
   PipelineSnapshot,
   SparseMemoryWords,
 } from "../core/types";
+
+declare global {
+  interface Window {
+    __componentPathTest?: {
+      run: typeof runComponentPathTest;
+    };
+  }
+}
 
 type UsePipelineRunSessionArgs = {
   program: string;
@@ -113,6 +122,20 @@ export function usePipelineRunSession({
       activeSignalComponent,
     });
   }, [encodedInstructionHexByPc, instructions, memoryWords, parsedProgram.labels, pcToInstructionIndex, pipelineEffects, pipelineInstructionIndices, placedComponents, registerValues]);
+
+  useEffect(() => {
+    if (!import.meta.env.DEV || typeof window === "undefined") {
+      return;
+    }
+
+    window.__componentPathTest = {
+      run: runComponentPathTest,
+    };
+
+    return () => {
+      delete window.__componentPathTest;
+    };
+  }, []);
 
   const resetPipeline = () => {
     const shouldRestoreRunState =

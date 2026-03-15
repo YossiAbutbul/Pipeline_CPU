@@ -5,6 +5,10 @@ import { getComponentValuePreview } from "./componentValueModel";
 export const SUPPORTED_COMPONENT_SIGNAL_KEYS = new Set<HoverSignalKey>([
   "imm16Value",
   "signExtendedImmValue",
+  "idBranchBasePcPlus4",
+  "idBranchOffsetShifted",
+  "idBranchTarget",
+  "nextPcSelected",
   "rsValue",
   "rtValue",
   "exRawAValue",
@@ -29,14 +33,17 @@ export type ActiveSignalComponent = {
 
 const BRANCH_COMPARE_RS_PATHS = new Set(["w_regfile_rs2_to_cmp_eq"]);
 const BRANCH_COMPARE_RT_PATHS = new Set(["w_regfile_rt2_to_cmp_eq"]);
+const BRANCH_BASE_PATHS = new Set(["w_ifid_to_adder_branch_id"]);
+const BRANCH_IMMEDIATE_PATHS = new Set(["w_16bit_imm_to_signext", "w_32bit_imm_to_shiftleft2_id"]);
+const BRANCH_SHIFTED_OFFSET_PATHS = new Set(["w_shiftleft2_id_to_adder_branch_id"]);
+const BRANCH_TARGET_PATHS = new Set(["w_adder_branch_id_to_mux_pcsrc"]);
+const NEXT_PC_SELECTED_PATHS = new Set(["w_mux_pcsrc_to_pc"]);
 const EX_SOURCE_A_PATHS = new Set(["w_regfile_rs2_to_idex", "w_idex_rs3_to_mux_fwd_a", "w_mux_fwd_a_rs_to_alu_a"]);
 const EX_SOURCE_B_PATHS = new Set(["w_regfile_rt2_to_idex", "w_idex_rt3_to_mux_fwd_b", "w_mux_fwd_b_to_mux_alusrc"]);
 const EX_IMMEDIATE_PATHS = new Set([
   "w_16bit_imm_to_signext",
   "w_signext_32bit_imm_to_idex",
   "w_idex_32bit_imm_to_mux_alusrc",
-  "w_32bit_imm_to_shiftleft2_id",
-  "w_shiftleft2_id_to_adder_branch_id",
 ]);
 const ALU_INPUT_B_PATHS = new Set(["w_mux_alusrc_to_alu_b"]);
 const ALU_RESULT_PATHS = new Set([
@@ -92,12 +99,33 @@ export function applySignalComponentToNumber(
 
 export function applySignalComponentToPathNumber(
   activeComponent: ActiveSignalComponent,
-  pathGroup: "branchRs" | "branchRt" | "exA" | "exB" | "imm" | "aluB" | "aluResult" | "memoryAddress" | "memoryWriteData" | "memoryReadData" | "writeBackValue",
+  pathGroup:
+    | "branchRs"
+    | "branchRt"
+    | "branchBase"
+    | "branchImm"
+    | "branchOffsetShifted"
+    | "branchTarget"
+    | "nextPcSelected"
+    | "exA"
+    | "exB"
+    | "imm"
+    | "aluB"
+    | "aluResult"
+    | "memoryAddress"
+    | "memoryWriteData"
+    | "memoryReadData"
+    | "writeBackValue",
   value: number | null,
 ) {
   const groups = {
     branchRs: BRANCH_COMPARE_RS_PATHS,
     branchRt: BRANCH_COMPARE_RT_PATHS,
+    branchBase: BRANCH_BASE_PATHS,
+    branchImm: BRANCH_IMMEDIATE_PATHS,
+    branchOffsetShifted: BRANCH_SHIFTED_OFFSET_PATHS,
+    branchTarget: BRANCH_TARGET_PATHS,
+    nextPcSelected: NEXT_PC_SELECTED_PATHS,
     exA: EX_SOURCE_A_PATHS,
     exB: EX_SOURCE_B_PATHS,
     imm: EX_IMMEDIATE_PATHS,
