@@ -1,5 +1,6 @@
 import { parseRegister } from "@/features/compiler/registers";
 import type { ParsedInstruction } from "@/features/compiler/types";
+import { applySignalComponentToNumber, type ActiveSignalComponent } from "@/features/components/placement/componentSignalRuntime";
 import { parseRegisterValue } from "@/features/statePanels/registerEditorModel";
 import { createRuntimeStageError } from "./runtimeError";
 
@@ -73,6 +74,7 @@ export function resolveControlFlow(
   registerValues: Record<string, string>,
   labels: Record<string, number>,
   pcToInstructionIndex: Map<number, number>,
+  activeSignalComponent: ActiveSignalComponent = null,
 ): ControlFlowResult {
   if (!instruction) {
     return { taken: false, targetInstructionIndex: null };
@@ -89,8 +91,19 @@ export function resolveControlFlow(
     }
 
     if (mnemonic === "beq" && operands.length === 3) {
-      const rs = getRegisterValue(registerValues, parseRegister(operands[0]));
-      const rt = getRegisterValue(registerValues, parseRegister(operands[1]));
+      const rs = applySignalComponentToNumber(
+        activeSignalComponent,
+        "rsValue",
+        getRegisterValue(registerValues, parseRegister(operands[0])),
+      );
+      const rt = applySignalComponentToNumber(
+        activeSignalComponent,
+        "rtValue",
+        getRegisterValue(registerValues, parseRegister(operands[1])),
+      );
+      if (rs === null || rt === null) {
+        return { taken: false, targetInstructionIndex: null };
+      }
       if (rs === rt) {
         return {
           taken: true,
@@ -101,8 +114,19 @@ export function resolveControlFlow(
     }
 
     if (mnemonic === "bne" && operands.length === 3) {
-      const rs = getRegisterValue(registerValues, parseRegister(operands[0]));
-      const rt = getRegisterValue(registerValues, parseRegister(operands[1]));
+      const rs = applySignalComponentToNumber(
+        activeSignalComponent,
+        "rsValue",
+        getRegisterValue(registerValues, parseRegister(operands[0])),
+      );
+      const rt = applySignalComponentToNumber(
+        activeSignalComponent,
+        "rtValue",
+        getRegisterValue(registerValues, parseRegister(operands[1])),
+      );
+      if (rs === null || rt === null) {
+        return { taken: false, targetInstructionIndex: null };
+      }
       if (rs !== rt) {
         return {
           taken: true,
@@ -113,7 +137,14 @@ export function resolveControlFlow(
     }
 
     if (mnemonic === "blez" && operands.length === 2) {
-      const rs = getRegisterValue(registerValues, parseRegister(operands[0]));
+      const rs = applySignalComponentToNumber(
+        activeSignalComponent,
+        "rsValue",
+        getRegisterValue(registerValues, parseRegister(operands[0])),
+      );
+      if (rs === null) {
+        return { taken: false, targetInstructionIndex: null };
+      }
       if (toSigned32(rs) <= 0) {
         return {
           taken: true,
@@ -124,7 +155,14 @@ export function resolveControlFlow(
     }
 
     if (mnemonic === "bgtz" && operands.length === 2) {
-      const rs = getRegisterValue(registerValues, parseRegister(operands[0]));
+      const rs = applySignalComponentToNumber(
+        activeSignalComponent,
+        "rsValue",
+        getRegisterValue(registerValues, parseRegister(operands[0])),
+      );
+      if (rs === null) {
+        return { taken: false, targetInstructionIndex: null };
+      }
       if (toSigned32(rs) > 0) {
         return {
           taken: true,
@@ -135,7 +173,14 @@ export function resolveControlFlow(
     }
 
     if (mnemonic === "bltz" && operands.length === 2) {
-      const rs = getRegisterValue(registerValues, parseRegister(operands[0]));
+      const rs = applySignalComponentToNumber(
+        activeSignalComponent,
+        "rsValue",
+        getRegisterValue(registerValues, parseRegister(operands[0])),
+      );
+      if (rs === null) {
+        return { taken: false, targetInstructionIndex: null };
+      }
       if (toSigned32(rs) < 0) {
         return {
           taken: true,
@@ -146,7 +191,14 @@ export function resolveControlFlow(
     }
 
     if (mnemonic === "bgez" && operands.length === 2) {
-      const rs = getRegisterValue(registerValues, parseRegister(operands[0]));
+      const rs = applySignalComponentToNumber(
+        activeSignalComponent,
+        "rsValue",
+        getRegisterValue(registerValues, parseRegister(operands[0])),
+      );
+      if (rs === null) {
+        return { taken: false, targetInstructionIndex: null };
+      }
       if (toSigned32(rs) >= 0) {
         return {
           taken: true,

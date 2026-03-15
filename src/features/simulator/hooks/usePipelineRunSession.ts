@@ -3,6 +3,8 @@ import { parseProgram } from "@/features/compiler/parser";
 import { useMemo, useRef, useState } from "react";
 import type { MemoryRuleConfig } from "@/app/store/appStore";
 import { notifyAppError } from "@/app/errors/appError";
+import { getActiveSignalComponent } from "@/features/components/placement/componentSignalRuntime";
+import type { PlacedComponent } from "@/features/components/placement/usePendingComponentPlacement";
 import { createMemoryFromRules } from "../runtime/memoryRuntime";
 import { parseInitialPc } from "../core/parse";
 import { buildPipelineSignalValues, type PipelineSignalValues } from "../signals/pipelineSignals";
@@ -20,6 +22,7 @@ type UsePipelineRunSessionArgs = {
   program: string;
   initialPc: string;
   memoryRules: MemoryRuleConfig[];
+  placedComponents: PlacedComponent[];
   registerValues: Record<string, string>;
   onRegisterValuesChange: (values: Record<string, string>) => void;
   onRunError: (message: string) => void;
@@ -36,6 +39,7 @@ export function usePipelineRunSession({
   program,
   initialPc,
   memoryRules,
+  placedComponents,
   registerValues,
   onRegisterValuesChange,
   onRunError,
@@ -96,6 +100,7 @@ export function usePipelineRunSession({
   const canStepBackward = runSessionActive && history.length > 0;
   const clockCycle = history.length;
   const hoveredSignalValues = useMemo<PipelineSignalValues>(() => {
+    const activeSignalComponent = getActiveSignalComponent(placedComponents);
     return buildPipelineSignalValues({
       instructions,
       pipelineInstructionIndices,
@@ -105,8 +110,9 @@ export function usePipelineRunSession({
       memoryWords,
       labels: parsedProgram.labels,
       pcToInstructionIndex,
+      activeSignalComponent,
     });
-  }, [encodedInstructionHexByPc, instructions, memoryWords, parsedProgram.labels, pcToInstructionIndex, pipelineEffects, pipelineInstructionIndices, registerValues]);
+  }, [encodedInstructionHexByPc, instructions, memoryWords, parsedProgram.labels, pcToInstructionIndex, pipelineEffects, pipelineInstructionIndices, placedComponents, registerValues]);
 
   const resetPipeline = () => {
     const shouldRestoreRunState =
@@ -199,6 +205,7 @@ export function usePipelineRunSession({
         pcToInstructionIndex,
         registerValues,
         memoryWords,
+        activeSignalComponent: getActiveSignalComponent(placedComponents),
       });
     } catch (error) {
       const appError = notifyAppError(onRuntimeError, error, "runtime", "Runtime execution failed");

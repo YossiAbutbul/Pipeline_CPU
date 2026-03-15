@@ -1,5 +1,6 @@
 import { parseRegister } from "@/features/compiler/registers";
 import type { ParsedInstruction } from "@/features/compiler/types";
+import { applySignalComponentToNumber, type ActiveSignalComponent } from "@/features/components/placement/componentSignalRuntime";
 import { parseRegisterValue } from "@/features/statePanels/registerEditorModel";
 import { parseImmediate } from "../core/parse";
 import { MEMORY_BYTE_COUNT, readWord, writeWord } from "../runtime/memoryRuntime";
@@ -71,6 +72,7 @@ export function runMemoryStage(
   instruction: ParsedInstruction | null,
   registerValues: Record<string, string>,
   memoryWords: SparseMemoryWords,
+  activeSignalComponent: ActiveSignalComponent = null,
 ): MemoryStageResult {
   if (!instruction) {
     return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
@@ -85,7 +87,11 @@ export function runMemoryStage(
 
     const rt = parseRegister(operands[0]);
     const { offset, base } = parseMemoryOperand(operands[1]);
-    const address = getRegisterValue(registerValues, base) + offset;
+    const address = applySignalComponentToNumber(
+      activeSignalComponent,
+      activeSignalComponent?.signalKey === "aluResult" ? "aluResult" : "memoryAddress",
+      (getRegisterValue(registerValues, base) + offset) >>> 0,
+    ) ?? 0;
     if (address % 4 !== 0) {
       throw createRuntimeStageError("MEM", instruction, `unaligned word store at address ${address}`);
     }
@@ -94,7 +100,11 @@ export function runMemoryStage(
     }
 
     const currentValue = readWord(memoryWords, address);
-    const nextValue = getRegisterValue(registerValues, rt);
+    const nextValue = applySignalComponentToNumber(
+      activeSignalComponent,
+      "memoryWriteData",
+      getRegisterValue(registerValues, rt),
+    ) ?? 0;
     if (currentValue === nextValue) {
       return { memoryWords, effect: null, changedMemoryWords: [], deltas: [] };
     }
@@ -122,7 +132,11 @@ export function runMemoryStage(
 
     const rt = parseRegister(operands[0]);
     const { offset, base } = parseMemoryOperand(operands[1]);
-    const address = getRegisterValue(registerValues, base) + offset;
+    const address = applySignalComponentToNumber(
+      activeSignalComponent,
+      activeSignalComponent?.signalKey === "aluResult" ? "aluResult" : "memoryAddress",
+      (getRegisterValue(registerValues, base) + offset) >>> 0,
+    ) ?? 0;
     if (address % 4 !== 0) {
       throw createRuntimeStageError("MEM", instruction, `unaligned word load at address ${address}`);
     }
@@ -135,7 +149,9 @@ export function runMemoryStage(
       effect: {
         wbWrite: {
           registerNumber: rt,
-          value: readWord(memoryWords, address),
+          value:
+            applySignalComponentToNumber(activeSignalComponent, "memoryReadData", readWord(memoryWords, address)) ??
+            readWord(memoryWords, address),
         },
       },
       changedMemoryWords: [],

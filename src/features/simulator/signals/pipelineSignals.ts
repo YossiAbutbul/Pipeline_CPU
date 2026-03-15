@@ -1,5 +1,6 @@
 import { parseRegister } from "@/features/compiler/registers";
 import type { ParsedInstruction } from "@/features/compiler/types";
+import type { ActiveSignalComponent } from "@/features/components/placement/componentSignalRuntime";
 import type { PipelineEffectSlots, PipelineInstructionSlots, StageEffect, SparseMemoryWords } from "../core/types";
 import { REG_INFO } from "@/monaco/mips/mipsData";
 import { parseRegisterValue, toHex32 } from "@/features/statePanels/registerEditorModel";
@@ -907,6 +908,7 @@ export function buildPipelineSignalValues(args: {
   memoryWords: SparseMemoryWords;
   labels: Record<string, number>;
   pcToInstructionIndex: Map<number, number>;
+  activeSignalComponent: ActiveSignalComponent;
 }): PipelineSignalValues {
   const {
     instructions,

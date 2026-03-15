@@ -15,6 +15,7 @@ export function stepPipelineForward(input: ForwardStepInput): ForwardStepResult 
     pcToInstructionIndex,
     registerValues,
     memoryWords,
+    activeSignalComponent,
   } = input;
 
   let incomingInstructionIndex = instructions[nextInstructionIndex] ? nextInstructionIndex : null;
@@ -25,9 +26,15 @@ export function stepPipelineForward(input: ForwardStepInput): ForwardStepResult 
   const memInstruction = memInstructionIndex !== null ? instructions[memInstructionIndex] : null;
   const exInstruction = pipelineInstructionIndices.EX !== null ? instructions[pipelineInstructionIndices.EX] : null;
   const idInstruction = pipelineInstructionIndices.ID !== null ? instructions[pipelineInstructionIndices.ID] : null;
-  const memResult = runMemoryStage(memInstruction, registerValues, memoryWords);
+  const memResult = runMemoryStage(memInstruction, registerValues, memoryWords, activeSignalComponent);
   const hasLoadUseHazard = shouldStallForLoadUseHazard(exInstruction, idInstruction);
-  const controlFlow = resolveControlFlow(exInstruction, registerValues, labels, pcToInstructionIndex);
+  const controlFlow = resolveControlFlow(
+    exInstruction,
+    registerValues,
+    labels,
+    pcToInstructionIndex,
+    activeSignalComponent,
+  );
   const isControlFlowTaken = !hasLoadUseHazard && controlFlow.taken && controlFlow.targetInstructionIndex !== null;
 
   if (isControlFlowTaken) {
@@ -53,7 +60,7 @@ export function stepPipelineForward(input: ForwardStepInput): ForwardStepResult 
 
   return {
     snapshot,
-    registerValues: applyWriteBack(wbInstruction, registerValues, wbEffect),
+    registerValues: applyWriteBack(wbInstruction, registerValues, wbEffect, activeSignalComponent),
     memoryWords: memResult.memoryWords,
     memoryDeltas: memResult.deltas,
     changedMemoryWords: memResult.changedMemoryWords,

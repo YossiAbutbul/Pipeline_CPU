@@ -78,6 +78,7 @@ export default function App() {
     program,
     initialPc,
     memoryRules: memory.rules,
+    placedComponents,
     registerValues: registers.values,
     onRegisterValuesChange: setRegisterValues,
     onRunError: pushProgramErrorNotification,

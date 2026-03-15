@@ -1,5 +1,7 @@
 import { Button, GuidedTourTooltip, Panel, Tooltip } from "@/ui/components";
 import CpuDiagram from "@/assets/cpu/mips_cpu.svg?react";
+import { canAttachComponentToSignal } from "@/features/components/placement/componentSignalRuntime";
+import { getComponentValuePreview } from "@/features/components/placement/componentValueModel";
 import type { PlacedComponent } from "@/features/components/placement/usePendingComponentPlacement";
 import { FastForward, Rewind, RotateCcw, SkipBack, ZoomIn, ZoomOut } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -32,6 +34,11 @@ type PipelineSlots = {
 type HoverTooltipState = {
   label: string;
   value: string;
+  componentPreview?: {
+    label: string;
+    beforeHex: string;
+    afterHex: string;
+  } | null;
   left: number;
   top: number;
 } | null;
@@ -208,6 +215,8 @@ export default function PipelineCanvas({
     sourcePaths.forEach((path) => {
       const pathId = path.id;
       const isControl = pathId.startsWith("ctrl_");
+      const signalKey = PATH_SIGNAL_MAP[pathId]?.key ?? null;
+      const canPlaceComponentHere = !isControl && canAttachComponentToSignal(signalKey);
       path.classList.add("cpuPath", isControl ? "cpuPathControl" : "cpuPathData");
       path.classList.remove("isHovered");
       targetById.set(pathId, path);
@@ -232,7 +241,7 @@ export default function PipelineCanvas({
         if (enableSignalHover) {
           path.classList.add("isHovered");
         }
-        if (pendingComponentLabel && !isControl) {
+        if (pendingComponentLabel && canPlaceComponentHere) {
           path.classList.add("isPlacementCandidate");
         }
       };
@@ -249,9 +258,22 @@ export default function PipelineCanvas({
           return;
         }
 
+        const hoveredValue = hoveredSignalValues[signal.key] ?? "Unknown";
+        const placedComponent = placedComponents.find((component) => component.pathId === pathId);
+        const componentPreview = placedComponent
+          ? getComponentValuePreview(placedComponent.label, hoveredValue)
+          : null;
+
         setHoverTooltip({
           label: signal.label,
-          value: hoveredSignalValues[signal.key] ?? "Unknown",
+          value: hoveredValue,
+          componentPreview: componentPreview
+            ? {
+                label: componentPreview.componentLabel,
+                beforeHex: componentPreview.beforeHex,
+                afterHex: componentPreview.afterHex,
+              }
+            : null,
           left: event.clientX - diagramBounds.left + 18,
           top: event.clientY - diagramBounds.top - 18,
         });
@@ -269,7 +291,7 @@ export default function PipelineCanvas({
       };
 
       const handlePlace = (event: PointerEvent) => {
-        if (!pendingComponentLabel || !onPlacePendingComponent || isControl) {
+        if (!pendingComponentLabel || !onPlacePendingComponent || !canPlaceComponentHere) {
           return;
         }
         event.preventDefault();
@@ -526,6 +548,21 @@ export default function PipelineCanvas({
                       <div className="pipelineTooltipBody">
                         <div className="pipelineTooltipHeader">{hoverTooltip.label}</div>
                         <div className="pipelineTooltipContent">{hoverTooltip.value}</div>
+                        {hoverTooltip.componentPreview ? (
+                          <div className="pipelineTooltipComponentPreview">
+                            <div className="pipelineTooltipComponentTitle">
+                              {hoverTooltip.componentPreview.label} on path
+                            </div>
+                            <div className="pipelineTooltipComponentRow">
+                              <span>Before</span>
+                              <code>{hoverTooltip.componentPreview.beforeHex}</code>
+                            </div>
+                            <div className="pipelineTooltipComponentRow">
+                              <span>After</span>
+                              <code>{hoverTooltip.componentPreview.afterHex}</code>
+                            </div>
+                          </div>
+                        ) : null}
                       </div>
                     }
                   />

@@ -1,9 +1,11 @@
 import { useCallback, useState } from "react";
+import { PATH_SIGNAL_MAP, type HoverSignalKey } from "@/features/pipelineCanvas/pipelineHoverMap";
 
 export type PlacedComponent = {
   id: number;
   label: string;
   pathId: string;
+  signalKey: HoverSignalKey | null;
   x: number;
   y: number;
 };
@@ -37,6 +39,7 @@ export function usePendingComponentPlacement() {
           id: Date.now() + Math.floor(Math.random() * 1000),
           label: pendingComponentLabel,
           pathId: placement.pathId,
+          signalKey: PATH_SIGNAL_MAP[placement.pathId]?.key ?? null,
           x: placement.x,
           y: placement.y,
         },

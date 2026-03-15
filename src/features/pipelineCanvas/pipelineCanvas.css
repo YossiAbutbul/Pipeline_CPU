@@ -322,6 +322,37 @@
   gap: 4px;
 }
 
+.pipelineTooltipComponentPreview {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid color-mix(in oklab, var(--border) 72%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pipelineTooltipComponentTitle {
+  color: var(--register-tooltip-title);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.pipelineTooltipComponentRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: var(--tooltip-body-size);
+}
+
+.pipelineTooltipComponentRow code {
+  color: var(--text);
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
 .pipelineTooltipHeader {
   color: var(--register-tooltip-title);
   font-size: var(--tooltip-caption-size);
