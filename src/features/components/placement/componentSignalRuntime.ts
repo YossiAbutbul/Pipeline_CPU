@@ -7,11 +7,18 @@ export const SUPPORTED_COMPONENT_SIGNAL_KEYS = new Set<HoverSignalKey>([
   "signExtendedImmValue",
   "rsValue",
   "rtValue",
+  "exRawAValue",
+  "exRawBValue",
+  "exSignExtendedImmValue",
+  "aluInputA",
+  "aluInputB",
   "aluResult",
+  "exForwardBValue",
   "memoryAddress",
   "memoryWriteData",
   "memoryReadData",
   "writeBackValue",
+  "memForwardValue",
 ]);
 
 export type ActiveSignalComponent = {
