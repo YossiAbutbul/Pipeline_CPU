@@ -66,6 +66,8 @@ type Props = {
 };
 
 const STAGE_ORDER: Array<keyof PipelineSlots> = ["IF", "ID", "EX", "MEM", "WB"];
+const CPU_DIAGRAM_WIDTH = 1848;
+const CPU_DIAGRAM_HEIGHT = 1075;
 const MIN_ZOOM = 0.3;
 const MAX_ZOOM = 2.5;
 const ZOOM_STEP = 0.1;
@@ -95,6 +97,7 @@ export default function PipelineCanvas({
   const [zoom, setZoom] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const [hoverTooltip, setHoverTooltip] = useState<HoverTooltipState>(null);
+  const [viewportWidth, setViewportWidth] = useState(0);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const diagramRef = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef({
@@ -105,6 +108,9 @@ export default function PipelineCanvas({
   });
 
   const canDrag = zoom > 1;
+  const baseDiagramWidth = viewportWidth > 0 ? viewportWidth : CPU_DIAGRAM_WIDTH;
+  const diagramWidth = baseDiagramWidth * zoom;
+  const diagramHeight = (baseDiagramWidth * CPU_DIAGRAM_HEIGHT * zoom) / CPU_DIAGRAM_WIDTH;
 
   const handleZoomOut = () => {
     setZoom((prev) => Math.max(MIN_ZOOM, Number((prev - ZOOM_STEP).toFixed(2))));
@@ -184,6 +190,28 @@ export default function PipelineCanvas({
       window.removeEventListener("mouseup", handleWindowMouseUp);
     };
   }, [isDragging]);
+
+  useEffect(() => {
+    const viewportElement = viewportRef.current;
+    if (!viewportElement) {
+      return;
+    }
+
+    const updateViewportWidth = () => {
+      setViewportWidth(viewportElement.clientWidth);
+    };
+
+    updateViewportWidth();
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateViewportWidth();
+    });
+    resizeObserver.observe(viewportElement);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     const diagramElement = diagramRef.current;
@@ -490,10 +518,14 @@ export default function PipelineCanvas({
             onMouseUp={handleDragEnd}
           >
             <div
-              ref={diagramRef}
-              className="diagramContent"
-              style={{ width: `${95 * zoom}%` }}
+              className="diagramSurface"
+              style={{ width: `${diagramWidth}px`, height: `${diagramHeight}px` }}
             >
+              <div
+                ref={diagramRef}
+                className="diagramContent"
+                style={{ width: `${diagramWidth}px`, height: `${diagramHeight}px` }}
+              >
               <CpuDiagram style={{ width: "100%", height: "auto" }} />
               <svg
                 className={`placedComponentOverlay ${
@@ -566,6 +598,7 @@ export default function PipelineCanvas({
                   />
                 </div>
               )}
+            </div>
             </div>
           </div>
         </div>

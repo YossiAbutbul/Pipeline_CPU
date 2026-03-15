@@ -111,6 +111,8 @@
   position: relative;
   flex: 1;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .pipelineDiagramTourTooltip.tooltipWrap {
@@ -135,6 +137,7 @@
 .diagramViewport {
   flex: 1;
   min-height: 0;
+  height: 100%;
   width: 100%;
   overflow: auto;
   display: block;
@@ -146,6 +149,10 @@
   width: 0;
   height: 0;
   display: none; /* Chrome/Safari */
+}
+
+.diagramSurface {
+  position: relative;
 }
 
 .diagramContent {
