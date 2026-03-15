@@ -10,7 +10,14 @@ import { parseInitialPc } from "../core/parse";
 import { buildPipelineSignalValues, type PipelineSignalValues } from "../signals/pipelineSignals";
 import { stepPipelineForward } from "../stages/pipelineStep";
 import { EMPTY_PIPELINE, EMPTY_PIPELINE_EFFECTS, EMPTY_PIPELINE_INDICES } from "../core/state";
-import { runComponentPathTest } from "../testing/componentPathTester";
+import {
+  runAllComponentPathSuites,
+  runBranchSuite,
+  runComponentPathTest,
+  runExInputSuite,
+  runMemorySuite,
+  runWritebackSuite,
+} from "../testing/componentPathTester";
 import type {
   PipelineEffectSlots,
   PipelineInstructionSlots,
@@ -23,6 +30,11 @@ declare global {
   interface Window {
     __componentPathTest?: {
       run: typeof runComponentPathTest;
+      branchSuite: typeof runBranchSuite;
+      writebackSuite: typeof runWritebackSuite;
+      memorySuite: typeof runMemorySuite;
+      exInputSuite: typeof runExInputSuite;
+      allSuites: typeof runAllComponentPathSuites;
     };
   }
 }
@@ -130,6 +142,11 @@ export function usePipelineRunSession({
 
     window.__componentPathTest = {
       run: runComponentPathTest,
+      branchSuite: runBranchSuite,
+      writebackSuite: runWritebackSuite,
+      memorySuite: runMemorySuite,
+      exInputSuite: runExInputSuite,
+      allSuites: runAllComponentPathSuites,
     };
 
     return () => {
